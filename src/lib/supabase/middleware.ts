@@ -35,6 +35,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Allow /order routes completely (customer ordering pages - no auth needed)
+  if (request.nextUrl.pathname.startsWith('/order')) {
+    return supabaseResponse;
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = [
     '/',
@@ -51,6 +56,12 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === route || 
     request.nextUrl.pathname.startsWith(route + '/')
   );
+
+  console.log('Middleware check:', {
+    path: request.nextUrl.pathname,
+    isPublicRoute,
+    hasUser: !!user
+  });
 
   if (
     !user &&

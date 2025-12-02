@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { createPortal } from "react-dom"
 import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
@@ -19,11 +20,18 @@ const navigation = [
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
   const { t } = useLanguage()
   const [isScrolled, setIsScrolled] = React.useState(false)
   const pathname = usePathname()
   
+  // Hide header on order pages
+  if (pathname?.startsWith('/order')) {
+    return null
+  }
+  
   React.useEffect(() => {
+    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
@@ -69,7 +77,7 @@ export function Header() {
                       isActive
                         ? pathname === '/' && !shouldShowScrolled
                           ? 'text-white bg-white/20'
-                          : 'text-[#FF5A5F] bg-[#FF5A5F]/10'
+                          : 'text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] shadow-md'
                         : pathname === '/' && !shouldShowScrolled
                           ? 'text-white/90 hover:text-white hover:bg-white/10'
                           : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
@@ -124,10 +132,10 @@ export function Header() {
       </Container>
 
       {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden">
-          <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm border-l border-gray-200 shadow-xl">
+      {mobileMenuOpen && mounted && createPortal(
+        <div className="lg:hidden relative z-[100]">
+          <div className="fixed inset-0 z-[100] bg-black/30 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed inset-y-0 right-0 z-[101] w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm border-l border-gray-200 shadow-xl">
             <div className="flex items-center justify-between mb-8">
               <Link 
                 href="/" 
@@ -156,7 +164,7 @@ export function Header() {
                         href={item.href}
                         className={`block px-4 py-3 text-base font-bold rounded-[12px] transition-all ${
                           isActive
-                            ? 'text-[#FF5A5F] bg-[#FF5A5F]/10'
+                            ? 'text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] shadow-md'
                             : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
@@ -191,7 +199,8 @@ export function Header() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </motion.header>
   )

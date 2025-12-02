@@ -1,7 +1,11 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host') || '';
+  if (host === 'order.kadaipos.id' || request.nextUrl.pathname.startsWith('/order')) {
+    return NextResponse.next();
+  }
   return await updateSession(request);
 }
 

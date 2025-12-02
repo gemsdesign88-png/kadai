@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Container } from "@/components/ui/container"
 import { useLanguage } from "@/lib/i18n/context"
 import { Facebook, Twitter, Instagram, Linkedin, Heart } from "lucide-react"
@@ -50,6 +51,11 @@ const navigation = {
 
 export function Footer() {
   const { t, language } = useLanguage()
+  const pathname = usePathname()
+
+  if (pathname?.startsWith('/order')) {
+    return null
+  }
   
   return (
     <footer className="relative overflow-hidden" aria-labelledby="footer-heading">
