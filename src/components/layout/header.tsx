@@ -77,7 +77,7 @@ export function Header() {
                       isActive
                         ? pathname === '/' && !shouldShowScrolled
                           ? 'text-white bg-white/20'
-                          : 'text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] shadow-md'
+                          : 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
                         : pathname === '/' && !shouldShowScrolled
                           ? 'text-white/90 hover:text-white hover:bg-white/10'
                           : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
@@ -164,7 +164,7 @@ export function Header() {
                         href={item.href}
                         className={`block px-4 py-3 text-base font-bold rounded-[12px] transition-all ${
                           isActive
-                            ? 'text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] shadow-md'
+                            ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
                             : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
