@@ -3,9 +3,23 @@ import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
-  if (host === 'order.kadaipos.id' || request.nextUrl.pathname.startsWith('/order')) {
+  const pathname = request.nextUrl.pathname;
+  
+  // Public routes that don't require authentication
+  const publicRoutes = [
+    '/order',
+    '/privacy',
+    '/terms',
+    '/cookies',
+  ];
+  
+  // Check if the path starts with any public route
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  
+  if (host === 'order.kadaipos.id' || isPublicRoute) {
     return NextResponse.next();
   }
+  
   return await updateSession(request);
 }
 

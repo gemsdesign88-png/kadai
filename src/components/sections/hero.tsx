@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/context"
 import { ArrowRight, ShoppingCart, BarChart3, Users, CreditCard, Package, Receipt, TrendingUp, Clock, Zap, Shield, Smartphone } from "lucide-react"
 import Link from "next/link"
+import { InteractiveDashboard } from "./interactive-dashboard"
 
 export function Hero() {
   const { t, language } = useLanguage()
@@ -32,7 +33,6 @@ export function Hero() {
   // Dashboard animations
   const dashboardY = useTransform(smoothProgress, [0, 0.3], [0, -100])
   const dashboardScale = useTransform(smoothProgress, [0, 0.2, 0.3], [1, 1, 0.95])
-  const dashboardOpacity = useTransform(smoothProgress, [0, 0.1, 0.3, 0.5], [1, 1, 1, 0])
   
   return (
     <div ref={containerRef} className="relative bg-black">
@@ -97,8 +97,8 @@ export function Hero() {
               className="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl mx-auto font-medium"
             >
               {language === "en" 
-                ? "The most powerful POS system designed for modern restaurants. Fast, intuitive, and built for growth."
-                : "Sistem POS paling powerful yang dirancang untuk restoran modern. Cepat, intuitif, dan dibangun untuk pertumbuhan."}
+                ? "The most powerful POS system designed end-to-end for restaurant and store owner. Fast, intuitive, and built for growth."
+                : "Sistem POS paling powerful yang dirancang menyeluruh untuk pemilik restoran dan toko. Cepat, intuitif, dan dibangun untuk pertumbuhan."}
             </motion.p>
             
             {/* CTA Buttons */}
@@ -187,207 +187,18 @@ export function Hero() {
               ))}
             </motion.div>
           </motion.div>
-          
-          {/* Dashboard Preview - Real UI */}
+
+          {/* Interactive Dashboard - EXACT replica with sidebar - OUTSIDE fading container */}
           <motion.div
-            style={{ 
-              y: dashboardY, 
-              scale: dashboardScale,
-              opacity: dashboardOpacity 
-            }}
-            className="relative max-w-5xl mx-auto mt-8 mb-20"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.8 }}
+            className="mt-16"
           >
-            {/* Glow effect */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-[#FF5A5F]/20 via-purple-500/20 to-[#3B82F6]/20 rounded-3xl blur-3xl" />
-            
-            <div className="relative aspect-[16/10] rounded-3xl overflow-hidden bg-[#F9FAFB] shadow-2xl border border-gray-200">
-              <div className="h-full p-6 md:p-8">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#111827] mb-1">Dashboard</h2>
-                    <p className="text-sm text-[#6B7280]">{language === "en" ? "Sales & Inventory Overview" : "Ringkasan Penjualan & Stok"}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Period Tabs */}
-                    <div className="flex items-center gap-1 p-1 rounded-xl bg-[#F3F4F6] border border-[#E5E7EB]">
-                      {[
-                        { key: 'daily', label: language === "en" ? "Daily" : "Harian" },
-                        { key: 'weekly', label: language === "en" ? "Weekly" : "Mingguan" },
-                        { key: 'monthly', label: language === "en" ? "Monthly" : "Bulanan" },
-                        { key: 'yearly', label: language === "en" ? "Yearly" : "Tahunan" }
-                      ].map((period, i) => (
-                        <div
-                          key={period.key}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                            i === 1 
-                              ? 'bg-white text-[#FF5A5F] shadow-sm' 
-                              : 'text-[#6B7280] hover:text-[#111827]'
-                          }`}
-                        >
-                          {period.label}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  {/* Left Column - Sales Stats */}
-                  <div className="space-y-4">
-                    {/* Revenue Card */}
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.3, duration: 0.6 }}
-                      className="bg-white rounded-2xl p-5 shadow-sm border border-[#E5E7EB]"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-[#DBEAFE] flex items-center justify-center">
-                          <TrendingUp className="h-6 w-6 text-[#3B82F6]" />
-                        </div>
-                        <span className="text-sm font-semibold text-[#10B981]">+24%</span>
-                      </div>
-                      <p className="text-sm text-[#6B7280] mb-1">{language === "en" ? "Today's Revenue" : "Pendapatan Hari Ini"}</p>
-                      <p className="text-3xl font-bold text-[#111827]">Rp 4.2M</p>
-                    </motion.div>
-
-                    {/* Orders Card */}
-                    <motion.div
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 1.4, duration: 0.6 }}
-                      className="bg-white rounded-2xl p-5 shadow-sm border border-[#E5E7EB]"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-12 h-12 rounded-xl bg-[#FEF3C7] flex items-center justify-center">
-                          <ShoppingCart className="h-6 w-6 text-[#F59E0B]" />
-                        </div>
-                        <span className="text-sm font-semibold text-[#10B981]">+12%</span>
-                      </div>
-                      <p className="text-sm text-[#6B7280] mb-1">{language === "en" ? "Total Orders" : "Total Pesanan"}</p>
-                      <p className="text-3xl font-bold text-[#111827]">127</p>
-                    </motion.div>
-                  </div>
-
-                  {/* Right Column - Stock Alerts & Reminders */}
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 1.5, duration: 0.6 }}
-                    className="bg-white rounded-2xl p-5 shadow-sm border border-[#E5E7EB]"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-sm text-[#6B7280] mb-1">{language === "en" ? "Stock Alerts" : "Peringatan Stok"}</p>
-                        <p className="text-xl font-bold text-[#EF4444]">3 {language === "en" ? "Items Need Attention" : "Item Perlu Perhatian"}</p>
-                      </div>
-                      <div className="w-12 h-12 rounded-xl bg-[#FEE2E2] flex items-center justify-center">
-                        <Package className="h-6 w-6 text-[#EF4444]" />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2.5">
-                      {[
-                        { 
-                          name: language === "en" ? "Cooking Oil" : "Minyak Goreng", 
-                          stock: 3, 
-                          unit: "L", 
-                          minStock: 20,
-                          status: "critical", 
-                          color: "#EF4444",
-                          alert: language === "en" ? "Critical - Order Now!" : "Kritis - Pesan Sekarang!"
-                        },
-                        { 
-                          name: language === "en" ? "Chicken Fillet" : "Ayam Fillet", 
-                          stock: 12, 
-                          unit: "kg", 
-                          minStock: 30,
-                          status: "low", 
-                          color: "#F59E0B",
-                          alert: language === "en" ? "Low Stock" : "Stok Menipis"
-                        },
-                        { 
-                          name: language === "en" ? "Chili Sauce" : "Saus Sambal", 
-                          stock: 8, 
-                          unit: language === "en" ? "btl" : "btl", 
-                          minStock: 25,
-                          status: "low", 
-                          color: "#F59E0B",
-                          alert: language === "en" ? "Restock Soon" : "Segera Isi Ulang"
-                        },
-                      ].map((item, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ x: -10, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ delay: 1.6 + i * 0.1, duration: 0.4 }}
-                          className="p-3 rounded-lg border-2"
-                          style={{ 
-                            borderColor: item.color,
-                            backgroundColor: `${item.color}08`
-                          }}
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: item.color }} />
-                              <span className="text-sm font-bold text-[#111827]">{item.name}</span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-sm font-bold" style={{ color: item.color }}>{item.stock}</span>
-                              <span className="text-xs text-[#6B7280] ml-0.5">/{item.minStock}{item.unit}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="h-3 w-3" style={{ color: item.color }} />
-                            <span className="text-xs font-semibold" style={{ color: item.color }}>{item.alert}</span>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Sales Chart */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 1.9, duration: 0.6 }}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-[#E5E7EB]"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-[#6B7280] mb-1">{language === "en" ? "Sales This Week" : "Penjualan Minggu Ini"}</p>
-                      <p className="text-xl font-bold text-[#111827]">Rp 18.5M</p>
-                    </div>
-                    <div className="px-3 py-1.5 rounded-lg bg-[#D1FAE5]">
-                      <span className="text-xs font-bold text-[#059669]">+15.3%</span>
-                    </div>
-                  </div>
-                  <div className="flex items-end justify-between h-24 md:h-32 gap-2">
-                    {[65, 45, 80, 55, 90, 70, 85].map((height, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ scaleY: 0 }}
-                        animate={{ scaleY: 1 }}
-                        transition={{ delay: 2.1 + i * 0.1, duration: 0.6, ease: "easeOut" }}
-                        className="flex-1 rounded-t-lg origin-bottom"
-                        style={{ 
-                          height: `${height}%`,
-                          backgroundColor: i === 6 ? '#FF5A5F' : '#E5E7EB'
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex justify-between mt-3">
-                    {(language === "en" ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']).map((day, i) => (
-                      <div key={i} className="text-xs text-[#6B7280] text-center flex-1">{day}</div>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
-            </div>
+            <InteractiveDashboard />
           </motion.div>
+          
+          {/* Dashboard Preview - Real UI - REMOVED, now using InteractiveDashboard */}
         </Container>
         
         {/* Scroll indicator */}

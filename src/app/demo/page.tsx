@@ -76,7 +76,7 @@ export default function DemoPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl md:text-7xl font-bold mb-6"
+              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6"
             >
               {language === "en" ? "Experience" : "Rasakan"}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
@@ -91,7 +91,7 @@ export default function DemoPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-xl text-gray-600 mb-12 leading-relaxed"
+              className="text-lg sm:text-xl text-gray-600 mb-12 leading-relaxed px-4"
             >
               {language === "en"
                 ? "We're preparing an amazing interactive demo experience for you. Leave your WhatsApp number and we'll notify you when it's ready!"
@@ -155,7 +155,7 @@ export default function DemoPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+            className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto px-4"
           >
             {features.map((feature, index) => (
               <motion.div
@@ -181,7 +181,7 @@ export default function DemoPage() {
       </div>
 
       {/* Meanwhile Section */}
-      <div className="py-20 bg-white/50">
+      <div className="py-12 sm:py-20 bg-white/50">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -189,10 +189,10 @@ export default function DemoPage() {
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto"
           >
-            <h2 className="text-4xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
               {language === "en" ? "Meanwhile..." : "Sementara itu..."}
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8">
               {language === "en"
                 ? "Want to learn more about KadaiPOS? Explore our features or contact us directly!"
                 : "Ingin tahu lebih banyak tentang KadaiPOS? Jelajahi fitur kami atau hubungi kami langsung!"}

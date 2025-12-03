@@ -1,0 +1,3 @@
+{
+  "/order/[tableBarcode]/page": "app/order/[tableBarcode]/page.js"
+}

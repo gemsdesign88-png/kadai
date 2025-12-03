@@ -8,22 +8,40 @@ import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { useLanguage } from "@/lib/i18n/context"
-import { Menu, X } from "lucide-react"
-import { motion } from "framer-motion"
+import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 const navigation = [
-  { name: "features", href: "/features" },
+  { name: "features", href: "/features", hasDropdown: true },
   { name: "pricing", href: "/pricing" },
   { name: "about", href: "/about" },
   { name: "contact", href: "/contact" },
 ]
 
+const featuresMenu = [
+  { icon: ShoppingCart, title: "Order Management", titleId: "orderManagement", href: "/features/orders", color: "#FF5A5F" },
+  { icon: Grid, title: "Table Management", titleId: "tableManagement", href: "/features/tables", color: "#8B5CF6" },
+  { icon: Utensils, title: "Menu Management", titleId: "menuManagement", href: "/features/menu", color: "#0066FF" },
+  { icon: TrendingUp, title: "Analytics & Insights", titleId: "analytics", href: "/features/analytics", color: "#00D4AA" },
+  { icon: Users, title: "Staff Management", titleId: "staffManagement", href: "/features/staff", color: "#FFB020" },
+  { icon: CreditCard, title: "Payment System", titleId: "paymentSystem", href: "/features/payment", color: "#EC4899" },
+  { icon: Package, title: "Inventory Control", titleId: "inventoryControl", href: "/features/inventory", color: "#10B981" },
+  { icon: ChefHat, title: "Kitchen Display", titleId: "kitchenDisplay", href: "/features/kitchen", color: "#F59E0B" },
+  { icon: QrCode, title: "QR Menu", titleId: "qrMenu", href: "/features/qr-menu", color: "#06B6D4" },
+  { icon: Tag, title: "Promo Manager", titleId: "promoManager", href: "/features/promo", color: "#EF4444" },
+  { icon: Heart, title: "Customer CRM", titleId: "customerCRM", href: "/features/crm", color: "#3B82F6" },
+  { icon: Settings, title: "System Settings", titleId: "systemSettings", href: "/features/settings", color: "#6366F1" },
+  { icon: Palette, title: "Theme Customization", titleId: "themeCustomization", href: "/features/theme", color: "#9C27B0" },
+]
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
-  const { t } = useLanguage()
+  const [featuresOpen, setFeaturesOpen] = React.useState(false)
+  const { t, language } = useLanguage()
   const [isScrolled, setIsScrolled] = React.useState(false)
   const pathname = usePathname()
+  const featuresTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   
   // Hide header on order pages
   if (pathname?.startsWith('/order')) {
@@ -37,8 +55,26 @@ export function Header() {
     }
     
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (featuresTimeoutRef.current) {
+        clearTimeout(featuresTimeoutRef.current)
+      }
+    }
   }, [])
+  
+  const handleFeaturesMouseEnter = () => {
+    if (featuresTimeoutRef.current) {
+      clearTimeout(featuresTimeoutRef.current)
+    }
+    setFeaturesOpen(true)
+  }
+  
+  const handleFeaturesMouseLeave = () => {
+    featuresTimeoutRef.current = setTimeout(() => {
+      setFeaturesOpen(false)
+    }, 200)
+  }
   
   // Only show glass effect when scrolling, not based on page
   const shouldShowScrolled = isScrolled
@@ -69,6 +105,101 @@ export function Header() {
             <div className="hidden lg:flex lg:gap-2">
               {navigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                
+                if (item.hasDropdown) {
+                  return (
+                    <div
+                      key={item.name}
+                      className="relative"
+                      onMouseEnter={handleFeaturesMouseEnter}
+                      onMouseLeave={handleFeaturesMouseLeave}
+                    >
+                      <button
+                        className={`px-4 py-2 text-sm font-bold rounded-[12px] transition-all flex items-center gap-1 ${
+                          isActive
+                            ? pathname === '/' && !shouldShowScrolled
+                              ? 'text-white bg-white/20'
+                              : 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
+                            : pathname === '/' && !shouldShowScrolled
+                              ? 'text-white/90 hover:text-white hover:bg-white/10'
+                              : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
+                        }`}
+                      >
+                        {t.nav[item.name as keyof typeof t.nav]}
+                        <ChevronDown className={`w-4 h-4 transition-transform ${featuresOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      <AnimatePresence>
+                        {featuresOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute left-0 right-0 mx-auto top-full mt-3 w-[1100px] bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden z-50"
+                          >
+                            <div className="p-8">
+                              <div className="mb-6">
+                                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                                  {language === 'en' ? 'Powerful Features' : 'Fitur Lengkap'}
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                  {language === 'en' ? 'Everything you need to run your business efficiently' : 'Semua yang Anda butuhkan untuk menjalankan bisnis dengan efisien'}
+                                </p>
+                              </div>
+                              
+                              <div className="grid grid-cols-4 gap-3">
+                                {featuresMenu.map((feature, idx) => {
+                                  const Icon = feature.icon
+                                  return (
+                                    <Link
+                                      key={idx}
+                                      href={feature.href}
+                                      onClick={() => setFeaturesOpen(false)}
+                                      className="group flex flex-col gap-3 p-4 rounded-2xl bg-gradient-to-br from-white to-gray-50/50 border border-gray-200/60 hover:border-gray-300 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                                    >
+                                      <div
+                                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-300 shadow-sm"
+                                        style={{ 
+                                          backgroundColor: `${feature.color}`,
+                                          boxShadow: `0 4px 12px ${feature.color}40`
+                                        }}
+                                      >
+                                        <Icon className="w-5 h-5 text-white" />
+                                      </div>
+                                      <div>
+                                        <p className="font-bold text-gray-900 text-xs leading-tight group-hover:text-[#FF5A5F] transition-colors mb-1">
+                                          {t.nav[feature.titleId as keyof typeof t.nav] || feature.title}
+                                        </p>
+                                        <p className="text-[10px] text-gray-500 leading-snug line-clamp-2">
+                                          {language === 'en' 
+                                            ? 'Streamline your operations' 
+                                            : 'Optimalkan operasional'}
+                                        </p>
+                                      </div>
+                                    </Link>
+                                  )
+                                })}
+                              </div>
+                              
+                              <div className="mt-6 pt-6 border-t border-gray-200 flex items-center justify-center">
+                                <Link
+                                  href="/features"
+                                  onClick={() => setFeaturesOpen(false)}
+                                  className="text-sm font-bold text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] px-5 py-2.5 rounded-full transition-all shadow-lg shadow-[#FF5A5F]/30 hover:shadow-xl inline-flex items-center gap-2"
+                                >
+                                  {language === 'en' ? 'Explore All Features' : 'Jelajahi Semua Fitur'}
+                                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                </Link>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                }
+                
                 return (
                   <Link
                     key={item.name}
