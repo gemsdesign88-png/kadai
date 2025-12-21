@@ -1,0 +1,11 @@
+name,price,description,parentCategoryId,categoryId,available
+Nasi Goreng,45000,Fried rice with egg and vegetables,,,true
+Mie Goreng,40000,Fried noodles with egg and vegetables,,,true
+Gado Gado,30000,Mixed vegetables with peanut sauce,,,true
+Soto Ayam,35000,Chicken soup with turmeric,,,true
+Perkedel,15000,Potato fritter,,,true
+Tahu Goreng,20000,Fried tofu,,,true
+Lumpia,25000,Spring rolls,,,true
+Bakso,40000,Beef meatball soup,,,true
+Sate Ayam,50000,Grilled chicken skewers with peanut sauce,,,true
+Rendang Daging,60000,Spicy beef curry,,,true

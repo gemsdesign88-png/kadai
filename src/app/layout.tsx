@@ -5,6 +5,8 @@ import { LanguageProvider } from "@/lib/i18n/context";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LayoutContent } from "./layout-content";
 
+export const dynamic = 'force-dynamic';
+
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],

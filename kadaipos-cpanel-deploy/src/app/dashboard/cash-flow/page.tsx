@@ -1,0 +1,2673 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { useLanguage } from '@/lib/i18n/context'
+import {
+  DollarSign,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Receipt,
+  Users,
+  ShoppingCart,
+  FileText,
+  Edit,
+  Trash2,
+  Search,
+  Archive,
+  CreditCard,
+  Wallet,
+  PieChart,
+  BarChart3,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Target,
+} from 'lucide-react'
+import { translations } from "@/lib/i18n/translations"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, BarChart, Bar, Legend } from 'recharts'
+
+type TransactionType = 'income' | 'expense' | 'debt'
+
+type IncomeCategory = 'sales' | 'investment' | 'other_income' | 'order'
+type ExpenseCategory = 'operational' | 'stock_purchase' | 'salary' | 'capital'
+type DebtCategory = 'supplier' | 'loan' | 'equipment' | 'other_debt'
+
+type TransactionCategory = IncomeCategory | ExpenseCategory | DebtCategory
+
+interface CashFlowTransaction {
+  id: string
+  restaurant_id: string
+  transaction_type: TransactionType
+  category: TransactionCategory
+  amount: number
+  description: string
+  date: string
+  created_at: string
+  created_by: string
+  ingredient_id?: string
+  quantity?: number
+  ingredient?: {
+    name: string
+    unit: string
+  }
+  employee_id?: string
+  order_id?: string
+  order?: {
+    id: string
+    total_amount?: number
+    total?: number
+    table_number?: string | null
+  }
+  // Debt specific fields
+  creditor_name?: string
+  due_date?: string
+  status?: 'active' | 'paid' | 'overdue'
+}
+
+interface Debt {
+  id: string
+  restaurant_id: string
+  creditor_name: string
+  amount: number
+  amount_paid: number
+  remaining_amount: number
+  description: string
+  due_date: string
+  status: 'active' | 'partial' | 'paid' | 'overdue'
+  created_at: string
+  updated_at: string
+  created_by: string
+  payments?: DebtPayment[]
+}
+
+interface DebtPayment {
+  id: string
+  debt_id: string
+  amount: number
+  payment_date: string
+  notes: string
+  created_at: string
+  transaction_id?: string
+}
+
+interface CashFlowStats {
+  totalIncome: number
+  totalExpenses: number
+  totalDebt: number
+  netWorth: number
+  monthlyIncome: number
+  monthlyExpenses: number
+  monthlyDebt: number
+  cashFlow: number
+  categoryBreakdown: Record<TransactionCategory, number>
+  debtBreakdown: Record<string, number>
+  cashFlowTrend: Array<{ period: string; income: number; expenses: number; debt: number; net: number }>
+}
+
+const categoryIcons = {
+  // Income categories
+  sales: DollarSign,
+  investment: TrendingUp,
+  other_income: DollarSign,
+  order: CreditCard,
+  // Expense categories
+  operational: Receipt,
+  stock_purchase: ShoppingCart,
+  salary: Users,
+  capital: FileText,
+  // Debt categories
+  supplier: ShoppingCart,
+  loan: Wallet,
+  equipment: FileText,
+  other_debt: AlertTriangle
+}
+
+const categoryLabels = {
+  // Income categories
+  sales: 'Sales',
+  investment: 'Investment',
+  other_income: 'Other Income',
+  order: 'Order Income',
+  // Expense categories
+  operational: 'Operational',
+  stock_purchase: 'Stock Purchase',
+  salary: 'Salary',
+  capital: 'Capital Expenditure',
+  // Debt categories
+  supplier: 'Supplier Debt',
+  loan: 'Loan',
+  equipment: 'Equipment Debt',
+  other_debt: 'Other Debt'
+}
+
+const debtStatusColors = {
+  active: 'bg-yellow-100 text-yellow-800',
+  partial: 'bg-blue-100 text-blue-800',
+  paid: 'bg-green-100 text-green-800',
+  overdue: 'bg-red-100 text-red-800'
+}
+
+const debtStatusIcons = {
+  active: Clock,
+  partial: Clock,
+  paid: CheckCircle,
+  overdue: AlertTriangle
+}
+
+const copy = {
+  en: {
+    headerTitle: 'Cash Flow',
+    headerSubtitle: 'Monitor financial health, net worth, and orders at a glance.',
+    restaurantLabel: 'Restaurant',
+    netWorth: 'Net Worth',
+    monthlyCashFlow: 'Monthly Cash Flow',
+    totalIncome: 'Total Income',
+    totalExpenses: 'Total Expenses',
+    totalDebt: 'Total Debt',
+    netWorthHelper: 'Income - Expenses - Debt',
+    monthlyHelper: 'This month',
+    incomeHelper: 'Including paid orders',
+    debtHelper: 'Active & overdue',
+    overviewTab: 'Overview',
+    transactionsTab: 'Transactions',
+    debtsTab: 'Debts',
+    trendTitle: 'Cash Flow Trend',
+    trendSubtitle: 'Track income, expenses, and net over time.',
+    trendEmpty: 'No trend data yet. Add transactions or orders to see cash flow.',
+    incomeBreakdown: 'Income Breakdown',
+    expenseBreakdown: 'Expense Breakdown',
+    searchTransactions: 'Search transactions...',
+    allCategories: 'All Categories',
+    noTransactionsTitle: 'No transactions found',
+    noTransactionsDesc: 'Try adjusting your search or filter criteria.',
+    startTransactionsDesc: 'Get started by adding your first transaction.',
+    addTransaction: 'Add Transaction',
+    addSampleExpenses: 'Add Sample Expenses',
+    addSampleOrders: 'Add Sample Orders',
+    recordDebt: 'Record Debt',
+    addCashFlow: 'Add Cash Flow',
+    editCashFlow: 'Edit Cash Flow',
+    selectedRange: 'Selected Range',
+    periodSelected: 'Period Selected',
+    today: 'Today',
+    thisWeek: 'This Week',
+    thisMonth: 'This Month',
+    sixMonths: '6 Months',
+    thisYear: 'This Year',
+    active: 'Active',
+    inactive: 'Inactive',
+    cashFlowHelper: 'Quickly log income, costs, or stock purchases. Orders already flow in automatically.',
+    orderIncome: 'Order Income',
+    incomePill: 'Money In',
+    incomeDesc: 'Sales, investments, orders',
+    expensePill: 'Money Out',
+    expenseDesc: 'Operational, stock, salary',
+    transactionType: 'Transaction Type',
+    category: 'Category',
+    amount: 'Amount',
+    date: 'Date',
+    description: 'Description',
+    descriptionPlaceholder: 'What is this for?',
+    ingredient: 'Ingredient *',
+    quantity: 'Quantity *',
+    employeeName: 'Employee Name *',
+    cancel: 'Cancel',
+    save: 'Save',
+    update: 'Update',
+    debtTitleNew: 'Add Debt',
+    debtTitleEdit: 'Edit Debt',
+    debtSubtitle: 'Track liabilities and due dates clearly.',
+    creditor: 'Creditor Name *',
+    dueDate: 'Due Date',
+    status: 'Status'
+  },
+  id: {
+    headerEyebrow: 'Keuangan',
+    headerTitle: 'Arus Kas',
+    headerSubtitle: 'Pantau kesehatan finansial, kekayaan bersih, dan pesanan.',
+    restaurantLabel: 'Restoran',
+    netWorth: 'Kekayaan Bersih',
+    monthlyCashFlow: 'Arus Kas Bulanan',
+    totalIncome: 'Total Pendapatan',
+    totalExpenses: 'Total Pengeluaran',
+    totalDebt: 'Total Utang',
+    netWorthHelper: 'Pendapatan - Pengeluaran - Utang',
+    monthlyHelper: 'Bulan ini',
+    incomeHelper: 'Termasuk pesanan dibayar',
+    debtHelper: 'Aktif & jatuh tempo',
+    overviewTab: 'Ringkasan',
+    transactionsTab: 'Transaksi',
+    debtsTab: 'Utang',
+    trendTitle: 'Tren Arus Kas',
+    trendSubtitle: 'Lacak pendapatan, pengeluaran, dan neto dari waktu ke waktu.',
+    trendEmpty: 'Belum ada data. Tambahkan transaksi atau pesanan untuk melihat arus kas.',
+    incomeBreakdown: 'Rincian Pendapatan',
+    expenseBreakdown: 'Rincian Pengeluaran',
+    searchTransactions: 'Cari transaksi...',
+    allCategories: 'Semua Kategori',
+    noTransactionsTitle: 'Tidak ada transaksi',
+    noTransactionsDesc: 'Sesuaikan pencarian atau filter Anda.',
+    startTransactionsDesc: 'Mulai dengan menambahkan transaksi pertama.',
+    addTransaction: 'Tambah Transaksi',
+    addSampleExpenses: 'Tambah Contoh Beban',
+    addSampleOrders: 'Tambah Contoh Pesanan',
+    recordDebt: 'Catat Utang',
+    addCashFlow: 'Tambah Arus Kas',
+    editCashFlow: 'Ubah Arus Kas',
+    selectedRange: 'Periode Dipilih',
+    periodSelected: 'Periode Dipilih',
+    today: 'Hari Ini',
+    thisWeek: 'Minggu Ini',
+    thisMonth: 'Bulan Ini',
+    sixMonths: '6 Bulan',
+    thisYear: 'Tahun Ini',
+    active: 'Aktif',
+    inactive: 'Tidak Aktif',
+    cashFlowHelper: 'Catat pendapatan, biaya, atau pembelian stok. Pesanan sudah otomatis masuk.',
+    orderIncome: 'Pendapatan Pesanan',
+    incomePill: 'Uang Masuk',
+    incomeDesc: 'Penjualan, investasi, pesanan',
+    expensePill: 'Uang Keluar',
+    expenseDesc: 'Operasional, stok, gaji',
+    transactionType: 'Jenis Transaksi',
+    category: 'Kategori',
+    amount: 'Jumlah',
+    date: 'Tanggal',
+    description: 'Deskripsi',
+    descriptionPlaceholder: 'Untuk apa ini?',
+    ingredient: 'Bahan *',
+    quantity: 'Jumlah *',
+    employeeName: 'Nama Karyawan *',
+    cancel: 'Batal',
+    save: 'Simpan',
+    update: 'Perbarui',
+    debtTitleNew: 'Tambah Utang',
+    debtTitleEdit: 'Ubah Utang',
+    debtSubtitle: 'Catat kewajiban dan jatuh tempo dengan jelas.',
+    creditor: 'Nama Kreditur *',
+    dueDate: 'Jatuh Tempo',
+    status: 'Status'
+  },
+  zh: {
+    headerEyebrow: '财务',
+    headerTitle: '现金流',
+    headerSubtitle: '一眼掌握财务健康、净资产和订单。',
+    restaurantLabel: '餐厅',
+    netWorth: '净资产',
+    monthlyCashFlow: '月度现金流',
+    totalIncome: '总收入',
+    totalExpenses: '总支出',
+    totalDebt: '总负债',
+    netWorthHelper: '收入 - 支出 - 负债',
+    monthlyHelper: '本月',
+    incomeHelper: '包含已支付订单',
+    debtHelper: '未结清与逾期',
+    overviewTab: '概览',
+    transactionsTab: '交易',
+    debtsTab: '负债',
+    trendTitle: '现金流趋势',
+    trendSubtitle: '跟踪收入、支出与净额。',
+    trendEmpty: '暂无趋势数据，请添加交易或订单。',
+    incomeBreakdown: '收入构成',
+    expenseBreakdown: '支出构成',
+    searchTransactions: '搜索交易...',
+    allCategories: '全部分类',
+    noTransactionsTitle: '暂无交易',
+    noTransactionsDesc: '请调整搜索或筛选。',
+    startTransactionsDesc: '添加第一笔交易以开始。',
+    addTransaction: '新增交易',
+    addSampleExpenses: '添加示例支出',
+    addSampleOrders: '添加示例订单',
+    recordDebt: '记录负债',
+    addCashFlow: '新增现金流',
+    editCashFlow: '编辑现金流',
+    cashFlowHelper: '记录收入、成本或备货。订单会自动流入。',
+    incomePill: '记录收入',
+    expensePill: '记录支出',
+    transactionType: '交易类型',
+    category: '分类',
+    amount: '金额',
+    date: '日期',
+    description: '描述',
+    descriptionPlaceholder: '这笔资金用途？',
+    ingredient: '食材 *',
+    quantity: '数量 *',
+    employeeName: '员工姓名 *',
+    cancel: '取消',
+    save: '保存',
+    update: '更新',
+    debtTitleNew: '新增负债',
+    debtTitleEdit: '编辑负债',
+    debtSubtitle: '清晰跟踪负债与到期日。',
+    creditor: '债权人 *',
+    dueDate: '到期日',
+    status: '状态',
+    orderIncome: '订单收入'
+  }
+}
+
+export default function CashFlowPage() {
+  const router = useRouter()
+  const supabase = createClient()
+  const { language } = useLanguage()
+  const t = (copy as any)[language] || copy.en
+  const cashFlowTranslations = translations[language].expenses
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [restaurant, setRestaurant] = useState<any>(null)
+  const [transactions, setTransactions] = useState<CashFlowTransaction[]>([])
+  const [orders, setOrders] = useState<any[]>([])
+  const [debts, setDebts] = useState<Debt[]>([])
+  const [ingredients, setIngredients] = useState<any[]>([])
+  const [stats, setStats] = useState<CashFlowStats>({
+    totalIncome: 0,
+    totalExpenses: 0,
+    totalDebt: 0,
+    netWorth: 0,
+    monthlyIncome: 0,
+    monthlyExpenses: 0,
+    monthlyDebt: 0,
+    cashFlow: 0,
+    categoryBreakdown: {} as Record<TransactionCategory, number>,
+    debtBreakdown: {} as Record<string, number>,
+    cashFlowTrend: []
+  })
+
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [showDebtModal, setShowDebtModal] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<CashFlowTransaction | null>(null)
+  const [editingDebt, setEditingDebt] = useState<Debt | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [trendRange, setTrendRange] = useState<'1D' | '1W' | '1M' | '6M' | '1Y' | 'ALL'>('ALL')
+  const [employees, setEmployees] = useState<any[]>([])
+  const [ingredientSearch, setIngredientSearch] = useState('')
+  const [employeeSearch, setEmployeeSearch] = useState('')
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+
+  const categoryLabel = (category: TransactionCategory) => {
+    return (cashFlowTranslations.categories as any)[category] || categoryLabels[category] || category
+  }
+
+  const getRangeStart = (range: typeof trendRange) => {
+    const d = new Date()
+    switch (range) {
+      case '1D':
+        d.setDate(d.getDate() - 1)
+        break
+      case '1W':
+        d.setDate(d.getDate() - 7)
+        break
+      case '1M':
+        d.setMonth(d.getMonth() - 1)
+        break
+      case '6M':
+        d.setMonth(d.getMonth() - 6)
+        break
+      case '1Y':
+        d.setFullYear(d.getFullYear() - 1)
+        break
+      case 'ALL':
+      default:
+        d.setFullYear(1970)
+        break
+    }
+    return d
+  }
+
+  const [formData, setFormData] = useState({
+    transaction_type: 'income' as TransactionType,
+    category: 'sales' as TransactionCategory,
+    amount: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
+    ingredientId: '',
+    quantity: '',
+    employeeId: '',
+    orderId: '',
+    unit: ''
+  })
+
+  const [debtFormData, setDebtFormData] = useState({
+    creditor_name: '',
+    amount: '',
+    description: '',
+    due_date: '',
+    status: 'active' as 'active' | 'partial' | 'paid' | 'overdue'
+  })
+
+  const [paymentFormData, setPaymentFormData] = useState({
+    amount: '',
+    payment_date: new Date().toISOString().split('T')[0],
+    notes: ''
+  })
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [selectedDebtForPayment, setSelectedDebtForPayment] = useState<Debt | null>(null)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useEffect(() => {
+    // Recalculate stats when range or data updates
+    if (!loading) {
+      calculateStats(transactionsInRange, debtsInRange)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trendRange, language, transactions, debts])
+
+  useEffect(() => {
+    // Reset search states when modal opens
+    if (showAddModal) {
+      setIngredientSearch('')
+      setEmployeeSearch('')
+    }
+  }, [showAddModal])
+
+  async function loadData() {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      console.log('Current user:', user.id)
+
+      // Get user's restaurants
+      const { data: restaurantsData, error: restaurantsError } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', user.id)
+
+      if (restaurantsError) {
+        console.error('Restaurants query error:', restaurantsError)
+        throw new Error(`Failed to load restaurants: ${restaurantsError.message}`)
+      }
+
+      if (!restaurantsData || restaurantsData.length === 0) {
+        console.error('No restaurants found for user:', user.id)
+        // Redirect to dashboard which will handle restaurant creation
+        router.push('/dashboard')
+        return
+      }
+
+      // Get selected restaurant from localStorage or use first one
+      let selectedRestaurant = restaurantsData[0]
+      let savedRestaurantId: string | null = null
+
+      // Only access localStorage if we're on the client side
+      if (typeof window !== 'undefined') {
+        try {
+          savedRestaurantId = localStorage.getItem('selected_restaurant_id')
+        } catch (error) {
+          console.warn('Error accessing localStorage:', error)
+        }
+      }
+
+      if (savedRestaurantId) {
+        const saved = restaurantsData.find(r => r.id === savedRestaurantId)
+        if (saved) {
+          selectedRestaurant = saved
+        }
+      }
+
+      console.log('Selected restaurant ID from localStorage:', savedRestaurantId)
+      console.log('Selected restaurant:', selectedRestaurant)
+      console.log('Restaurant belongs to user?', selectedRestaurant.owner_id === user.id)
+      setRestaurant(selectedRestaurant)
+
+      // Load transactions (expenses table - handle case where transaction_type might not exist)
+      let transactionsData: any[] = []
+      try {
+        // First try a simple query without joins to see if basic access works
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('expenses')
+          .select('id, restaurant_id, category, amount, description, date, created_at, created_by, transaction_type, ingredient_id, employee_id, order_id, quantity, ingredients(id, name, unit)')
+          .eq('restaurant_id', selectedRestaurant.id)
+          .order('date', { ascending: false })
+          .limit(1000)
+
+        if (simpleError) {
+          console.warn('Simple expenses query error:', simpleError)
+          console.warn('Simple error details:', JSON.stringify(simpleError, null, 2))
+        } else {
+          console.log('Simple expenses query successful:', simpleData?.length, 'records')
+          transactionsData = simpleData || []
+        }
+      } catch (error) {
+        console.warn('Error with simple expenses query:', error)
+      }
+
+      console.log('Loaded transactions:', transactionsData.length, 'records')
+
+      // Load debts
+      // Get debts (optional - table might not exist yet)
+      let debtsData: any[] = []
+      try {
+        const { data: debtsResult, error: debtsError } = await supabase
+          .from('debts')
+          .select('*')
+          .eq('restaurant_id', selectedRestaurant.id)
+          .order('due_date', { ascending: true })
+
+        if (debtsError) {
+          console.warn('Debts table may not exist yet:', debtsError.message)
+        } else {
+          // Ensure all debts have payment tracking fields (for backward compatibility)
+          debtsData = (debtsResult || []).map(debt => ({
+            ...debt,
+            amount_paid: debt.amount_paid ?? 0,
+            remaining_amount: debt.remaining_amount ?? debt.amount,
+            status: debt.status || 'active'
+          }))
+        }
+      } catch (error) {
+        console.warn('Error querying debts table:', error)
+      }
+
+      console.log('Loaded debts:', debtsData.length, 'records')
+
+      // Load orders as income (if not already in expenses)
+      let ordersData: any[] = []
+      try {
+        // First try to get all orders for this restaurant (no status filter)
+        const { data: allOrders, error: allOrdersError } = await supabase
+          .from('orders')
+          // Use the actual total column; older rows may still expose total_amount via views
+          .select('id, total, table_number, created_at, status, payment_status')
+          .eq('restaurant_id', selectedRestaurant.id)
+          .order('created_at', { ascending: false })
+          .limit(1000)
+
+        if (allOrdersError) {
+          console.warn('All orders query error:', allOrdersError)
+          console.warn('All orders error details:', JSON.stringify(allOrdersError, null, 2))
+        } else {
+          console.log('All orders query successful:', allOrders?.length, 'total orders found')
+          if (allOrders && allOrders.length > 0) {
+            console.log('First 5 orders:', allOrders.slice(0, 5).map(o => ({
+              id: o.id,
+              total_amount: Number((o as any).total ?? (o as any).total_amount ?? 0),
+              status: o.status,
+              payment_status: o.payment_status,
+              table_number: o.table_number
+            })))
+            console.log('Sample order data:', allOrders[0])
+            // Filter for paid orders or orders that should be considered income
+            const normalizedOrders = allOrders.map(o => ({
+              ...o,
+              total_amount: Number((o as any).total ?? (o as any).total_amount ?? 0)
+            }))
+
+            // Include everything that isn't cancelled/void/refunded to keep cashflow honest
+            ordersData = normalizedOrders.filter(order => {
+              const status = (order.status || '').toLowerCase()
+              const isCancelled = ['cancelled', 'canceled', 'void', 'refunded'].includes(status)
+              return !isCancelled && order.total_amount > 0
+            })
+            console.log('Filtered to paid/completed orders:', ordersData.length)
+            console.log('Filter breakdown:')
+            console.log('- payment_status=paid:', allOrders.filter(o => o.payment_status === 'paid').length)
+            console.log('- status=completed:', allOrders.filter(o => o.status === 'completed').length)
+            console.log('- status=paid:', allOrders.filter(o => o.status === 'paid').length)
+            console.log('- no status:', allOrders.filter(o => !o.payment_status && !o.status).length)
+          }
+        }
+      } catch (error) {
+        console.warn('Error with orders query:', error)
+      }
+
+      console.log('Loaded orders:', ordersData.length, 'paid orders')
+      if (ordersData.length > 0) {
+        console.log('Sample order:', ordersData[0])
+      }
+
+      // Load ingredients for stock purchases
+      let ingredientsData: any[] = []
+      try {
+        const { data: ingredientsResult, error: ingredientsError } = await supabase
+          .from('ingredients')
+          .select('id, name, unit')
+          .eq('restaurant_id', selectedRestaurant.id)
+          .order('name')
+
+        if (ingredientsError) {
+          console.warn('Ingredients query error:', ingredientsError)
+        } else {
+          ingredientsData = ingredientsResult || []
+        }
+      } catch (error) {
+        console.warn('Error loading ingredients:', error)
+      }
+
+      console.log('Loaded ingredients:', ingredientsData.length, 'records')
+
+      // Load employees (staff)
+      let employeesData: any[] = []
+      try {
+        const { data: employeesResult, error: employeesError } = await supabase
+          .from('staff')
+          .select('id, name')
+          .eq('restaurant_id', selectedRestaurant.id)
+          .order('name')
+
+        if (employeesError) {
+          console.warn('Employees query error:', employeesError)
+        } else {
+          employeesData = employeesResult || []
+        }
+      } catch (error) {
+        console.warn('Error loading employees:', error)
+      }
+
+      // Process data
+      const processedTransactions = (transactionsData || []).map(transaction => {
+        // Handle ingredient data from Supabase join
+        let ingredient = null
+        if (transaction.ingredients) {
+          // Supabase returns joined single records as objects
+          ingredient = Array.isArray(transaction.ingredients) ? transaction.ingredients[0] : transaction.ingredients
+        } else if (transaction.ingredient) {
+          ingredient = transaction.ingredient
+        }
+        
+        return {
+          ...transaction,
+          transaction_type: transaction.transaction_type || 'expense',
+          ingredient: ingredient,
+          order: transaction.order || null
+        }
+      })
+      const processedDebts = debtsData || []
+      const processedIngredients = ingredientsData || []
+
+      // Add orders as income transactions
+      // For now, include all paid orders (we can filter out duplicates later if needed)
+      const orderTransactions = (ordersData || [])
+        .map(order => ({
+          id: `order-${order.id}`,
+          restaurant_id: selectedRestaurant.id,
+          transaction_type: 'income' as TransactionType,
+          category: 'order' as TransactionCategory,
+          amount: order.total ?? order.total_amount ?? 0,
+          description: `Order ${order.table_number ? `#${order.table_number}` : `(ID: ${order.id.slice(-8)})`}`,
+          date: order.created_at.split('T')[0],
+          created_at: order.created_at,
+          created_by: '',
+          order_id: order.id,
+          ingredient: null,
+          order: {
+            id: order.id,
+            total_amount: order.total ?? order.total_amount ?? 0,
+            total: order.total ?? order.total_amount ?? 0,
+            table_number: order.table_number || null
+          }
+        }))
+
+      const allTransactions = [...processedTransactions, ...orderTransactions]
+
+      console.log('Final transactions:', allTransactions.length, 'records')
+      console.log('Processed transactions:', processedTransactions.length, 'expenses')
+      console.log('Order transactions:', orderTransactions.length, 'orders')
+
+      setTransactions(allTransactions)
+      setOrders(ordersData)
+      setDebts(processedDebts)
+      setIngredients(ingredientsData)
+      setEmployees(employeesData)
+      calculateStats(allTransactions, processedDebts)
+
+    } catch (error) {
+      console.error('Error loading data:', error)
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        error
+      })
+      setError(error instanceof Error ? error.message : 'Failed to load data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function calculateStats(transactions: CashFlowTransaction[], debts: Debt[]) {
+    const now = new Date()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+    const startDate = getRangeStart(trendRange)
+
+    let totalIncome = 0
+    let totalExpenses = 0
+    let totalDebt = 0
+    let monthlyIncome = 0
+    let monthlyExpenses = 0
+    let monthlyDebt = 0
+
+    const categoryBreakdown: Record<string, number> = {}
+    const debtBreakdown: Record<string, number> = {}
+
+    const rangeTransactions = transactions.filter(t => new Date(t.date) >= startDate)
+    const rangeDebts = debts.filter(d => (d.status === 'active' || d.status === 'overdue') && (!d.due_date || new Date(d.due_date) >= startDate))
+
+    rangeTransactions.forEach(transaction => {
+      const amount = transaction.amount
+      const transactionDate = new Date(transaction.date)
+      const isCurrentMonth = transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear
+
+      if (transaction.transaction_type === 'income') {
+        totalIncome += amount
+        if (isCurrentMonth) monthlyIncome += amount
+      } else if (transaction.transaction_type === 'expense') {
+        totalExpenses += amount
+        if (isCurrentMonth) monthlyExpenses += amount
+      }
+
+      categoryBreakdown[transaction.category] = (categoryBreakdown[transaction.category] || 0) + amount
+    })
+
+    rangeDebts.forEach(debt => {
+      totalDebt += debt.amount
+      const dueDate = debt.due_date ? new Date(debt.due_date) : null
+      const isCurrentMonth = dueDate ? (dueDate.getMonth() === currentMonth && dueDate.getFullYear() === currentYear) : false
+      if (isCurrentMonth) monthlyDebt += debt.amount
+
+      debtBreakdown[debt.status] = (debtBreakdown[debt.status] || 0) + debt.amount
+    })
+
+    // In range view, treat monthly metrics as the selected range totals
+    monthlyIncome = totalIncome
+    monthlyExpenses = totalExpenses
+    monthlyDebt = totalDebt
+
+    const netWorth = totalIncome - totalExpenses - totalDebt
+    const cashFlow = monthlyIncome - monthlyExpenses - monthlyDebt
+
+    // Generate trend data based on selected range
+    const trendData: Array<{ period: string; income: number; expenses: number; debt: number; net: number }> = []
+    const formatterLocale = language === 'id' ? 'id-ID' : 'en-US'
+
+    const addPoint = (label: string, incomeVal: number, expenseVal: number, debtVal: number, netVal: number) => {
+      trendData.push({
+        period: label,
+        income: incomeVal,
+        expenses: expenseVal,
+        debt: debtVal,
+        net: netVal
+      })
+    }
+
+    const filteredTx = rangeTransactions
+    const filteredDebts = rangeDebts
+
+    const bucketKey = (date: Date) => {
+      if (trendRange === '1D') return date.getHours().toString()
+      if (trendRange === '1W') return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+      if (trendRange === '1M') return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+      if (trendRange === '6M') return `${date.getFullYear()}-${date.getMonth()}`
+      if (trendRange === '1Y') return `${date.getFullYear()}-${date.getMonth()}`
+      return `${date.getFullYear()}-${date.getMonth()}`
+    }
+
+    const buckets = new Map<string, { income: number; expenses: number; debt: number; date: Date }>()
+
+    const upsertBucket = (key: string, date: Date, incomeVal: number, expenseVal: number, debtVal: number) => {
+      const existing = buckets.get(key)
+      const payload = existing || { income: 0, expenses: 0, debt: 0, date }
+      payload.income += incomeVal
+      payload.expenses += expenseVal
+      payload.debt += debtVal
+      buckets.set(key, payload)
+    }
+
+    filteredTx.forEach(t => {
+      const d = new Date(t.date)
+      const key = bucketKey(d)
+      upsertBucket(key, d, t.transaction_type === 'income' ? t.amount : 0, t.transaction_type === 'expense' ? t.amount : 0, 0)
+    })
+
+    filteredDebts.forEach(d => {
+      if (!d.due_date) return
+      const due = new Date(d.due_date)
+      if (due < startDate) return
+      const key = bucketKey(due)
+      upsertBucket(key, due, 0, 0, d.amount)
+    })
+
+    const sorted = Array.from(buckets.entries()).sort((a, b) => a[1].date.getTime() - b[1].date.getTime())
+
+    sorted.forEach(([, value]) => {
+      const { date, income: incomeVal, expenses: expenseVal, debt: debtVal } = value
+
+      let label = date.toLocaleDateString(formatterLocale, { month: 'short', year: 'numeric' })
+      if (trendRange === '1D') label = `${date.getHours()}:00`
+      if (trendRange === '1W' || trendRange === '1M') label = date.toLocaleDateString(formatterLocale, { day: 'numeric', month: 'short' })
+
+      addPoint(label, incomeVal, expenseVal, debtVal, incomeVal - expenseVal - debtVal)
+    })
+
+    setStats({
+      totalIncome,
+      totalExpenses,
+      totalDebt,
+      netWorth,
+      monthlyIncome,
+      monthlyExpenses,
+      monthlyDebt,
+      cashFlow,
+      categoryBreakdown,
+      debtBreakdown,
+      cashFlowTrend: trendData
+    })
+  }
+
+  async function handleSubmitTransaction(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!restaurant) return
+
+    const amount = parseFloat(formData.amount)
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid amount')
+      return
+    }
+
+    // Validate stock purchase fields
+    if (formData.transaction_type === 'expense' && formData.category === 'stock_purchase') {
+      if (!formData.ingredientId.trim()) {
+        alert('Please select an ingredient for stock purchases')
+        return
+      }
+      if (!formData.quantity.trim() || parseFloat(formData.quantity) <= 0) {
+        alert('Please enter a valid quantity for stock purchases')
+        return
+      }
+    }
+
+    // Auto-generate description based on category
+    let description = formData.description
+    if (formData.transaction_type === 'expense' && formData.category === 'stock_purchase' && formData.ingredientId && formData.quantity) {
+      const ingredient = ingredients.find(i => i.id === formData.ingredientId)
+      if (ingredient) {
+        description = `${formData.quantity}${ingredient.unit} ${ingredient.name}`
+      }
+    } else if (formData.transaction_type === 'expense' && formData.category === 'salary' && formData.employeeId) {
+      const employee = employees.find(e => e.id === formData.employeeId)
+      if (employee) {
+        description = `gaji ${employee.name}`
+      }
+    }
+
+    try {
+      if (editingTransaction) {
+        // Update existing transaction
+        const updateData: any = {
+          transaction_type: formData.transaction_type,
+          category: formData.category,
+          amount,
+          description,
+          date: formData.date
+        }
+
+        if (formData.transaction_type === 'expense' && formData.category === 'stock_purchase' && formData.ingredientId) {
+          updateData.ingredient_id = formData.ingredientId
+          updateData.quantity = formData.quantity ? parseFloat(formData.quantity) : null
+        } else {
+          updateData.ingredient_id = null
+          updateData.quantity = null
+        }
+
+        if (formData.transaction_type === 'expense' && formData.category === 'salary' && formData.employeeId) {
+          updateData.employee_id = formData.employeeId
+        } else {
+          updateData.employee_id = null
+        }
+
+        const { error } = await supabase
+          .from('expenses')
+          .update(updateData)
+          .eq('id', editingTransaction.id)
+
+        if (error) throw error
+      } else {
+        // Create new transaction
+        const insertData: any = {
+          restaurant_id: restaurant.id,
+          transaction_type: formData.transaction_type,
+          category: formData.category,
+          amount,
+          description,
+          date: formData.date
+        }
+
+        if (formData.transaction_type === 'expense' && formData.category === 'stock_purchase' && formData.ingredientId) {
+          insertData.ingredient_id = formData.ingredientId
+          insertData.quantity = formData.quantity ? parseFloat(formData.quantity) : null
+        }
+
+        if (formData.transaction_type === 'expense' && formData.category === 'salary' && formData.employeeId) {
+          insertData.employee_id = formData.employeeId
+        }
+
+        const { error } = await supabase
+          .from('expenses')
+          .insert(insertData)
+
+        if (error) throw error
+      }
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: editingTransaction ? 'Transaction updated successfully' : 'Transaction added successfully'
+      })
+      
+      // Reset form and reload
+      setFormData({
+        transaction_type: 'income',
+        category: 'sales',
+        amount: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+        ingredientId: '',
+        quantity: '',
+        employeeId: '',
+        orderId: '',
+        unit: ''
+      })
+      setShowAddModal(false)
+      setEditingTransaction(null)
+      loadData()
+      
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => setNotification(null), 3000)
+
+    } catch (error) {
+      console.error('Full error object:', error)
+      console.error('Error type:', typeof error)
+      console.error('Error keys:', Object.keys(error || {}))
+      
+      let errorMessage = 'Error saving transaction. Please try again.'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+        console.error('Error message:', error.message)
+        console.error('Error stack:', error.stack)
+      } else if (typeof error === 'object' && error !== null) {
+        const err = error as any
+        if (err.message) {
+          errorMessage = err.message
+        } else if (err.error_description) {
+          errorMessage = err.error_description
+        } else if (err.details) {
+          errorMessage = err.details
+        } else if (err.hint) {
+          errorMessage = err.hint
+        }
+      }
+      
+      setNotification({
+        type: 'error',
+        message: errorMessage
+      })
+      
+      // Auto-hide error notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000)
+    }
+  }
+
+  async function deleteTransaction(id: string) {
+    try {
+      if (!restaurant) return
+
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id)
+        .eq('restaurant_id', restaurant.id)
+
+      if (error) throw error
+
+      loadData()
+    } catch (error) {
+      console.error('Error deleting transaction:', error)
+      alert('Error deleting transaction. Please try again.')
+    }
+  }
+
+  async function handleSubmitDebt(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!restaurant) return
+
+    const amount = parseFloat(debtFormData.amount)
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid amount')
+      return
+    }
+
+    if (!debtFormData.creditor_name.trim()) {
+      alert('Please enter creditor name')
+      return
+    }
+
+    try {
+      if (editingDebt) {
+        // Update existing debt
+        const { error } = await supabase
+          .from('debts')
+          .update({
+            creditor_name: debtFormData.creditor_name,
+            amount,
+            description: debtFormData.description,
+            due_date: debtFormData.due_date,
+            status: debtFormData.status
+          })
+          .eq('id', editingDebt.id)
+
+        if (error) throw error
+      } else {
+        // Create new debt
+        const { error } = await supabase
+          .from('debts')
+          .insert({
+            restaurant_id: restaurant.id,
+            creditor_name: debtFormData.creditor_name,
+            amount,
+            amount_paid: 0,
+            remaining_amount: amount,
+            description: debtFormData.description,
+            due_date: debtFormData.due_date,
+            status: debtFormData.status,
+            created_by: (await supabase.auth.getUser()).data.user?.id || ''
+          })
+
+        if (error) throw error
+      }
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: editingDebt ? 'Debt updated successfully' : 'Debt added successfully'
+      })
+
+      // Reset form and reload
+      setDebtFormData({
+        creditor_name: '',
+        amount: '',
+        description: '',
+        due_date: '',
+        status: 'active'
+      })
+      setShowDebtModal(false)
+      setEditingDebt(null)
+      loadData()
+      
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => setNotification(null), 3000)
+
+    } catch (error) {
+      console.error('Error saving debt:', error)
+      let errorMessage = 'Error saving debt. Please try again.'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'object' && error !== null) {
+        const err = error as any
+        if (err.message) {
+          errorMessage = err.message
+        } else if (err.error_description) {
+          errorMessage = err.error_description
+        }
+      }
+      
+      setNotification({
+        type: 'error',
+        message: errorMessage
+      })
+      
+      // Auto-hide error notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000)
+    }
+  }
+
+  async function handlePayDebt(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!restaurant || !selectedDebtForPayment) return
+
+    const paymentAmount = parseFloat(paymentFormData.amount)
+    if (isNaN(paymentAmount) || paymentAmount <= 0) {
+      alert('Please enter a valid payment amount')
+      return
+    }
+
+    if (paymentAmount > selectedDebtForPayment.remaining_amount) {
+      alert(`Payment amount cannot exceed remaining debt (IDR ${selectedDebtForPayment.remaining_amount.toLocaleString()})`)
+      return
+    }
+
+    try {
+      // 1. Create debt payment record
+      const { data: paymentData, error: paymentError } = await supabase
+        .from('debt_payments')
+        .insert({
+          debt_id: selectedDebtForPayment.id,
+          amount: paymentAmount,
+          payment_date: paymentFormData.payment_date,
+          notes: paymentFormData.notes,
+          restaurant_id: restaurant.id
+        })
+        .select()
+        .single()
+
+      if (paymentError) throw paymentError
+
+      // 2. Create expense transaction for this payment
+      const { data: transactionData, error: transactionError } = await supabase
+        .from('expenses')
+        .insert({
+          restaurant_id: restaurant.id,
+          transaction_type: 'expense',
+          category: 'operational',
+          amount: paymentAmount,
+          description: `Pembayaran hutang ke ${selectedDebtForPayment.creditor_name}${paymentFormData.notes ? ' - ' + paymentFormData.notes : ''}`,
+          date: paymentFormData.payment_date,
+          created_by: (await supabase.auth.getUser()).data.user?.id || ''
+        })
+        .select()
+        .single()
+
+      if (transactionError) throw transactionError
+
+      // 3. Update debt_payment with transaction_id
+      if (paymentData && transactionData) {
+        await supabase
+          .from('debt_payments')
+          .update({ transaction_id: transactionData.id })
+          .eq('id', paymentData.id)
+      }
+
+      // 4. Calculate new amounts and status
+      const newAmountPaid = (selectedDebtForPayment.amount_paid || 0) + paymentAmount
+      const newRemainingAmount = selectedDebtForPayment.amount - newAmountPaid
+      
+      let newStatus: 'active' | 'partial' | 'paid' | 'overdue'
+      if (newRemainingAmount === 0) {
+        newStatus = 'paid'
+      } else if (newAmountPaid > 0) {
+        newStatus = 'partial'
+      } else {
+        newStatus = selectedDebtForPayment.status
+      }
+
+      // 5. Update debt with new amounts and status
+      const { error: updateError } = await supabase
+        .from('debts')
+        .update({
+          amount_paid: newAmountPaid,
+          remaining_amount: newRemainingAmount,
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedDebtForPayment.id)
+
+      if (updateError) throw updateError
+
+      // Reset form and reload
+      setPaymentFormData({
+        amount: '',
+        payment_date: new Date().toISOString().split('T')[0],
+        notes: ''
+      })
+      setShowPaymentModal(false)
+      setSelectedDebtForPayment(null)
+      loadData()
+
+      // Show success notification
+      setNotification({
+        type: 'success',
+        message: 'Payment recorded successfully'
+      })
+      
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => setNotification(null), 3000)
+
+    } catch (error) {
+      console.error('Error recording payment:', error)
+      let errorMessage = 'Error recording payment. Please try again.'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'object' && error !== null) {
+        const err = error as any
+        if (err.message) {
+          errorMessage = err.message
+        } else if (err.error_description) {
+          errorMessage = err.error_description
+        }
+      }
+      
+      setNotification({
+        type: 'error',
+        message: errorMessage
+      })
+      
+      // Auto-hide error notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000)
+    }
+  }
+
+
+  async function deleteDebt(id: string) {
+    try {
+      if (!restaurant) return
+
+      const { error } = await supabase
+        .from('debts')
+        .delete()
+        .eq('id', id)
+        .eq('restaurant_id', restaurant.id)
+
+      if (error) throw error
+
+      loadData()
+    } catch (error) {
+      console.error('Error deleting debt:', error)
+      alert('Error deleting debt. Please try again.')
+    }
+  }
+
+  function formatCurrency(amount: number) {
+    const formatted = new Intl.NumberFormat(language === 'id' ? 'id-ID' : 'en-US', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(amount)
+    return formatted.replace(/\s+/g, '') // remove spaces between currency and number
+  }
+
+  function formatAmountInput(value: string): string {
+    // Remove all non-digits
+    const numericValue = value.replace(/\D/g, '')
+    if (!numericValue) return ''
+    // Format with thousands separator
+    return new Intl.NumberFormat('id-ID').format(parseInt(numericValue))
+  }
+
+  function parseAmountInput(value: string): string {
+    // Remove all non-digits and return as string for storage
+    return value.replace(/\D/g, '')
+  }
+
+  const rangeStart = getRangeStart(trendRange)
+
+  const transactionsInRange = transactions.filter(t => new Date(t.date) >= rangeStart)
+  const debtsInRange = debts.filter(d => (d.status === 'active' || d.status === 'overdue') && (!d.due_date || new Date(d.due_date) >= rangeStart))
+
+  // Combine orders as income with expenses
+  const allTransactionsWithOrders = [
+    ...transactionsInRange,
+    ...(orders?.map((order, index) => ({
+      id: `order-${order.id}-${index}`,
+      orderId: order.id,
+      date: order.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+      amount: order.total || 0,
+      description: `Order #${order.id}`,
+      transaction_type: 'income' as const,
+      category: 'order' as const
+    })) || [])
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  // Filter transactions based on search and category
+  const filteredTransactions = allTransactionsWithOrders.filter(transaction => {
+    const matchesSearch = (transaction.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (categoryLabel(transaction.category as TransactionCategory) || transaction.category).toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = categoryFilter === 'all' || transaction.category === categoryFilter
+    return matchesSearch && matchesCategory
+  })
+
+  // Filter debts based on search
+  const filteredDebts = debtsInRange.filter(debt => {
+    const matchesSearch = (debt.creditor_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (debt.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesSearch
+  })
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-600 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Data</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null)
+              loadData()
+            }}
+            className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:bg-opacity-90 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[var(--color-accent)]"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-8">
+        {/* Header */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t.headerTitle}</h1>
+              <p className="text-sm sm:text-base text-gray-600">{t.headerSubtitle}</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setShowDebtModal(true)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 border border-gray-200 rounded-xl font-semibold hover:shadow-sm transition-colors"
+              >
+                <AlertTriangle className="w-4 h-4 text-red-500" />
+                {t.recordDebt}
+              </button>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                {t.addTransaction}
+              </button>
+            </div>
+          </div>
+
+          {/* Range selector aligned with header */}
+          <div className="flex flex-wrap gap-2">
+            {([
+              { key: '1D', label: 'Harian' },
+              { key: '1W', label: 'Mingguan' },
+              { key: '1M', label: 'Bulanan' },
+              { key: '6M', label: '6 Bulan' },
+              { key: '1Y', label: 'Tahunan' },
+              { key: 'ALL', label: 'Semua' }
+            ] as const).map(range => (
+              <button
+                key={range.key}
+                onClick={() => setTrendRange(range.key as typeof trendRange)}
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                  trendRange === range.key
+                    ? 'bg-[var(--color-accent)] text-white'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Premium Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Net Worth - Gradient Card */}
+          <div className={`relative overflow-hidden rounded-3xl p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 ${stats.netWorth >= 0 ? 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600' : 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-600'}`}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <Target className="w-6 h-6" />
+                </div>
+                {stats.netWorth >= 0 ? (
+                  <TrendingUp className="w-5 h-5 opacity-60" />
+                ) : (
+                  <TrendingDown className="w-5 h-5 opacity-60" />
+                )}
+              </div>
+              <p className="text-sm font-medium opacity-90 mb-1">{t.netWorth}</p>
+              <p className="text-3xl font-bold">{formatCurrency(stats.netWorth)}</p>
+            </div>
+          </div>
+
+          {/* Income Card */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-green-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-50 rounded-2xl">
+                <DollarSign className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full">
+                <TrendingUp className="w-3 h-3 text-green-700" />
+                <span className="text-xs font-bold text-green-700">{trendRange === '1D' ? t.today : trendRange === '1W' ? t.thisWeek : trendRange === '1M' ? t.thisMonth : trendRange === '6M' ? t.sixMonths : t.thisYear}</span>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">{t.totalIncome}</p>
+            <p className="text-2xl font-bold text-gray-900 mb-3">{formatCurrency(stats.totalIncome)}</p>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-500">{t.selectedRange}:</span>
+              <span className="font-semibold text-gray-700">{trendRange}</span>
+            </div>
+          </div>
+
+          {/* Expenses Card */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-red-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-50 rounded-2xl">
+                <TrendingDown className="w-6 h-6 text-red-600" />
+              </div>
+              <div className="flex items-center gap-1 px-3 py-1 bg-red-100 rounded-full">
+                <TrendingDown className="w-3 h-3 text-red-700" />
+                <span className="text-xs font-bold text-red-700">{trendRange === '1D' ? t.today : trendRange === '1W' ? t.thisWeek : trendRange === '1M' ? t.thisMonth : trendRange === '6M' ? t.sixMonths : t.thisYear}</span>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">{t.totalExpenses}</p>
+            <p className="text-2xl font-bold text-gray-900 mb-3">{formatCurrency(stats.totalExpenses)}</p>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-500">{t.selectedRange}:</span>
+              <span className="font-semibold text-gray-700">{trendRange}</span>
+            </div>
+          </div>
+
+          {/* Debts Card */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-orange-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-orange-50 rounded-2xl">
+                <AlertTriangle className="w-6 h-6 text-orange-600" />
+              </div>
+              <span className="px-3 py-1 bg-orange-50 rounded-full text-xs font-medium text-orange-600">
+                {debts.filter(d => d.status !== 'paid').length} {t.active}
+              </span>
+            </div>
+            <p className="text-sm font-medium text-gray-600 mb-1">{t.totalDebt}</p>
+            <p className="text-2xl font-bold text-gray-900 mb-1">{formatCurrency(stats.totalDebt)}</p>
+            <p className="text-xs text-gray-500">{t.debtHelper}</p>
+          </div>
+        </div>
+
+      {/* Charts and Transactions Section */}
+        <div className="space-y-6">
+          {/* Cash Flow Trend Chart */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{t.trendTitle}</h3>
+                <p className="text-sm text-gray-500 mt-1">{t.trendSubtitle}</p>
+              </div>
+            </div>
+            <div className="h-96 min-h-[380px]">
+              {stats.cashFlowTrend.length ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stats.cashFlowTrend} margin={{ top: 10, right: 40, left: 40, bottom: 10 }}>
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+                    <XAxis dataKey="period" stroke="#9CA3AF" style={{ fontSize: '12px' }} />
+                    <YAxis tickFormatter={(value) => formatCurrency(value)} stroke="#9CA3AF" style={{ fontSize: '12px' }} width={50} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#FFFFFF', 
+                        border: '1px solid #E5E7EB', 
+                        borderRadius: '12px',
+                        padding: '12px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                      }}
+                      labelStyle={{ color: '#1F2937', fontWeight: 'bold', marginBottom: '8px' }}
+                      formatter={(value: number, name: string) => {
+                        let label = name
+                        if (name === 'income') label = 'Income'
+                        if (name === 'expenses') label = 'Expenses'
+                        if (name === 'net') label = 'Net Cash Flow'
+                        return [formatCurrency(value), label]
+                      }}
+                      cursor={{ stroke: '#D1D5DB', strokeWidth: 2 }}
+                    />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '20px' }}
+                      iconType="line"
+                    />
+                    <Line type="monotone" dataKey="income" stroke="#10B981" strokeWidth={3} name="Income" dot={{ fill: '#10B981', r: 5 }} activeDot={{ r: 8, stroke: '#059669', strokeWidth: 2 }} />
+                    <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} name="Expenses" dot={{ fill: '#EF4444', r: 5 }} activeDot={{ r: 8, stroke: '#DC2626', strokeWidth: 2 }} />
+                    <Line type="monotone" dataKey="net" stroke="#3B82F6" strokeWidth={3} name="Net Cash Flow" dot={{ fill: '#3B82F6', r: 5 }} activeDot={{ r: 8, stroke: '#1D4ED8', strokeWidth: 2 }} strokeDasharray="5 5" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full w-full rounded-lg border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500 bg-gray-50/50">
+                  <Calendar className="w-12 h-12 text-gray-400 mb-3" />
+                  <p className="text-sm font-medium">{t.trendEmpty}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Category Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">{t.incomeBreakdown}</h3>
+              <div className="space-y-4">
+                {Object.entries(stats.categoryBreakdown)
+                  .filter(([category]) => ['sales', 'investment', 'other_income', 'order'].includes(category))
+                  .map(([category, amount]) => {
+                    const Icon = categoryIcons[category as TransactionCategory] || DollarSign
+                    const percentage = stats.totalIncome > 0 ? (amount / stats.totalIncome) * 100 : 0
+                    return (
+                      <div key={category} className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-transparent rounded-2xl border border-green-100 hover:border-green-200 transition-colors">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="p-2.5 bg-green-100 rounded-xl">
+                            <Icon className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900">{categoryLabel(category as TransactionCategory)}</p>
+                            <div className="w-24 bg-gray-200 rounded-full h-1.5 mt-2">
+                              <div
+                                className="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full"
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right ml-4">
+                          <p className="text-sm font-bold text-green-600">{formatCurrency(amount)}</p>
+                          <p className="text-xs text-gray-500 mt-1">{percentage.toFixed(1)}%</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">{t.expenseBreakdown}</h3>
+              <div className="space-y-4">
+                {Object.entries(stats.categoryBreakdown)
+                  .filter(([category]) => ['operational', 'stock_purchase', 'salary', 'capital'].includes(category))
+                  .map(([category, amount]) => {
+                    const Icon = categoryIcons[category as TransactionCategory] || Receipt
+                    const percentage = stats.totalExpenses > 0 ? (amount / stats.totalExpenses) * 100 : 0
+                    return (
+                      <div key={category} className="flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-transparent rounded-2xl border border-red-100 hover:border-red-200 transition-colors">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="p-2.5 bg-red-100 rounded-xl">
+                            <Icon className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900">{categoryLabel(category as TransactionCategory)}</p>
+                            <div className="w-24 bg-gray-200 rounded-full h-1.5 mt-2">
+                              <div
+                                className="bg-gradient-to-r from-red-500 to-rose-500 h-1.5 rounded-full"
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right ml-4">
+                          <p className="text-sm font-bold text-red-600">{formatCurrency(amount)}</p>
+                          <p className="text-xs text-gray-500 mt-1">{percentage.toFixed(1)}%</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {/* Transactions Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          {/* Search and Filter */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder={t.searchTransactions}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+              >
+                <option value="all">{t.allCategories}</option>
+                {Object.entries(categoryLabels).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.date}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.type}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.category}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.description}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.amount}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.actions}</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center">
+                        <DollarSign className="w-12 h-12 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">{t.noTransactionsTitle}</h3>
+                        <p className="text-gray-500 mb-4">
+                          {searchQuery || categoryFilter !== 'all'
+                            ? t.noTransactionsDesc
+                            : t.startTransactionsDesc}
+                        </p>
+                        {(!searchQuery && categoryFilter === 'all') && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setShowAddModal(true)}
+                              className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              {t.addTransaction}
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!restaurant) return
+                                try {
+                                  // Create sample expenses (matching existing table structure)
+                                  const sampleExpenses = [
+                                    {
+                                      restaurant_id: restaurant.id,
+                                      category: 'stock_purchase',
+                                      amount: 1500000,
+                                      description: 'Weekly stock purchase',
+                                      date: new Date().toISOString().split('T')[0],
+                                      created_by: (await supabase.auth.getUser()).data.user?.id
+                                    },
+                                    {
+                                      restaurant_id: restaurant.id,
+                                      category: 'salary',
+                                      amount: 2000000,
+                                      description: 'Monthly staff salaries',
+                                      date: new Date().toISOString().split('T')[0],
+                                      created_by: (await supabase.auth.getUser()).data.user?.id
+                                    },
+                                    {
+                                      restaurant_id: restaurant.id,
+                                      category: 'utilities',
+                                      amount: 500000,
+                                      description: 'Electricity and water bills',
+                                      date: new Date().toISOString().split('T')[0],
+                                      created_by: (await supabase.auth.getUser()).data.user?.id
+                                    }
+                                  ]
+
+                                  for (const expense of sampleExpenses) {
+                                    const { error } = await supabase
+                                      .from('expenses')
+                                      .insert(expense)
+                                    if (error) {
+                                      console.warn('Error creating sample expense:', error)
+                                    } else {
+                                      console.log('Sample expense created successfully')
+                                    }
+                                  }
+
+                                  // Reload data
+                                  loadData()
+                                } catch (error) {
+                                  console.error('Error creating sample data:', error)
+                                }
+                              }}
+                              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              {t.addSampleExpenses}
+                            </button>
+
+                            <button
+                              onClick={async () => {
+                                if (!restaurant) return
+                                try {
+                                  // First, get or create a table for the restaurant
+                                  let { data: tables } = await supabase
+                                    .from('tables')
+                                    .select('id')
+                                    .eq('restaurant_id', restaurant.id)
+                                    .limit(1)
+
+                                  let tableId = tables?.[0]?.id
+                                  if (!tableId) {
+                                    // Create a sample table
+                                    const { data: newTable, error: tableError } = await supabase
+                                      .from('tables')
+                                      .insert({
+                                        restaurant_id: restaurant.id,
+                                        table_number: 1,
+                                        capacity: 4,
+                                        status: 'available'
+                                      })
+                                      .select('id')
+                                      .single()
+                                    
+                                    if (tableError) {
+                                      console.warn('Error creating table:', tableError)
+                                      return
+                                    }
+                                    tableId = newTable.id
+                                  }
+
+                                  // Create sample orders
+                                  const sampleOrders = [
+                                    {
+                                      restaurant_id: restaurant.id,
+                                      table_id: tableId,
+                                      table_number: 1,
+                                      customer_name: 'Sample Customer',
+                                      status: 'paid',
+                                      payment_status: 'paid',
+                                      payment_method: 'cash',
+                                      total_amount: 75000,
+                                      subtotal: 75000,
+                                      paid_amount: 75000,
+                                      paid_at: new Date().toISOString()
+                                    },
+                                    {
+                                      restaurant_id: restaurant.id,
+                                      table_id: tableId,
+                                      table_number: 2,
+                                      customer_name: 'Another Customer',
+                                      status: 'completed',
+                                      payment_status: 'paid',
+                                      payment_method: 'qris',
+                                      total_amount: 125000,
+                                      subtotal: 125000,
+                                      paid_amount: 125000,
+                                      paid_at: new Date().toISOString()
+                                    }
+                                  ]
+
+                                  for (const order of sampleOrders) {
+                                    const { error } = await supabase
+                                      .from('orders')
+                                      .insert(order)
+                                    if (error) {
+                                      console.warn('Error creating sample order:', error)
+                                    } else {
+                                      console.log('Sample order created successfully')
+                                    }
+                                  }
+
+                                  // Reload data
+                                  loadData()
+                                } catch (error) {
+                                  console.error('Error creating sample orders:', error)
+                                }
+                              }}
+                              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              {t.addSampleOrders}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTransactions.map((transaction) => {
+                    const Icon = categoryIcons[transaction.category] || DollarSign
+                    return (
+                      <tr key={transaction.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(transaction.date).toLocaleDateString(language === 'id' ? 'id-ID' : language === 'zh' ? 'zh-CN' : 'en-US')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            transaction.transaction_type === 'income'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {transaction.transaction_type === 'income'
+                              ? cashFlowTranslations.transactionTypes.income
+                              : cashFlowTranslations.transactionTypes.expense}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="flex items-center gap-2">
+                            <Icon className="w-4 h-4" />
+                            {categoryLabel(transaction.category as TransactionCategory)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {transaction.category === 'stock_purchase' && transaction.ingredient ? (
+                            <div className="space-y-1">
+                              <div className="font-semibold text-gray-900">
+                                {transaction.quantity} {transaction.ingredient.unit} {transaction.ingredient.name}
+                              </div>
+                              {transaction.description && transaction.description.trim().toLowerCase() !== transaction.ingredient.name.trim().toLowerCase() && (
+                                <div className="text-xs text-gray-500 italic">{transaction.description}</div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <div className="font-medium">{transaction.description}</div>
+                              {'category' in transaction && transaction.category === 'order' && (
+                                <div className="text-xs text-gray-500">
+                                  {transaction.description}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                          <span className={transaction.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'}>
+                            {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {'category' in transaction && transaction.category === 'order' ? (
+                            <button
+                              disabled
+                              className="text-gray-300 cursor-not-allowed"
+                              title="View only - Order transactions cannot be edited"
+                            >
+                              <FileText className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => {
+                                  const fullTransaction = transaction as CashFlowTransaction
+                                  setEditingTransaction(fullTransaction)
+                                  setFormData({
+                                    transaction_type: fullTransaction.transaction_type,
+                                    category: fullTransaction.category,
+                                    amount: fullTransaction.amount.toString(),
+                                    description: fullTransaction.description,
+                                    date: fullTransaction.date,
+                                    ingredientId: fullTransaction.ingredient_id || '',
+                                    quantity: fullTransaction.quantity?.toString() || '',
+                                    employeeId: fullTransaction.employee_id || '',
+                                    orderId: fullTransaction.order_id || '',
+                                    unit: fullTransaction.ingredient?.unit || ''
+                                  })
+                                  setShowAddModal(true)
+                                }}
+                                className="text-[var(--color-accent)] hover:text-opacity-80 mr-3"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to delete this transaction?')) {
+                                    deleteTransaction(transaction.id)
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-800"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      {/* Debts Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          {/* Search */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder={language === 'id' ? 'Cari utang...' : 'Search debts...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Debts List */}
+          <div className="divide-y divide-gray-200">
+            {filteredDebts.map((debt) => {
+              const StatusIcon = debtStatusIcons[debt.status]
+              return (
+                <div key={debt.id} className="p-6 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <StatusIcon className={`w-5 h-5 ${
+                        debt.status === 'active' ? 'text-yellow-600' :
+                        debt.status === 'partial' ? 'text-blue-600' :
+                        debt.status === 'paid' ? 'text-green-600' : 'text-red-600'
+                      }`} />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">{debt.creditor_name}</h3>
+                        <p className="text-sm text-gray-500">{debt.description}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          {debt.due_date && (
+                            <p className="text-xs text-gray-400">
+                              Due: {new Date(debt.due_date).toLocaleDateString()}
+                            </p>
+                          )}
+                          {debt.status !== 'paid' && debt.amount_paid > 0 && (
+                            <p className="text-xs text-blue-600 font-medium">
+                              Paid: {formatCurrency(debt.amount_paid)} / {formatCurrency(debt.amount)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${debtStatusColors[debt.status]}`}>
+                          {debt.status}
+                        </span>
+                        {debt.status !== 'paid' && (
+                          <p className="text-lg font-semibold text-red-600 mt-1">
+                            {formatCurrency(debt.remaining_amount || debt.amount)}
+                          </p>
+                        )}
+                        {debt.status === 'paid' && (
+                          <p className="text-lg font-semibold text-green-600 mt-1">
+                            {formatCurrency(debt.amount)}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {debt.status !== 'paid' && (
+                          <button
+                            onClick={() => {
+                              setSelectedDebtForPayment(debt)
+                              setPaymentFormData({
+                                amount: (debt.remaining_amount || debt.amount).toString(),
+                                payment_date: new Date().toISOString().split('T')[0],
+                                notes: ''
+                              })
+                              setShowPaymentModal(true)
+                            }}
+                            className="text-green-600 hover:text-green-800 font-medium text-sm px-3 py-1 border border-green-600 rounded-lg hover:bg-green-50"
+                            title="Pay Debt"
+                          >
+                            <DollarSign className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setEditingDebt(debt)
+                            setDebtFormData({
+                              creditor_name: debt.creditor_name,
+                              amount: debt.amount.toString(),
+                              description: debt.description,
+                              due_date: debt.due_date,
+                              status: debt.status
+                            })
+                            setShowDebtModal(true)
+                          }}
+                          className="text-[var(--color-accent)] hover:text-opacity-80"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this debt?')) {
+                              deleteDebt(debt.id)
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+      {/* Add Transaction Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
+          <div className="bg-white rounded-3xl p-7 w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="flex items-start justify-between mb-6">
+              <div className="space-y-1.5">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {editingTransaction ? t.editCashFlow : t.addCashFlow}
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{t.cashFlowHelper}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddModal(false)
+                  setEditingTransaction(null)
+                }}
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full p-2 transition-colors ml-4 -mt-1"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitTransaction} className="space-y-6">
+              {/* Transaction Type Selection */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-900">{t.transactionType}</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    { id: 'income', label: t.incomePill || 'Recording Income', desc: t.incomeDesc || 'Sales, investments, orders', tone: '#10B981' },
+                    { id: 'expense', label: t.expensePill || 'Recording Expense', desc: t.expenseDesc || 'Operational, stock, salary', tone: '#EF4444' }
+                  ] as const).map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, transaction_type: option.id, category: option.id === 'income' ? 'sales' : 'operational', ingredientId: '', quantity: '', employeeId: '' })}
+                      className="rounded-2xl border-2 px-4 py-3.5 text-left transition-all duration-200 hover:scale-[1.02]"
+                      style={{
+                        borderColor: formData.transaction_type === option.id ? 'var(--color-primary)' : '#E5E7EB',
+                        backgroundColor: formData.transaction_type === option.id ? 'var(--color-primary)' : '#FFFFFF',
+                        boxShadow: formData.transaction_type === option.id ? '0 4px 12px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.05)'
+                      }}
+                    >
+                      <div className="text-sm font-semibold" style={{ color: formData.transaction_type === option.id ? '#FFFFFF' : '#374151' }}>
+                        {option.label}
+                      </div>
+                      <div className="text-xs mt-1" style={{ color: formData.transaction_type === option.id ? 'rgba(255,255,255,0.9)' : '#9CA3AF' }}>
+                        {option.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Selection */}
+              <div className="space-y-3">
+                <label className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900">{t.category}</span>
+                  <span className="text-xs text-gray-500 font-medium">Required</span>
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {(formData.transaction_type === 'income'
+                    ? [
+                        { value: 'sales', label: cashFlowTranslations.categories.sales },
+                        { value: 'investment', label: cashFlowTranslations.categories.investment },
+                        { value: 'other_income', label: cashFlowTranslations.categories.other_income },
+                        { value: 'order', label: t.orderIncome }
+                      ]
+                    : [
+                        { value: 'operational', label: cashFlowTranslations.categories.operational },
+                        { value: 'stock_purchase', label: cashFlowTranslations.categories.stock_purchase },
+                        { value: 'salary', label: cashFlowTranslations.categories.salary },
+                        { value: 'capital', label: cashFlowTranslations.categories.capital }
+                      ]).map(cat => (
+                    <button
+                      type="button"
+                      key={cat.value}
+                      onClick={() => setFormData({ ...formData, category: cat.value as TransactionCategory })}
+                      className={`rounded-xl border-2 px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                        formData.category === cat.value
+                          ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-md scale-[1.02]'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Expense-dependent fields with improved UX */}
+              {formData.transaction_type === 'expense' && formData.category === 'stock_purchase' && (
+                <div className="space-y-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900">{t.ingredient}</label>
+                      <div className="relative z-10">
+                        <button
+                          type="button"
+                          onClick={() => setIngredientSearch(ingredientSearch === 'open' ? '' : 'open')}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white text-left flex items-center justify-between hover:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all text-sm"
+                        >
+                          <span className={formData.ingredientId ? 'text-gray-900 font-semibold' : 'text-gray-500'}>
+                            {formData.ingredientId 
+                              ? ingredients.find(i => i.id === formData.ingredientId)?.name 
+                              : 'Select ingredient...'}
+                          </span>
+                          <svg className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${ingredientSearch === 'open' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+
+                        {ingredientSearch === 'open' && (
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-xl z-50">
+                            <div className="p-3 border-b border-gray-200">
+                              <input
+                                type="text"
+                                value={ingredientSearch === 'open' ? '' : ingredientSearch}
+                                onChange={(e) => setIngredientSearch(e.target.value || 'open')}
+                                placeholder="Search ingredients..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent text-sm"
+                                autoFocus
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <div className="max-h-48 overflow-y-auto">
+                              {ingredients
+                                .filter((ingredient) => ingredient.name.toLowerCase().includes(ingredientSearch.toLowerCase().replace('open', '')))
+                                .map((ingredient) => (
+                                  <button
+                                    type="button"
+                                    key={ingredient.id}
+                                    onClick={() => {
+                                      setFormData({ ...formData, ingredientId: ingredient.id, unit: ingredient.unit })
+                                      setIngredientSearch('')
+                                    }}
+                                    className={`w-full text-left px-4 py-3 text-sm border-b border-gray-100 last:border-b-0 hover:bg-blue-50 transition-colors ${
+                                      formData.ingredientId === ingredient.id
+                                        ? 'bg-[var(--color-primary)] bg-opacity-10 border-[var(--color-primary)] text-gray-900 font-medium'
+                                        : 'text-gray-800'
+                                    }`}
+                                  >
+                                    <div className="font-medium">{ingredient.name}</div>
+                                    {ingredient.unit && <div className="text-xs text-gray-500 mt-0.5">{ingredient.unit}</div>}
+                                  </button>
+                                ))}
+                              {ingredients.filter((i) => i.name.toLowerCase().includes(ingredientSearch.toLowerCase().replace('open', ''))).length === 0 && (
+                                <div className="px-4 py-6 text-sm text-gray-500 text-center">No ingredients found</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900">Berapa Banyak {formData.unit && `(${formData.unit})`}</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.quantity}
+                          onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all text-sm font-medium"
+                          placeholder="0.00"
+                          required
+                        />
+                        {formData.unit && (
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
+                            {formData.unit}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {formData.transaction_type === 'expense' && formData.category === 'salary' && (
+                <div className="space-y-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                  <label className="block text-sm font-semibold text-gray-900">{t.employeeName}</label>
+                  <div className="relative z-10">
+                    <button
+                      type="button"
+                      onClick={() => setEmployeeSearch(employeeSearch === 'open' ? '' : 'open')}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between hover:border-gray-400 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors text-sm"
+                    >
+                      <span className={formData.employeeId ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                        {formData.employeeId 
+                          ? employees.find(e => e.id === formData.employeeId)?.name 
+                          : 'Select employee...'}
+                      </span>
+                      <svg className={`h-5 w-5 text-gray-400 transition-transform ${employeeSearch === 'open' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+
+                    {employeeSearch === 'open' && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                        <div className="p-3 border-b border-gray-200">
+                          <input
+                            type="text"
+                            value={employeeSearch === 'open' ? '' : employeeSearch}
+                            onChange={(e) => setEmployeeSearch(e.target.value || 'open')}
+                            placeholder="Search employees..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent text-sm"
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {employees
+                            .filter((emp) => (emp.name || '').toLowerCase().includes(employeeSearch.toLowerCase().replace('open', '')))
+                            .map((emp) => (
+                              <button
+                                type="button"
+                                key={emp.id}
+                                onClick={() => {
+                                  setFormData({ ...formData, employeeId: emp.id })
+                                  setEmployeeSearch('')
+                                }}
+                                className={`w-full text-left px-4 py-3 text-sm border-b border-gray-100 last:border-b-0 hover:bg-amber-50 transition-colors ${
+                                  formData.employeeId === emp.id
+                                    ? 'bg-[var(--color-primary)] bg-opacity-10 border-[var(--color-primary)] text-gray-900 font-medium'
+                                    : 'text-gray-800'
+                                }`}
+                              >
+                                {emp.name}
+                              </button>
+                            ))}
+                          {employees.filter((e) => (e.name || '').toLowerCase().includes(employeeSearch.toLowerCase().replace('open', ''))).length === 0 && (
+                            <div className="px-4 py-6 text-sm text-gray-500 text-center">No employees found</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-gray-900">{t.amount}</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold text-sm">IDR</span>
+                    <input
+                      type="text"
+                      value={formatAmountInput(formData.amount)}
+                      onChange={(e) => setFormData({ ...formData, amount: parseAmountInput(e.target.value) })}
+                      className="w-full pl-14 pr-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all text-sm font-medium"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-gray-900">{t.date}</label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all text-sm"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900">{t.description}</span>
+                  <span className="text-xs text-gray-500 font-medium">Required</span>
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] transition-all text-sm resize-none"
+                  rows={3}
+                  placeholder={t.descriptionPlaceholder}
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddModal(false)
+                    setEditingTransaction(null)
+                    setFormData({
+                      transaction_type: 'income',
+                      category: 'sales',
+                      amount: '',
+                      description: '',
+                      date: new Date().toISOString().split('T')[0],
+                      ingredientId: '',
+                      quantity: '',
+                      employeeId: '',
+                      orderId: '',
+                      unit: ''
+                    })
+                  }}
+                  className="flex-1 px-5 py-3 text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all font-semibold text-sm"
+                >
+                  {t.cancel}
+                </button>
+                <button
+                  type="submit"
+                  disabled={editingTransaction?.order_id ? true : false}
+                  className={`flex-1 px-5 py-3 rounded-xl transition-all font-semibold text-sm ${
+                    editingTransaction?.order_id
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-[var(--color-primary)] text-white hover:bg-opacity-90 shadow-md hover:shadow-lg'
+                  }`}
+                  title={editingTransaction?.order_id ? 'Order transactions cannot be edited' : ''}
+                >
+                  {editingTransaction ? t.update : t.save}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Debt Modal */}
+      {showDebtModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl border border-gray-100">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-600">
+                  <AlertTriangle className="w-4 h-4" />
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {editingDebt ? t.debtTitleEdit : t.debtTitleNew}
+                  </h3>
+                  <p className="text-sm text-gray-500">{t.debtSubtitle}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDebtModal(false)
+                  setEditingDebt(null)
+                }}
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSubmitDebt} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.creditor}</label>
+                <input
+                  type="text"
+                  value={debtFormData.creditor_name}
+                  onChange={(e) => setDebtFormData({ ...debtFormData, creditor_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="Enter creditor name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.amount}</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold text-sm">IDR</span>
+                  <input
+                    type="text"
+                    value={formatAmountInput(debtFormData.amount)}
+                    onChange={(e) => setDebtFormData({ ...debtFormData, amount: parseAmountInput(e.target.value) })}
+                    className="w-full pl-14 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    placeholder="0"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.description}</label>
+                <textarea
+                  value={debtFormData.description}
+                  onChange={(e) => setDebtFormData({ ...debtFormData, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter debt description..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.dueDate}</label>
+                <input
+                  type="date"
+                  value={debtFormData.due_date}
+                  onChange={(e) => setDebtFormData({ ...debtFormData, due_date: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.status}</label>
+                <select
+                  value={debtFormData.status}
+                  onChange={(e) => setDebtFormData({ ...debtFormData, status: e.target.value as 'active' | 'paid' | 'overdue' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  <option value="active">Active</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDebtModal(false)
+                    setEditingDebt(null)
+                    setDebtFormData({
+                      creditor_name: '',
+                      amount: '',
+                      description: '',
+                      due_date: '',
+                      status: 'active'
+                    })
+                  }}
+                  className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  {t.cancel}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  {editingDebt ? t.update : t.save}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedDebtForPayment && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
+          <div className="bg-white rounded-3xl p-7 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600">
+                  <DollarSign className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Bayar Hutang</h3>
+                  <p className="text-sm text-gray-600">Ke {selectedDebtForPayment.creditor_name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowPaymentModal(false)
+                  setSelectedDebtForPayment(null)
+                }}
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full p-2 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Debt Summary */}
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Total Hutang:</span>
+                  <span className="font-semibold text-gray-900">{formatCurrency(selectedDebtForPayment.amount)}</span>
+                </div>
+                {selectedDebtForPayment.amount_paid > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Sudah Dibayar:</span>
+                    <span className="font-semibold text-green-600">{formatCurrency(selectedDebtForPayment.amount_paid)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
+                  <span className="text-gray-900 font-semibold">Sisa Hutang:</span>
+                  <span className="font-bold text-red-600">{formatCurrency(selectedDebtForPayment.remaining_amount || selectedDebtForPayment.amount)}</span>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handlePayDebt} className="space-y-5">
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-900">
+                  Jumlah Bayar
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 font-semibold text-sm">IDR</span>
+                  <input
+                    type="text"
+                    value={formatAmountInput(paymentFormData.amount)}
+                    onChange={(e) => setPaymentFormData({ ...paymentFormData, amount: parseAmountInput(e.target.value) })}
+                    className="w-full pl-14 pr-4 py-3 border-2 border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm font-medium"
+                    placeholder="0"
+                    required
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentFormData({ ...paymentFormData, amount: ((selectedDebtForPayment.remaining_amount || selectedDebtForPayment.amount) / 2).toString() })}
+                    className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    50%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentFormData({ ...paymentFormData, amount: (selectedDebtForPayment.remaining_amount || selectedDebtForPayment.amount).toString() })}
+                    className="flex-1 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors"
+                  >
+                    Lunas
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-900">
+                  Tanggal Bayar
+                </label>
+                <input
+                  type="date"
+                  value={paymentFormData.payment_date}
+                  onChange={(e) => setPaymentFormData({ ...paymentFormData, payment_date: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm"
+                  required
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-900">
+                  Catatan <span className="text-gray-400 font-normal">(Optional)</span>
+                </label>
+                <textarea
+                  value={paymentFormData.notes}
+                  onChange={(e) => setPaymentFormData({ ...paymentFormData, notes: e.target.value })}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm resize-none"
+                  rows={3}
+                  placeholder="Catatan pembayaran (opsional)"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPaymentModal(false)
+                    setSelectedDebtForPayment(null)
+                  }}
+                  className="flex-1 px-5 py-3 text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all font-semibold text-sm"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all font-semibold text-sm shadow-md hover:shadow-lg"
+                >
+                  Bayar Sekarang
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      </div>
+
+      {/* Notification Toast */}
+      {notification && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
+          <div className={`px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 min-w-80 ${
+            notification.type === 'success'
+              ? 'bg-green-600 text-white'
+              : 'bg-red-600 text-white'
+          }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+            )}
+            <p className="font-medium text-sm sm:text-base flex-1">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-2 text-white hover:opacity-80 transition-opacity"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

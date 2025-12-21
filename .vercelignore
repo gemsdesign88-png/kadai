@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.md
+.gitignore
+kadaipos-cpanel-deploy
+src/app/dashboard/_backups
+*.sql
+*.sh
+.github
+docs
