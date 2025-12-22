@@ -1,0 +1,175 @@
+"use client"
+import * as React from "react"
+import { motion } from "framer-motion"
+
+export function PromoListMockup({ color, language }: { color: string; language: string }) {
+  const isEnglish = language === 'en'
+  return (
+    <div className="w-full max-w-md mx-auto">
+      <div className="relative aspect-[4/5] rounded-3xl p-8 shadow-2xl border" style={{ background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`, borderColor: `${color}30` }}>
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Manage Promos' : 'Kelola Promo'}</h3>
+          <p className="text-sm text-gray-600 mt-1">4 {isEnglish ? 'active promos' : 'promo aktif'}</p>
+        </div>
+        <div className="space-y-3">
+          {[
+            { name: isEnglish ? 'Weekend Special 20%' : 'Spesial Weekend 20%', discount: '20%', used: 45, status: 'active', color: 'from-red-500 to-pink-500' },
+            { name: isEnglish ? 'Buy 2 Get 1' : 'Beli 2 Gratis 1', discount: 'BOGO', used: 23, status: 'active', color: 'from-blue-500 to-cyan-500' },
+            { name: isEnglish ? 'New Customer 15%' : 'Pelanggan Baru 15%', discount: '15%', used: 12, status: 'active', color: 'from-green-500 to-emerald-500' },
+          ].map((promo, i) => (
+            <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
+              className="bg-white rounded-2xl p-4 shadow-md border border-gray-100">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className={`inline-block px-3 py-1 rounded-full bg-gradient-to-r ${promo.color} text-white text-xs font-bold mb-2`}>{promo.discount}</div>
+                  <p className="font-bold text-gray-900">{promo.name}</p>
+                  <p className="text-sm text-gray-600 mt-1">{promo.used} {isEnglish ? 'times used' : 'kali digunakan'}</p>
+                </div>
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">{isEnglish ? 'Active' : 'Aktif'}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <button className="w-full mt-6 py-4 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl font-bold shadow-lg">
+          + {isEnglish ? 'Create New Promo' : 'Buat Promo Baru'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export function CreatePromoMockup({ color, language }: { color: string; language: string }) {
+  const isEnglish = language === 'en'
+  return (
+    <div className="w-full max-w-md mx-auto">
+      <div className="relative aspect-[4/5] rounded-3xl p-8 shadow-2xl border" style={{ background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`, borderColor: `${color}30` }}>
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Create Promo' : 'Buat Promo'}</h3>
+          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'New promotion' : 'Promosi baru'}</p>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Promo Name' : 'Nama Promo'}</label>
+            <div className="bg-white rounded-xl p-3 border-2 border-red-200">
+              <p className="font-semibold text-gray-900">{isEnglish ? 'Weekend Special' : 'Spesial Weekend'}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Discount Type' : 'Tipe Diskon'}</label>
+              <div className="bg-white rounded-xl p-3 border-2 border-red-200">
+                <p className="font-semibold text-gray-900">{isEnglish ? 'Percentage' : 'Persentase'}</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Value' : 'Nilai'}</label>
+              <div className="bg-white rounded-xl p-3 border-2 border-red-200">
+                <p className="font-semibold text-gray-900">20%</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Valid Period' : 'Periode Berlaku'}</label>
+            <div className="bg-white rounded-xl p-3 border-2 border-red-200">
+              <p className="text-sm text-gray-900">Dec 7-8, 2025</p>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Applicable To' : 'Berlaku Untuk'}</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[isEnglish ? 'All Items' : 'Semua Item', isEnglish ? 'Food Only' : 'Makanan Saja'].map((opt, i) => (
+                <div key={i} className={`p-3 rounded-xl border-2 text-center text-sm font-bold ${i === 0 ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-gray-200 text-gray-600'}`}>
+                  {opt}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button className="w-full mt-6 py-4 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl font-bold shadow-lg">
+          {isEnglish ? 'Create Promo' : 'Buat Promo'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export function ActivePromosMockup({ color, language }: { color: string; language: string }) {
+  const isEnglish = language === 'en'
+  return (
+    <div className="w-full max-w-md mx-auto">
+      <div className="relative aspect-[4/5] rounded-3xl p-8 shadow-2xl border" style={{ background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`, borderColor: `${color}30` }}>
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Active Promos' : 'Promo Aktif'}</h3>
+          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'Customer View' : 'Tampilan Pelanggan'}</p>
+        </div>
+        <div className="space-y-4">
+          {[
+            { name: isEnglish ? 'Weekend Special' : 'Spesial Weekend', discount: '20%', desc: isEnglish ? 'Get 20% off all food items' : 'Diskon 20% semua makanan', color: 'from-red-500 to-pink-500', icon: '🎉' },
+            { name: isEnglish ? 'Buy 2 Get 1' : 'Beli 2 Gratis 1', discount: 'BOGO', desc: isEnglish ? 'Buy 2 drinks, get 1 free' : 'Beli 2 minuman gratis 1', color: 'from-blue-500 to-cyan-500', icon: '🥤' },
+          ].map((promo, i) => (
+            <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }}
+              className={`rounded-2xl p-5 shadow-lg bg-gradient-to-br ${promo.color} text-white relative overflow-hidden`}>
+              <div className="absolute top-0 right-0 text-6xl opacity-20">{promo.icon}</div>
+              <div className="relative z-10">
+                <div className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-bold mb-2">{promo.discount}</div>
+                <p className="font-bold text-xl mb-2">{promo.name}</p>
+                <p className="text-sm opacity-90">{promo.desc}</p>
+                <button className="mt-3 px-4 py-2 bg-white text-gray-900 rounded-lg font-bold text-sm">
+                  {isEnglish ? 'Apply Now' : 'Gunakan Sekarang'}
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function PromoPerformanceMockup({ color, language }: { color: string; language: string }) {
+  const isEnglish = language === 'en'
+  return (
+    <div className="w-full max-w-md mx-auto">
+      <div className="relative aspect-[4/5] rounded-3xl p-8 shadow-2xl border" style={{ background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`, borderColor: `${color}30` }}>
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Promo Performance' : 'Performa Promo'}</h3>
+          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'This month' : 'Bulan ini'}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {[
+            { label: isEnglish ? 'Total Used' : 'Total Digunakan', value: '156' },
+            { label: isEnglish ? 'Revenue' : 'Pendapatan', value: 'Rp 8.5M' },
+            { label: isEnglish ? 'Avg Discount' : 'Diskon Rata-rata', value: '18%' },
+            { label: isEnglish ? 'New Customers' : 'Pelanggan Baru', value: '45' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-md border border-gray-100">
+              <p className="text-xs text-gray-600 mb-1">{stat.label}</p>
+              <p className="text-2xl font-bold text-red-600">{stat.value}</p>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-3">
+          <p className="font-bold text-gray-900">{isEnglish ? 'Top Performing Promos' : 'Promo Terlaris'}</p>
+          {[
+            { name: 'Weekend Special 20%', uses: 45, revenue: '3.2M' },
+            { name: 'Buy 2 Get 1', uses: 38, revenue: '2.8M' },
+            { name: isEnglish ? 'New Customer 15%' : 'Pelanggan Baru 15%', uses: 28, revenue: '1.9M' },
+          ].map((promo, i) => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-bold text-gray-900 text-sm flex-1">{promo.name}</p>
+                <span className="text-xs font-bold text-red-600">Rp {promo.revenue}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-600">
+                <span>{promo.uses} {isEnglish ? 'uses' : 'kali'}</span>
+                <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                  <div className="bg-red-600 h-1.5 rounded-full" style={{ width: `${(promo.uses / 45) * 100}%` }}></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

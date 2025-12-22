@@ -1,0 +1,1381 @@
+"use client"
+
+import * as React from "react"
+import { motion } from "framer-motion"
+import { useLanguage } from "@/lib/i18n/context"
+import { 
+  BarChart3, ShoppingCart, Users, Package, TrendingUp, Clock, DollarSign, 
+  Building2, UtensilsCrossed, Zap, Bell, CheckCircle, ChevronRight, Star, AlertTriangle, Info, AlertCircle, Check
+} from "lucide-react"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from "recharts"
+
+// Compelling dummy data showcasing business growth and profitability
+const DUMMY_STATS = {
+  weekRevenue: 45800000, // Higher revenue showing successful business
+  weekOrders: 623, // More orders = busier restaurant
+  avgOrderValue: 145000, // Higher AOV = better margins
+  totalCustomers: 478, // More customers = popular venue
+  activeOrders: 18, // Busy restaurant right now
+  growthPercent: 34.2 // Strong growth trend
+}
+
+const DUMMY_REVENUE_TREND = [
+  { date: "Nov 2", revenue: 3200000 },
+  { date: "Nov 3", revenue: 3800000 },
+  { date: "Nov 4", revenue: 3500000 },
+  { date: "Nov 5", revenue: 4200000 },
+  { date: "Nov 6", revenue: 4600000 },
+  { date: "Nov 7", revenue: 5100000 },
+  { date: "Nov 8", revenue: 5800000 },
+  { date: "Nov 9", revenue: 5400000 },
+  { date: "Nov 10", revenue: 6200000 },
+  { date: "Nov 11", revenue: 5900000 },
+  { date: "Nov 12", revenue: 6500000 },
+  { date: "Nov 13", revenue: 6100000 },
+  { date: "Nov 14", revenue: 6900000 },
+  { date: "Nov 15", revenue: 7300000 },
+  { date: "Nov 16", revenue: 7100000 },
+  { date: "Nov 17", revenue: 7800000 },
+  { date: "Nov 18", revenue: 7500000 },
+  { date: "Nov 19", revenue: 8200000 },
+  { date: "Nov 20", revenue: 8800000 },
+  { date: "Nov 21", revenue: 8400000 },
+  { date: "Nov 22", revenue: 9100000 },
+  { date: "Nov 23", revenue: 8700000 },
+  { date: "Nov 24", revenue: 9500000 },
+  { date: "Nov 25", revenue: 10200000 },
+  { date: "Nov 26", revenue: 9800000 },
+  { date: "Nov 27", revenue: 10600000 },
+  { date: "Nov 28", revenue: 10300000 },
+  { date: "Nov 29", revenue: 11100000 },
+  { date: "Nov 30", revenue: 11800000 },
+  { date: "Dec 1", revenue: 11400000 },
+  { date: "Dec 2", revenue: 12200000 }
+]
+
+const DUMMY_ORDERS_AOV = [
+  { day: "Senin", orders: 68, avgOrderValue: 125000 },
+  { day: "Selasa", orders: 74, avgOrderValue: 118000 },
+  { day: "Rabu", orders: 62, avgOrderValue: 138000 },
+  { day: "Kamis", orders: 82, avgOrderValue: 132000 },
+  { day: "Jumat", orders: 105, avgOrderValue: 158000 },
+  { day: "Sabtu", orders: 128, avgOrderValue: 175000 },
+  { day: "Minggu", orders: 116, avgOrderValue: 168000 }
+]
+
+const DUMMY_TOP_ITEMS = [
+  { name: "Nasi Goreng Spesial", revenue: 5800000, count: 287 },
+  { name: "Ayam Bakar Premium", revenue: 4900000, count: 214 },
+  { name: "Mie Goreng Seafood", revenue: 4200000, count: 196 },
+  { name: "Soto Ayam Komplit", revenue: 3600000, count: 189 },
+  { name: "Es Teh Manis", revenue: 2100000, count: 412 }
+]
+
+const DUMMY_TOP_TABLES = [
+  { tableNumber: 8, orders: 72, revenue: 8900000 },
+  { tableNumber: 5, orders: 65, revenue: 8200000 },
+  { tableNumber: 12, orders: 58, revenue: 7400000 }
+]
+
+const DUMMY_TOP_STAFF = [
+  { name: "Rina", orders: 245, revenue: 14800000, rating: 4.9 },
+  { name: "Budi", orders: 228, revenue: 13500000, rating: 4.9 },
+  { name: "Sari", orders: 198, revenue: 11900000, rating: 4.8 }
+]
+
+const DUMMY_INSIGHTS = [
+  {
+    id: 'growth',
+    icon: TrendingUp,
+    title: 'Pertumbuhan Eksplosif',
+    message: '+34% pertumbuhan pendapatan minggu ini - Tren naik konsisten!',
+    color: 'green',
+    link: '/dashboard/analytics'
+  },
+  {
+    id: 'top-item',
+    icon: UtensilsCrossed,
+    title: 'Menu Andalan',
+    message: 'Nasi Goreng Spesial menghasilkan Rp 5.8M minggu ini (287 porsi)',
+    color: 'blue',
+    link: '/dashboard/menu'
+  },
+  {
+    id: 'top-table',
+    icon: Building2,
+    title: 'Meja Premium',
+    message: 'Meja 8 menghasilkan Rp 8.9M - Area dengan ROI tertinggi',
+    color: 'purple',
+    link: '/dashboard/tables'
+  },
+  {
+    id: 'top-staff',
+    icon: Users,
+    title: 'Staf Bintang',
+    message: 'Rina mencatat Rp 14.8M penjualan - Rating 4.9 ⭐',
+    color: 'indigo',
+    link: '/dashboard/staff'
+  },
+  {
+    id: 'peak-time',
+    icon: Clock,
+    title: 'Waktu Puncak',
+    message: 'Jumat-Minggu 18:00-21:00 = 68% total pendapatan mingguan',
+    color: 'orange',
+    link: '/dashboard/analytics'
+  },
+  {
+    id: 'customer-loyalty',
+    icon: Star,
+    title: 'Loyalitas Tinggi',
+    message: '68% pelanggan kembali - Program loyalty bekerja optimal!',
+    color: 'pink',
+    link: '/dashboard/customers'
+  }
+]
+
+const DUMMY_ALERTS = [
+  {
+    id: 'peak-prep',
+    type: 'info',
+    message: 'Persiapan weekend rush - Prediksi 130+ pesanan/hari',
+    action: 'Lihat Jadwal',
+    link: '/dashboard/staff'
+  },
+  {
+    id: 'vip-reservation',
+    type: 'info',
+    message: '5 reservasi VIP untuk malam ini - Meja 8, 12, 15',
+    action: 'Lihat Detail',
+    link: '/dashboard/tables'
+  },
+  {
+    id: 'stock-trending',
+    type: 'warning',
+    message: 'Ayam Premium stok tinggal 15 kg - Best seller alert',
+    action: 'Order Sekarang',
+    link: '/dashboard/inventory'
+  }
+]
+
+const DUMMY_TODOS = [
+  {
+    id: 'restock-premium',
+    text: 'Order Ayam Premium 50kg (trending +45%)',
+    priority: 'high',
+    link: '/dashboard/inventory'
+  },
+  {
+    id: 'staff-schedule',
+    text: 'Jadwal 3 staff extra untuk weekend',
+    priority: 'high',
+    link: '/dashboard/staff'
+  },
+  {
+    id: 'promo-plan',
+    text: 'Setup promo weekday (Mon-Thu) untuk boost traffic',
+    priority: 'medium',
+    link: '/dashboard/menu'
+  }
+]
+
+export function InteractiveDashboard() {
+  const { language } = useLanguage()
+  const [activeTab, setActiveTab] = React.useState('dashboard')
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const menuItems = [
+    { id: 'dashboard', label: language === 'en' ? 'Dashboard' : 'Dasbor', icon: BarChart3 },
+    { id: 'analytics', label: language === 'en' ? 'Analytics' : 'Analitik', icon: TrendingUp },
+    { id: 'orders', label: language === 'en' ? 'Orders' : 'Pesanan', icon: ShoppingCart },
+    { id: 'menu', label: 'Menu', icon: UtensilsCrossed },
+    { id: 'customers', label: language === 'en' ? 'Customers' : 'Pelanggan', icon: Users },
+    { id: 'inventory', label: language === 'en' ? 'Inventory' : 'Stok', icon: Package },
+    { id: 'staff', label: language === 'en' ? 'Staff' : 'Staf', icon: Users },
+    { id: 'tables', label: language === 'en' ? 'Tables' : 'Meja', icon: Building2 }
+  ]
+
+  const renderContent = () => {
+    // ANALYTICS TAB - Exact replica of analytics/page.tsx
+    if (activeTab === 'analytics') {
+      const dummyAnalyticsStats = {
+        revenue: 12200000,
+        orders: 186,
+        avgOrder: 145000,
+        cashRevenue: 3660000, // 30%
+        qrisRevenue: 5490000, // 45%
+        transferRevenue: 3050000, // 25%
+        peakHour: '19:00',
+        topTable: 8
+      }
+
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Analitik</h1>
+            <p className="text-sm text-gray-600">Ringkasan performa & pendapatan</p>
+          </div>
+
+          {/* Period Selector */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-gray-500 mb-2">PERIODE</p>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {['Harian', 'Mingguan', 'Bulanan', 'Tahunan'].map((p, idx) => (
+                <button
+                  key={p}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap ${
+                    idx === 0 ? 'bg-[#FF5A5F] text-white shadow-md' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date Selector */}
+          <div className="mb-6 -mx-4">
+            <p className="text-xs font-semibold text-gray-500 mb-2 px-4">TANGGAL</p>
+            <div className="px-4 overflow-x-auto pb-2">
+              <div className="inline-flex gap-2">
+                {['28', '29', '30', 'Dec 1', 'Dec 2'].map((date, idx) => (
+                  <button
+                    key={date}
+                    className={`px-2 py-2 rounded-lg text-xs whitespace-nowrap ${
+                      idx === 4 ? 'bg-[#FF5A5F] text-white shadow-md' : 'bg-white text-gray-700 border border-gray-200'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className={`font-bold ${idx === 4 ? 'text-white' : 'text-gray-900'}`}>{date.includes('Dec') ? date.split(' ')[1] : date}</div>
+                      {date.includes('Dec') && <div className={`text-xs ${idx === 4 ? 'text-white' : 'text-gray-500'}`}>Des</div>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Revenue Card */}
+          <div className="bg-gradient-to-br from-[#FF5A5F] to-[#8B5CF6] rounded-xl p-6 mb-6 text-white shadow-lg">
+            <p className="text-xs opacity-90 mb-1">Dec 2</p>
+            <h2 className="text-3xl font-bold mb-3">{formatCurrency(dummyAnalyticsStats.revenue)}</h2>
+            <div className="flex items-center gap-6">
+              <div>
+                <p className="text-xl font-bold">{dummyAnalyticsStats.orders}</p>
+                <p className="text-xs opacity-90">Pesanan</p>
+              </div>
+              <div className="w-px h-10 bg-white/20"></div>
+              <div>
+                <p className="text-xl font-bold">{formatCurrency(dummyAnalyticsStats.avgOrder)}</p>
+                <p className="text-xs opacity-90">Rata-rata</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Methods with Donut Chart */}
+          <div className="bg-white rounded-xl p-5 mb-6 shadow-sm border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">METODE PEMBAYARAN</h3>
+            
+            <div className="flex flex-col md:flex-row items-center gap-6 mb-4">
+              {/* Donut Chart SVG */}
+              <div className="relative w-40 h-40 flex-shrink-0">
+                <svg viewBox="0 0 200 200" className="transform -rotate-90">
+                  {(() => {
+                    const total = dummyAnalyticsStats.cashRevenue + dummyAnalyticsStats.qrisRevenue + dummyAnalyticsStats.transferRevenue
+                    const cashPercent = (dummyAnalyticsStats.cashRevenue / total) * 100
+                    const qrisPercent = (dummyAnalyticsStats.qrisRevenue / total) * 100
+                    const circumference = 2 * Math.PI * 70
+                    const cashLength = (cashPercent / 100) * circumference
+                    const qrisLength = (qrisPercent / 100) * circumference
+                    
+                    return (
+                      <>
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="#10B981" strokeWidth="40" 
+                          strokeDasharray={`${cashLength} ${circumference}`} strokeDashoffset={0} />
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="#3B82F6" strokeWidth="40"
+                          strokeDasharray={`${qrisLength} ${circumference}`} strokeDashoffset={-cashLength} />
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="#8B5CF6" strokeWidth="40"
+                          strokeDasharray={`${(100-cashPercent-qrisPercent)/100 * circumference} ${circumference}`} 
+                          strokeDashoffset={-(cashLength + qrisLength)} />
+                      </>
+                    )
+                  })()}
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-gray-900">{dummyAnalyticsStats.orders}</p>
+                    <p className="text-xs text-gray-500">Transaksi</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex-1 space-y-2 w-full">
+                <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-900">💵 Tunai</p>
+                      <p className="text-xs text-gray-600">{((dummyAnalyticsStats.cashRevenue / (dummyAnalyticsStats.cashRevenue + dummyAnalyticsStats.qrisRevenue + dummyAnalyticsStats.transferRevenue)) * 100).toFixed(1)}%</p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900">{formatCurrency(dummyAnalyticsStats.cashRevenue)}</p>
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-900">📱 QRIS</p>
+                      <p className="text-xs text-gray-600">{((dummyAnalyticsStats.qrisRevenue / (dummyAnalyticsStats.cashRevenue + dummyAnalyticsStats.qrisRevenue + dummyAnalyticsStats.transferRevenue)) * 100).toFixed(1)}%</p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900">{formatCurrency(dummyAnalyticsStats.qrisRevenue)}</p>
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-900">🏦 Transfer</p>
+                      <p className="text-xs text-gray-600">{((dummyAnalyticsStats.transferRevenue / (dummyAnalyticsStats.cashRevenue + dummyAnalyticsStats.qrisRevenue + dummyAnalyticsStats.transferRevenue)) * 100).toFixed(1)}%</p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900">{formatCurrency(dummyAnalyticsStats.transferRevenue)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Items */}
+          <div className="bg-white rounded-xl p-5 mb-6 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-3">ITEM TERLARIS</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {DUMMY_TOP_ITEMS.slice(0, 6).map((item, idx) => (
+                <div key={idx} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-5 h-5 bg-[#FF5A5F] text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
+                        <p className="text-sm font-semibold text-gray-900 line-clamp-1">{item.name}</p>
+                      </div>
+                      <p className="text-xs text-gray-600">{item.count} terjual</p>
+                    </div>
+                    <p className="text-sm font-bold text-[#FF5A5F] ml-2">{formatCurrency(item.revenue)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Table Analytics */}
+          <div className="bg-white rounded-xl p-5 mb-6 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-3">PERFORMA MEJA</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {DUMMY_TOP_TABLES.map((table, idx) => (
+                <div key={table.tableNumber} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-5 h-5 bg-[#FF5A5F] text-white rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
+                        <p className="text-sm font-semibold text-gray-900">Meja {table.tableNumber}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-gray-600">
+                        <span>{Math.floor(table.orders * 1.2)} pelanggan</span>
+                        <span>•</span>
+                        <span>{table.orders} pesanan</span>
+                      </div>
+                    </div>
+                    <p className="text-sm font-bold text-[#FF5A5F] ml-2">{formatCurrency(table.revenue)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Insights */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-3">INSIGHTS</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="p-3 bg-yellow-50 rounded-lg text-center">
+                <Clock className="w-6 h-6 text-yellow-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-gray-900">{dummyAnalyticsStats.peakHour}</p>
+                <p className="text-xs text-gray-600">Waktu Tersibuk</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg text-center">
+                <Building2 className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-gray-900">Meja {dummyAnalyticsStats.topTable}</p>
+                <p className="text-xs text-gray-600">Meja Terlaris</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg text-center">
+                <DollarSign className="w-6 h-6 text-green-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-gray-900">{formatCurrency(dummyAnalyticsStats.avgOrder)}</p>
+                <p className="text-xs text-gray-600">Rata-rata Pesanan</p>
+              </div>
+              <div className="p-3 bg-purple-50 rounded-lg text-center">
+                <Clock className="w-6 h-6 text-purple-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-gray-900">65 min</p>
+                <p className="text-xs text-gray-600">Waktu Per Meja</p>
+              </div>
+              <div className="p-3 bg-pink-50 rounded-lg text-center">
+                <Users className="w-6 h-6 text-pink-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-gray-900">Sabtu</p>
+                <p className="text-xs text-gray-600">Hari Tersibuk</p>
+              </div>
+              <div className="p-3 bg-orange-50 rounded-lg text-center">
+                <TrendingUp className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                <p className="text-lg font-bold text-gray-900">45%</p>
+                <p className="text-xs text-gray-600">Metode Terpopuler</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // ORDERS TAB - Exact replica of orders/page.tsx
+    if (activeTab === 'orders') {
+      const dummyOrdersStats = {
+        todayRevenue: 12200000,
+        todayOrders: 186,
+        todayAvg: 145000,
+        growth: 34.2
+      }
+
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Analitik Pesanan</h1>
+            <p className="text-sm text-gray-600">Pantau performa dan tren pesanan Anda</p>
+          </div>
+
+          {/* Time Range Selector */}
+          <div className="mb-4 flex gap-2">
+            {['Hari Ini', '7 Hari', '30 Hari'].map((range, idx) => (
+              <button
+                key={range}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  idx === 0 ? 'bg-[#FF5A5F] text-white' : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {range}
+              </button>
+            ))}
+          </div>
+
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Total Revenue */}
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-green-100 text-green-700">
+                  <TrendingUp className="w-3 h-3" />
+                  <span className="text-xs font-bold">{dummyOrdersStats.growth}%</span>
+                </div>
+              </div>
+              <h3 className="text-xs font-medium text-gray-600 mb-1">Total Pendapatan</h3>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(dummyOrdersStats.todayRevenue)}</p>
+              <p className="text-xs text-gray-500 mt-1">vs kemarin</p>
+            </div>
+
+            {/* Total Orders */}
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <ShoppingCart className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xs font-medium text-gray-600 mb-1">Total Pesanan</h3>
+              <p className="text-2xl font-bold text-gray-900">{dummyOrdersStats.todayOrders}</p>
+              <p className="text-xs text-gray-500 mt-1">pesanan selesai</p>
+            </div>
+
+            {/* Average Order Value */}
+            <div className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xs font-medium text-gray-600 mb-1">Rata-rata Pesanan</h3>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(dummyOrdersStats.todayAvg)}</p>
+              <p className="text-xs text-gray-500 mt-1">per pesanan</p>
+            </div>
+          </div>
+
+          {/* Peak Hours */}
+          <div className="bg-white rounded-xl p-5 mb-6 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">JAM TERSIBUK</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { hour: 12, orders: 45, label: '12:00' },
+                { hour: 18, orders: 58, label: '18:00' },
+                { hour: 19, orders: 72, label: '19:00' }
+              ].map((peak, idx) => (
+                <div key={peak.hour} className={`p-4 rounded-xl border-2 ${
+                  idx === 2 ? 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-300' : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <Clock className={`w-5 h-5 mb-2 ${idx === 2 ? 'text-purple-600' : 'text-gray-600'}`} />
+                  <p className="text-xl font-bold text-gray-900">{peak.label}</p>
+                  <p className="text-sm text-gray-600 mt-1">{peak.orders} pesanan</p>
+                  {idx === 2 && <p className="text-xs text-purple-600 font-semibold mt-1">Paling Ramai</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Top Selling Items */}
+          <div className="bg-white rounded-xl p-5 mb-6 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">ITEM TERLARIS HARI INI</h3>
+            <div className="space-y-2">
+              {DUMMY_TOP_ITEMS.slice(0, 5).map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <span className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">{idx + 1}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{item.name}</p>
+                      <p className="text-xs text-gray-600">{item.count} porsi terjual</p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-blue-600">{formatCurrency(item.revenue)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Orders */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">PESANAN TERBARU</h3>
+            <div className="space-y-2">
+              {[...Array(10)].map((_, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Order #{1200 + idx}</p>
+                    <p className="text-xs text-gray-600">Meja {idx + 1} • {Math.floor(Math.random() * 60)} menit lalu</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-gray-900">{formatCurrency(Math.floor(Math.random() * 300000) + 50000)}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      idx % 3 === 0 ? 'bg-green-100 text-green-700' : 
+                      idx % 3 === 1 ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {idx % 3 === 0 ? 'Selesai' : idx % 3 === 1 ? 'Memasak' : 'Menunggu'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // MENU TAB - Exact replica of menu/page.tsx
+    if (activeTab === 'menu') {
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Performa Menu</h1>
+            <p className="text-sm text-gray-600">Optimalkan menu Anda untuk profitabilitas maksimal</p>
+          </div>
+
+          {/* Menu Engineering Matrix Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {/* Stars */}
+            <button className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-5 border-2 border-yellow-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center">
+                  <Star className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Bintang</h3>
+                  <p className="text-xs text-gray-600">Untung tinggi & populer</p>
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">18</p>
+              <p className="text-xs text-gray-600 mt-1">item</p>
+            </button>
+
+            {/* Plow Horses / Workhorses */}
+            <button className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-green-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Andalan</h3>
+                  <p className="text-xs text-gray-600">Populer, untung rendah</p>
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">12</p>
+              <p className="text-xs text-gray-600 mt-1">item</p>
+            </button>
+
+            {/* Puzzles */}
+            <button className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Teka-teki</h3>
+                  <p className="text-xs text-gray-600">Untung tinggi, kurang laku</p>
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">8</p>
+              <p className="text-xs text-gray-600 mt-1">item</p>
+            </button>
+
+            {/* Dogs */}
+            <button className="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-5 border-2 border-red-300 shadow-sm transition-all hover:scale-105 hover:shadow-lg text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Perlu Perbaikan</h3>
+                  <p className="text-xs text-gray-600">Untung rendah, kurang laku</p>
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">4</p>
+              <p className="text-xs text-gray-600 mt-1">item</p>
+            </button>
+          </div>
+
+          {/* Star Items - Detailed List */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-semibold text-gray-500">ITEM BINTANG ⭐</h3>
+              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">12 items</span>
+            </div>
+            <div className="space-y-2">
+              {DUMMY_TOP_ITEMS.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200">
+                  <div className="flex items-center gap-3">
+                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{item.name}</p>
+                      <div className="flex items-center gap-3 text-xs text-gray-600 mt-0.5">
+                        <span>{item.count} terjual</span>
+                        <span>•</span>
+                        <span>Margin: 72%</span>
+                        <span>•</span>
+                        <span className="text-green-600 font-semibold">Popularitas Tinggi</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm font-bold text-yellow-700">{formatCurrency(item.revenue)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Performance Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl p-5 border border-gray-100">
+              <h4 className="text-xs font-semibold text-gray-500 mb-2">TOTAL PENDAPATAN MENU</h4>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(DUMMY_TOP_ITEMS.reduce((sum, item) => sum + item.revenue, 0))}</p>
+              <p className="text-xs text-green-600 mt-1">↑ 34% dari bulan lalu</p>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-gray-100">
+              <h4 className="text-xs font-semibold text-gray-500 mb-2">RATA-RATA MARGIN</h4>
+              <p className="text-2xl font-bold text-gray-900">73%</p>
+              <p className="text-xs text-gray-600 mt-1">Margin keuntungan</p>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-gray-100">
+              <h4 className="text-xs font-semibold text-gray-500 mb-2">TOTAL ITEM AKTIF</h4>
+              <p className="text-2xl font-bold text-gray-900">42</p>
+              <p className="text-xs text-gray-600 mt-1">item dalam menu</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // CUSTOMERS TAB - Customer stats and insights
+    if (activeTab === 'customers') {
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Customers' : 'Pelanggan'}</h1>
+            <p className="text-gray-600 text-sm">{language === 'en' ? 'Customer behavior and retention' : 'Perilaku dan retensi pelanggan'}</p>
+          </div>
+
+          {/* Customer Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+              <Users className="w-6 h-6 mb-2 opacity-90" />
+              <p className="text-xs opacity-90 mb-1">{language === 'en' ? 'Total Customers' : 'Total Pelanggan'}</p>
+              <p className="text-3xl font-bold">1,234</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+              <Star className="w-6 h-6 mb-2 opacity-90" />
+              <p className="text-xs opacity-90 mb-1">{language === 'en' ? 'VIP Members' : 'Member VIP'}</p>
+              <p className="text-3xl font-bold">156</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
+              <TrendingUp className="w-6 h-6 mb-2 opacity-90" />
+              <p className="text-xs opacity-90 mb-1">{language === 'en' ? 'Repeat Rate' : 'Tingkat Kembali'}</p>
+              <p className="text-3xl font-bold">68%</p>
+            </div>
+          </div>
+
+          {/* Customer Insights */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">{language === 'en' ? 'CUSTOMER INSIGHTS' : 'WAWASAN PELANGGAN'}</h3>
+            <div className="space-y-3">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Info className="w-4 h-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-gray-900">{language === 'en' ? 'Peak Visit Time' : 'Waktu Kunjungan Puncak'}</p>
+                </div>
+                <p className="text-xs text-gray-600">{language === 'en' ? 'Peak hours: 6-9 PM (Fri-Sun) = 68% weekly revenue' : 'Jam puncak: 18-21 (Jum-Min) = 68% pendapatan mingguan'}</p>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Check className="w-4 h-4 text-green-600" />
+                  <p className="text-sm font-semibold text-gray-900">{language === 'en' ? 'Loyalty Program Success' : 'Sukses Program Loyalitas'}</p>
+                </div>
+                <p className="text-xs text-gray-600">{language === 'en' ? '428 VIP members (+42% growth) - Average spend 2.8x higher' : '428 member VIP (+42% growth) - Rata pembelanjaan 2.8x lebih tinggi'}</p>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-1">
+                  <Star className="w-4 h-4 text-purple-600" />
+                  <p className="text-sm font-semibold text-gray-900">{language === 'en' ? 'Customer Lifetime Value' : 'Nilai Seumur Hidup Pelanggan'}</p>
+                </div>
+                <p className="text-xs text-gray-600">{language === 'en' ? 'Average customer returns 8.5 times - Estimated CLV: Rp 1.2M' : 'Rata pelanggan kembali 8.5 kali - Estimasi CLV: Rp 1.2M'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // INVENTORY TAB - Stock alerts and inventory management
+    if (activeTab === 'inventory') {
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Inventory' : 'Inventori'}</h1>
+            <p className="text-gray-600 text-sm">{language === 'en' ? 'Stock levels and alerts' : 'Level stok dan peringatan'}</p>
+          </div>
+
+          {/* Stock Summary */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white border border-gray-100 rounded-xl p-4">
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Items' : 'Total Item'}</p>
+              <p className="text-2xl font-bold text-gray-900">247</p>
+            </div>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'In Stock' : 'Tersedia'}</p>
+              <p className="text-2xl font-bold text-green-600">238</p>
+            </div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Low Stock' : 'Stok Menipis'}</p>
+              <p className="text-2xl font-bold text-yellow-600">7</p>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Out of Stock' : 'Habis'}</p>
+              <p className="text-2xl font-bold text-red-600">2</p>
+            </div>
+          </div>
+
+          {/* Low Stock Alert */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-blue-600" />
+              <h3 className="text-sm font-bold text-gray-900">{language === 'en' ? 'Smart Stock Insights' : 'Wawasan Stok Cerdas'}</h3>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 bg-white rounded-lg border-l-4 border-green-500">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Ayam Premium</p>
+                  <p className="text-xs text-green-600">Trending +45% - Order lebih banyak untuk weekend</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">15 kg</p>
+                  <p className="text-xs text-gray-600">tersisa</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-white rounded-lg border-l-4 border-blue-500">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Beras Premium</p>
+                  <p className="text-xs text-blue-600">Usage stabil - Aman hingga 5 hari</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">85 kg</p>
+                  <p className="text-xs text-gray-600">tersisa</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-white rounded-lg border-l-4 border-yellow-500">
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Minyak Goreng</p>
+                  <p className="text-xs text-yellow-600">Order baru tiba besok - On track</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-gray-900">8 L</p>
+                  <p className="text-xs text-gray-600">tersisa</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // STAFF TAB - Staff performance and top performers
+    if (activeTab === 'staff') {
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Staff' : 'Staf'}</h1>
+            <p className="text-gray-600 text-sm">{language === 'en' ? 'Team productivity metrics' : 'Metrik produktivitas tim'}</p>
+          </div>
+
+          {/* Staff Stats */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white border border-gray-100 rounded-xl p-4">
+              <Users className="w-5 h-5 text-blue-600 mb-2" />
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Staff' : 'Total Staf'}</p>
+              <p className="text-2xl font-bold text-gray-900">24</p>
+            </div>
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <Check className="w-5 h-5 text-green-600 mb-2" />
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'On Duty' : 'Bertugas'}</p>
+              <p className="text-2xl font-bold text-green-600">18</p>
+            </div>
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+              <Star className="w-5 h-5 text-purple-600 mb-2" />
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Top Performer' : 'Terbaik'}</p>
+              <p className="text-lg font-bold text-purple-600">{DUMMY_TOP_STAFF[0].name}</p>
+            </div>
+            <div className="bg-white border border-gray-100 rounded-xl p-4">
+              <TrendingUp className="w-5 h-5 text-orange-600 mb-2" />
+              <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Avg Rating' : 'Rating Rata'}</p>
+              <p className="text-2xl font-bold text-gray-900">4.8</p>
+            </div>
+          </div>
+
+          {/* Top Performers */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">{language === 'en' ? 'TOP PERFORMERS THIS WEEK' : 'KINERJA TERBAIK MINGGU INI'}</h3>
+            <div className="space-y-3">
+              {DUMMY_TOP_STAFF.map((staff, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-lg ${
+                      idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600' :
+                      idx === 1 ? 'bg-gradient-to-br from-gray-400 to-gray-600' :
+                      'bg-gradient-to-br from-orange-400 to-orange-600'
+                    }`}>
+                      {staff.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{staff.name}</p>
+                      <p className="text-xs text-gray-600">{staff.orders} {language === 'en' ? 'orders handled' : 'pesanan ditangani'}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-[#FF5A5F]">{formatCurrency(staff.revenue)}</p>
+                    <div className="flex items-center gap-1 justify-end">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <span className="text-xs font-semibold text-gray-700">{staff.rating}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // TABLES TAB - Table occupancy and performance
+    if (activeTab === 'tables') {
+      return (
+        <div key={activeTab} className="space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Tables' : 'Meja'}</h1>
+            <p className="text-gray-600 text-sm">{language === 'en' ? 'Table occupancy and revenue' : 'Okupansi dan pendapatan meja'}</p>
+          </div>
+
+          {/* Table Status Overview */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-green-600">12</p>
+              <p className="text-sm text-gray-600 mt-1">{language === 'en' ? 'Available' : 'Tersedia'}</p>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-blue-600">8</p>
+              <p className="text-sm text-gray-600 mt-1">{language === 'en' ? 'Occupied' : 'Terisi'}</p>
+            </div>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-yellow-600">3</p>
+              <p className="text-sm text-gray-600 mt-1">{language === 'en' ? 'Reserved' : 'Dipesan'}</p>
+            </div>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold text-red-600">2</p>
+              <p className="text-sm text-gray-600 mt-1">{language === 'en' ? 'Cleaning' : 'Dibersihkan'}</p>
+            </div>
+          </div>
+
+          {/* Table Grid */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">{language === 'en' ? 'TABLE STATUS' : 'STATUS MEJA'}</h3>
+            <div className="grid grid-cols-5 gap-3">
+              {Array.from({ length: 20 }).map((_, idx) => {
+                const status = idx % 4 === 0 ? 'occupied' : idx % 4 === 1 ? 'available' : idx % 4 === 2 ? 'reserved' : 'cleaning'
+                return (
+                  <div key={idx} className={`p-4 rounded-lg text-center border-2 transition-all hover:scale-105 cursor-pointer ${
+                    status === 'occupied' ? 'bg-red-50 border-red-300' :
+                    status === 'reserved' ? 'bg-yellow-50 border-yellow-300' :
+                    status === 'cleaning' ? 'bg-gray-50 border-gray-300' :
+                    'bg-green-50 border-green-300'
+                  }`}>
+                    <p className="text-lg font-bold text-gray-900">{idx + 1}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      {status === 'occupied' ? (language === 'en' ? 'Busy' : 'Terisi') : 
+                       status === 'reserved' ? (language === 'en' ? 'Reserved' : 'Dipesan') : 
+                       status === 'cleaning' ? (language === 'en' ? 'Cleaning' : 'Bersih') : 
+                       (language === 'en' ? 'Free' : 'Kosong')}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Top Tables */}
+          <div className="bg-white rounded-xl p-5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-500 mb-4">{language === 'en' ? 'TOP PERFORMING TABLES' : 'MEJA DENGAN KINERJA TERBAIK'}</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {DUMMY_TOP_TABLES.map((table, idx) => (
+                <div key={idx} className="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#FF5A5F] to-[#8B5CF6] rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                      {table.tableNumber}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{language === 'en' ? 'Table' : 'Meja'} {table.tableNumber}</p>
+                      <p className="text-xs text-gray-600">{table.orders} {language === 'en' ? 'orders' : 'pesanan'}</p>
+                    </div>
+                  </div>
+                  <p className="text-lg font-bold text-[#FF5A5F]">{formatCurrency(table.revenue)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // DEFAULT DASHBOARD TAB - Full layout matching real dashboard exactly
+    return (
+      <div key={activeTab} className="space-y-8">
+            {/* KPI Cards - Week Overview - EXACT REPLICA */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Revenue Card */}
+              <div className="bg-gradient-to-br from-[#FF5A5F] to-[#8B5CF6] rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <DollarSign className="w-5 h-5 opacity-80" />
+                  <span className="text-xs bg-white/20 px-2 py-1 rounded-full font-bold">+{DUMMY_STATS.growthPercent}%</span>
+                </div>
+                <p className="text-xs opacity-80 mb-1">{language === 'en' ? 'This Week' : 'Minggu Ini'}</p>
+                <h3 className="text-lg font-bold leading-tight">{formatCurrency(DUMMY_STATS.weekRevenue)}</h3>
+              </div>
+
+              {/* Orders */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <ShoppingCart className="w-5 h-5 text-blue-600" />
+                </div>
+                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Orders' : 'Total Pesanan'}</p>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">{DUMMY_STATS.weekOrders}</h3>
+              </div>
+
+              {/* Avg Order Value */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                </div>
+                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Avg Order' : 'Rata Pesanan'}</p>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">{formatCurrency(DUMMY_STATS.avgOrderValue)}</h3>
+              </div>
+
+              {/* Customers */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <Users className="w-5 h-5 text-purple-600" />
+                </div>
+                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Customers' : 'Pelanggan'}</p>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">{DUMMY_STATS.totalCustomers}</h3>
+              </div>
+
+              {/* Active Orders */}
+              <div className="bg-yellow-50 border-yellow-100 rounded-xl p-4 border shadow-sm hover:shadow-md transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-semibold">{language === 'en' ? 'Active' : 'Aktif'}</span>
+                </div>
+                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'In Progress' : 'Sedang Diproses'}</p>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">{DUMMY_STATS.activeOrders}</h3>
+              </div>
+            </div>
+
+            {/* Charts Grid - Revenue Trend and Customer vs Revenue - EXACT REPLICA */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Revenue Trend Chart - Left */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <BarChart3 className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Revenue Trend (30 Days)' : 'Tren Pendapatan (30 Hari)'}</h3>
+                </div>
+                <div className="w-full h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={DUMMY_REVENUE_TREND}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="#6b7280"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <YAxis 
+                        stroke="#6b7280"
+                        style={{ fontSize: '12px' }}
+                        tickFormatter={(value) => `Rp ${(value / 1000000).toFixed(0)}M`}
+                      />
+                      <Tooltip 
+                        formatter={(value: any) => formatCurrency(Number(value))}
+                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="revenue" 
+                        stroke="#3b82f6" 
+                        strokeWidth={3}
+                        dot={{ fill: '#3b82f6', r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Customer vs Revenue - Right */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <ShoppingCart className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Orders vs AOV by Day' : 'Pesanan vs AOV per Hari'}</h3>
+                </div>
+                <div className="w-full h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={DUMMY_ORDERS_AOV}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis 
+                        dataKey="day" 
+                        stroke="#6b7280"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <YAxis 
+                        yAxisId="left"
+                        stroke="#6b7280"
+                        style={{ fontSize: '12px' }}
+                        label={{ value: language === 'en' ? 'Orders' : 'Pesanan', angle: -90, position: 'insideLeft' }}
+                      />
+                      <YAxis 
+                        yAxisId="right"
+                        orientation="right"
+                        stroke="#6b7280"
+                        style={{ fontSize: '12px' }}
+                        tickFormatter={(value) => `Rp ${(value / 1000).toFixed(0)}K`}
+                        label={{ value: language === 'en' ? 'AOV' : 'AOV', angle: 90, position: 'insideRight' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+                        formatter={(value: any) => {
+                          if (typeof value === 'number' && value > 10000) {
+                            return formatCurrency(value);
+                          }
+                          return value;
+                        }}
+                      />
+                      <Legend />
+                      <Bar 
+                        yAxisId="left"
+                        dataKey="orders" 
+                        fill="#3b82f6" 
+                        name={language === 'en' ? 'Orders' : 'Pesanan'}
+                        radius={[8, 8, 0, 0]}
+                      />
+                      <Line 
+                        yAxisId="right"
+                        type="monotone" 
+                        dataKey="avgOrderValue" 
+                        stroke="#10b981" 
+                        strokeWidth={3}
+                        name={language === 'en' ? 'Avg Order Value' : 'Nilai Pesanan Rata'}
+                        dot={{ fill: '#10b981', r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Business Insights - EXACT REPLICA */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-5 h-5 text-[#FF5A5F]" />
+                <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Business Insights' : 'Wawasan Bisnis'}</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {DUMMY_INSIGHTS.map((insight) => {
+                  const IconComponent = insight.icon
+                  const colorClasses = {
+                    green: 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200',
+                    blue: 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200',
+                    purple: 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200',
+                    orange: 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200',
+                    pink: 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200',
+                    indigo: 'bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-200'
+                  }
+                  
+                  return (
+                    <div
+                      key={insight.id}
+                      className={`rounded-2xl p-6 border-2 transition-all hover:shadow-lg hover:scale-105 ${colorClasses[insight.color as keyof typeof colorClasses]} shadow-md`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
+                          insight.color === 'green' ? 'bg-gradient-to-br from-green-100 to-emerald-100' :
+                          insight.color === 'blue' ? 'bg-gradient-to-br from-blue-100 to-cyan-100' :
+                          insight.color === 'purple' ? 'bg-gradient-to-br from-purple-100 to-pink-100' :
+                          insight.color === 'orange' ? 'bg-gradient-to-br from-orange-100 to-amber-100' :
+                          insight.color === 'pink' ? 'bg-gradient-to-br from-pink-100 to-rose-100' :
+                          'bg-gradient-to-br from-indigo-100 to-blue-100'
+                        }`}>
+                          <IconComponent className={`w-6 h-6 ${
+                            insight.color === 'green' ? 'text-green-600' :
+                            insight.color === 'blue' ? 'text-blue-600' :
+                            insight.color === 'purple' ? 'text-purple-600' :
+                            insight.color === 'orange' ? 'text-orange-600' :
+                            insight.color === 'pink' ? 'text-pink-600' :
+                            'text-indigo-600'
+                          }`} />
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          insight.color === 'green' ? 'bg-green-100 text-green-700' :
+                          insight.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                          insight.color === 'purple' ? 'bg-purple-100 text-purple-700' :
+                          insight.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                          insight.color === 'pink' ? 'bg-pink-100 text-pink-700' :
+                          'bg-indigo-100 text-indigo-700'
+                        }`}>
+                          ⚡
+                        </div>
+                      </div>
+                      <h4 className={`font-bold text-gray-900 mb-2 text-sm ${
+                        insight.color === 'green' ? 'text-green-900' :
+                        insight.color === 'blue' ? 'text-blue-900' :
+                        insight.color === 'purple' ? 'text-purple-900' :
+                        insight.color === 'orange' ? 'text-orange-900' :
+                        insight.color === 'pink' ? 'text-pink-900' :
+                        'text-indigo-900'
+                      }`}>{insight.title}</h4>
+                      <p className={`text-sm leading-relaxed ${
+                        insight.color === 'green' ? 'text-green-700' :
+                        insight.color === 'blue' ? 'text-blue-700' :
+                        insight.color === 'purple' ? 'text-purple-700' :
+                        insight.color === 'orange' ? 'text-orange-700' :
+                        insight.color === 'pink' ? 'text-pink-700' :
+                        'text-indigo-700'
+                      }`}>{insight.message}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Alerts & Todos Row - EXACT REPLICA */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Alerts */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Bell className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Alerts' : 'Notifikasi'}</h3>
+                </div>
+                <div className="space-y-3">
+                  {DUMMY_ALERTS.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`p-4 rounded-lg border-l-4 ${
+                        alert.type === 'error' ? 'bg-red-50 border-red-500' :
+                        alert.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
+                        'bg-blue-50 border-blue-500'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-gray-900 text-sm">{alert.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Todos */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckCircle className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Action Items' : 'Hal yang Harus Dilakukan'}</h3>
+                </div>
+                <div className="space-y-2">
+                  {DUMMY_TODOS.map((todo) => (
+                    <div
+                      key={todo.id}
+                      className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors group text-left"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          todo.priority === 'high' ? 'bg-red-500' :
+                          todo.priority === 'medium' ? 'bg-yellow-500' :
+                          'bg-blue-500'
+                        }`} />
+                        <span className="text-gray-900 font-medium text-sm truncate">{todo.text}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#FF5A5F] transition-colors flex-shrink-0" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Performers - EXACT REPLICA */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Top Menu Items */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <UtensilsCrossed className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Sellers' : 'Menu Terlaris'}</h3>
+                </div>
+                <div className="space-y-3">
+                  {DUMMY_TOP_ITEMS.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
+                        <p className="text-xs text-gray-600">{item.count} {language === 'en' ? 'sold' : 'terjual'}</p>
+                      </div>
+                      <span className="text-sm font-bold text-[#FF5A5F]">{formatCurrency(item.revenue)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Tables */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <Building2 className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Tables' : 'Meja Populer'}</h3>
+                </div>
+                <div className="space-y-3">
+                  {DUMMY_TOP_TABLES.map((table, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">{language === 'en' ? 'Table' : 'Meja'} {table.tableNumber}</p>
+                        <p className="text-xs text-gray-600">{table.orders} {language === 'en' ? 'orders' : 'pesanan'}</p>
+                      </div>
+                      <span className="text-sm font-bold text-[#FF5A5F]">{formatCurrency(table.revenue)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Staff */}
+              <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-5">
+                  <Users className="w-5 h-5 text-[#FF5A5F]" />
+                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Staff' : 'Staf Terbaik'}</h3>
+                </div>
+                <div className="space-y-3">
+                  {DUMMY_TOP_STAFF.map((member, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
+                        <p className="text-xs text-gray-600">{member.orders} {language === 'en' ? 'orders' : 'pesanan'}</p>
+                      </div>
+                      <span className="text-sm font-bold text-[#FF5A5F]">{formatCurrency(member.revenue)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-full max-w-[1600px] mx-auto">
+      {/* Dashboard Container with Sidebar - Exact replica from dashboard-client.tsx */}
+      <div className="bg-gray-50 rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+        <div className="flex h-[900px]">
+          {/* Sidebar - Exact replica matching real dashboard */}
+          <div className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col flex-shrink-0">
+            <div className="mb-8">
+              <img src="/logo-black.svg" alt="KadaiPOS" className="h-8 w-auto" />
+              <p className="text-xs text-gray-500 mt-2">{language === 'en' ? 'Dashboard' : 'Dasbor'}</p>
+            </div>
+
+            <nav className="flex-1 space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                const isActive = activeTab === item.id
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white shadow-md'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </button>
+                )
+              })}
+            </nav>
+
+            <div className="pt-6 border-t border-gray-200">
+              <p className="text-xs text-gray-500">{language === 'en' ? 'Demo Version' : 'Versi Demo'}</p>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-auto bg-gray-50 p-8">
+            {renderContent()}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
