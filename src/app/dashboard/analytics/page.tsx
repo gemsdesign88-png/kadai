@@ -40,10 +40,6 @@ export default function AnalyticsPage() {
   const { t: dt } = createDashboardTranslator(language)
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState<any>(null)
   const [allRestaurants, setAllRestaurants] = useState<any[]>([])
@@ -51,8 +47,6 @@ export default function AnalyticsPage() {
   const [dates, setDates] = useState<DateRange[]>([])
   const [selected, setSelected] = useState(0)
 
-  if (!mounted) return null
-  
   const [stats, setStats] = useState({
     revenue: 0,
     orders: 0,
@@ -73,6 +67,12 @@ export default function AnalyticsPage() {
   const [promoData, setPromoData] = useState<Array<{ name: string; revenue: number; discount: number; netRevenue: number }>>([])
   const [voidDiscountData, setVoidDiscountData] = useState<Array<{ type: string; count: number; amount: number }>>([])
   const [ratingData, setRatingData] = useState<Array<{ period: string; rating: number; reviews: number }>>([])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   // Initialize: Load user and restaurants
   useEffect(() => {

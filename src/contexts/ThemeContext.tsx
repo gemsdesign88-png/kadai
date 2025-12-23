@@ -17,30 +17,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [primaryColor, setPrimaryColorState] = useState<string>(DEFAULT_PRIMARY_COLOR);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadThemeColor();
-
-    // Listen for restaurant changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'selected_restaurant_id') {
-        loadThemeColor();
-      }
-    };
-
-    // Listen for custom event when restaurant is changed in same tab
-    const handleRestaurantChange = () => {
-      loadThemeColor();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('restaurantChanged', handleRestaurantChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('restaurantChanged', handleRestaurantChange);
-    };
-  }, []);
-
   const loadThemeColor = async () => {
     try {
       const supabase = createClient();
@@ -98,6 +74,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadThemeColor();
+
+    // Listen for restaurant changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'selected_restaurant_id') {
+        loadThemeColor();
+      }
+    };
+
+    // Listen for custom event when restaurant is changed in same tab
+    const handleRestaurantChange = () => {
+      loadThemeColor();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('restaurantChanged', handleRestaurantChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('restaurantChanged', handleRestaurantChange);
+    };
+  }, []);
 
   const updateCSSVariables = (color: string) => {
     // Update CSS variables dynamically
