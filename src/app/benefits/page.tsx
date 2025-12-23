@@ -5,16 +5,9 @@ import { CheckCircle, TrendingUp, Clock, Shield, Users, Globe } from 'lucide-rea
 import { Container } from '@/components/ui/container'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
+import { InteractiveDashboardClient } from '@/components/sections/interactive-dashboard-client'
 
-const InteractiveDashboard = dynamic(() => import('@/components/sections/interactive-dashboard').then(mod => mod.InteractiveDashboard), {
-  ssr: true,
-  loading: () => (
-    <div className="w-full aspect-[16/10] bg-gray-100 rounded-3xl animate-pulse border border-gray-200 flex items-center justify-center">
-      <div className="text-gray-400 font-medium">Loading Dashboard...</div>
-    </div>
-  )
-})
+const InteractiveDashboard = InteractiveDashboardClient
 
 export default function BenefitsPage() {
   const { t } = useLanguage()
