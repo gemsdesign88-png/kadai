@@ -16,12 +16,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
     // Load language from localStorage only on client
     const savedLang = localStorage.getItem("language") as Language
     if (savedLang && (savedLang === "en" || savedLang === "id" || savedLang === "zh")) {
       setLanguageState(savedLang)
     }
-    setIsMounted(true)
   }, [])
 
   const setLanguage = (lang: Language) => {
@@ -35,14 +35,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     t: translations[language],
   }
 
-  // Don't render children until mounted to avoid hydration mismatch
-  if (!isMounted) {
-    return <>{children}</>
-  }
-
   return (
     <LanguageContext.Provider value={value}>
-      {children}
+      {/* Only render children after hydration to avoid mismatch */}
+      {isMounted && children}
     </LanguageContext.Provider>
   )
 }
