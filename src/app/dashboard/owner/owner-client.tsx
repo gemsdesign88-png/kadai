@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Building2, Calendar, CreditCard, MapPin, Phone, Mail, Edit, Plus, ChevronRight } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function OwnerClient() {
   const router = useRouter();
   const supabase = createClient();
   const { language } = useLanguage();
-  const { t: dt, locale } = createDashboardTranslator(language);
+  const { t: dt, locale } = useMemo(() => createDashboardTranslator(language), [language]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);

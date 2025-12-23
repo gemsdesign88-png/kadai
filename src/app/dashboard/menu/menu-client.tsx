@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { TrendingUp, DollarSign, Star, AlertTriangle, ThumbsUp, ThumbsDown, TrendingDown, Zap, Plus, Settings, PieChart as PieChartIcon } from "lucide-react"
@@ -35,7 +35,7 @@ export default function MenuClient() {
   const supabase = createClient()
   const { language } = useLanguage()
   const { t } = useLanguage()
-  const { t: dt } = createDashboardTranslator(language)
+  const { t: dt } = useMemo(() => createDashboardTranslator(language), [language])
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<MenuAnalytics[]>([])
   const [stars, setStars] = useState<MenuAnalytics[]>([])

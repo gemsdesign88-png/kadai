@@ -1,7 +1,7 @@
 "use client"
 
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Plus, Edit2, Trash2, Search, Tag, FolderOpen, ArrowLeft, Grid3X3, List, Upload, X } from "lucide-react"
@@ -50,7 +50,7 @@ export default function MenuManagePage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
-  const { t: dt } = createDashboardTranslator(language)
+  const { t: dt } = useMemo(() => createDashboardTranslator(language), [language])
   const [loading, setLoading] = useState(true)
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [filteredItems, setFilteredItems] = useState<MenuItem[]>([])

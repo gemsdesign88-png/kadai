@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/context"
@@ -30,7 +30,7 @@ export default function InventoryPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
-  const dt = createDashboardTranslator(language)
+  const dt = useMemo(() => createDashboardTranslator(language), [language])
   const [loading, setLoading] = useState(true)
   const [stockItems, setStockItems] = useState<StockItem[]>([])
   const [showModal, setShowModal] = useState(false)

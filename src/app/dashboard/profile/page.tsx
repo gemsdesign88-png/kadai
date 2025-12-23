@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { User, Mail, Phone, MapPin, Save, ArrowLeft } from "lucide-react"
@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
-  const { t: dt } = createDashboardTranslator(language)
+  const { t: dt } = useMemo(() => createDashboardTranslator(language), [language])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [user, setUser] = useState<any>(null)

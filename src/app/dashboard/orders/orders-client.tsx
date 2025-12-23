@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { TrendingUp, DollarSign, ShoppingBag, Clock, Calendar, Users, ArrowUp, ArrowDown, Star, PieChart as PieChartIcon, BarChart3 } from "lucide-react"
@@ -51,7 +51,7 @@ export default function OrdersClient() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
-  const { t: dt, shortDayLabel } = createDashboardTranslator(language)
+  const { t: dt, shortDayLabel } = useMemo(() => createDashboardTranslator(language), [language])
   const formatText = (key: string, replacements?: Record<string, string | number>) => {
     let text = dt(key)
     if (replacements) {

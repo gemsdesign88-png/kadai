@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DollarSign, ShoppingCart, Clock, Package, ChevronRight, Bell, AlertTriangle, CheckCircle, TrendingUp, Users, UtensilsCrossed, Building2, Archive, BarChart3, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/lib/i18n/context';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
 import { createDashboardTranslator } from '@/lib/i18n/dashboard-translator';
@@ -29,7 +29,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
   const router = useRouter();
   const supabase = createClient();
   const { language, t } = useLanguage();
-  const { t: dt, locale } = createDashboardTranslator(language);
+  const { t: dt, locale } = useMemo(() => createDashboardTranslator(language), [language]);
 
   const [loading, setLoading] = useState(false);
   const [activeRestaurant, setActiveRestaurant] = useState<any>(null);

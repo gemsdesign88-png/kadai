@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/context"
@@ -14,7 +14,7 @@ export default function StaffClient() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
-  const { t: dt } = createDashboardTranslator(language)
+  const { t: dt } = useMemo(() => createDashboardTranslator(language), [language])
   const [loading, setLoading] = useState(true)
   const [staff, setStaff] = useState<any[]>([])
   const [filteredStaff, setFilteredStaff] = useState<any[]>([])

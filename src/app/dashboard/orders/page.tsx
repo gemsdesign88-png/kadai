@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { TrendingUp, DollarSign, ShoppingBag, Clock, Calendar, Users, ArrowUp, ArrowDown, Star, PieChart as PieChartIcon, BarChart3 } from "lucide-react"
@@ -51,7 +51,7 @@ export default function OrdersPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language, t } = useLanguage()
-  const { t: dt, locale, dayLabel } = createDashboardTranslator(language)
+  const { t: dt, locale, dayLabel } = useMemo(() => createDashboardTranslator(language), [language])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<OrderStats | null>(null)
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today')
