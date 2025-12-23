@@ -2165,7 +2165,7 @@ export function InteractiveDashboard() {
 
         {/* Regular Dashboard Preview */}
         <div 
-          className={`w-full mx-auto relative ${isMobile ? 'cursor-pointer mb-16' : 'max-w-[1400px]'}`}
+          className={`w-full max-w-7xl mx-auto relative ${isMobile ? 'cursor-pointer mb-16' : ''}`}
           style={{ transform: isMobile ? 'scale(1)' : 'scale(0.8)', transformOrigin: 'top center' }}
           onClick={() => {
             if (isMobile && !isFullscreen) {

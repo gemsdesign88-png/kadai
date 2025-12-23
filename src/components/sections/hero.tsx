@@ -221,7 +221,7 @@ export function Hero() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2.7, duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          className="absolute bottom-8 -translate-x-1/2 z-10"
         >
           <div className="flex flex-col items-center gap-2">
             <span className="text-xs text-gray-500">{t.hero.scrollExplore}</span>
