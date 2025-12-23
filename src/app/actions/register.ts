@@ -181,7 +181,7 @@ export async function createRestaurantAction(input: CreateRestaurantInput) {
       owner_id: input.userId,
       business_type: input.businessType,
       business_category: input.category,
-      plan_tier: plan?.plan_tier || (input.businessType === 'toko' ? 'lite' : 'starter'),
+      plan_tier: plan?.plan_tier || (input.businessType === 'toko' ? 'toko' : 'starter'),
       onboarding_completed: true,
       is_trial: true,
       subscription_status: 'trial',
