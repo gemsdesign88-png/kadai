@@ -210,7 +210,8 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 1.8 }}
             className="mt-16"
           >
-            <InteractiveDashboard />
+            {/* Temporarily disabled - React #310 error fix pending */}
+            {/* <InteractiveDashboard /> */}
           </motion.div>
           
           {/* Dashboard Preview - Real UI - REMOVED, now using InteractiveDashboard */}

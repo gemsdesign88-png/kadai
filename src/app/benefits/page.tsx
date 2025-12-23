@@ -67,7 +67,8 @@ export default function BenefitsPage() {
 
           {/* Interactive Dashboard Preview */}
           <div className="relative z-10">
-            <InteractiveDashboard />
+            {/* Temporarily disabled - React #310 error fix pending */}
+            {/* <InteractiveDashboard /> */}
           </div>
         </Container>
       </section>
