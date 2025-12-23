@@ -6,38 +6,60 @@ import { Rocket, Bell, Sparkles, Calendar, Phone, ArrowRight } from 'lucide-reac
 import { useState } from 'react';
 
 export default function DemoPage() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
+  const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement WhatsApp number collection
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/demo-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, whatsapp }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit demo request');
+      }
+
+      setIsSubmitted(true);
+      setName('');
+      setWhatsapp('');
+      setTimeout(() => setIsSubmitted(false), 3000);
+    } catch (err) {
+      console.error('Demo request error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to submit request');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const features = [
     {
       icon: Rocket,
-      title: language === "en" ? "Live Demo" : "Demo Langsung",
-      description: language === "en"
-        ? "Experience KadaiPOS in action with interactive demo"
-        : "Rasakan KadaiPOS dengan demo interaktif"
+      title: t.demo.features.liveDemo.title,
+      description: t.demo.features.liveDemo.description
     },
     {
       icon: Calendar,
-      title: language === "en" ? "Schedule Tour" : "Jadwalkan Tour",
-      description: language === "en"
-        ? "Book a personalized walkthrough with our team"
-        : "Booking tour personal dengan tim kami"
+      title: t.demo.features.scheduleTour.title,
+      description: t.demo.features.scheduleTour.description
     },
     {
       icon: Sparkles,
-      title: language === "en" ? "Try All Features" : "Coba Semua Fitur",
-      description: language === "en"
-        ? "Explore every feature without limitations"
-        : "Jelajahi semua fitur tanpa batasan"
+      title: t.demo.features.tryAllFeatures.title,
+      description: t.demo.features.tryAllFeatures.description
     }
   ];
 
@@ -67,7 +89,7 @@ export default function DemoPage() {
             >
               <Sparkles className="w-5 h-5 text-[#FF5A5F]" />
               <span className="text-sm font-semibold bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "COMING SOON" : "SEGERA HADIR"}
+                {t.demo.badge}
               </span>
             </motion.div>
 
@@ -78,12 +100,12 @@ export default function DemoPage() {
               transition={{ delay: 0.3 }}
               className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6"
             >
-              {language === "en" ? "Experience" : "Rasakan"}{" "}
+              {t.demo.title}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "KadaiPOS" : "KadaiPOS"}
+                {t.demo.titleHighlight}
               </span>
               <br />
-              {language === "en" ? "Live Demo" : "Demo Langsung"}
+              {t.demo.subtitle}
             </motion.h1>
 
             {/* Description */}
@@ -93,9 +115,7 @@ export default function DemoPage() {
               transition={{ delay: 0.4 }}
               className="text-lg sm:text-xl text-gray-600 mb-12 leading-relaxed px-4"
             >
-              {language === "en"
-                ? "We're preparing an amazing interactive demo experience for you. Leave your WhatsApp number and we'll notify you when it's ready!"
-                : "Kami sedang mempersiapkan pengalaman demo interaktif yang luar biasa untuk Anda. Tinggalkan nomor WhatsApp Anda dan kami akan memberitahu Anda saat sudah siap!"}
+              {t.demo.description}
             </motion.p>
 
             {/* WhatsApp Notification Form */}
@@ -103,50 +123,78 @@ export default function DemoPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="max-w-md mx-auto mb-16"
+              className="max-w-xl mx-auto mb-16"
             >
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="tel"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder={language === "en" ? "WhatsApp number (e.g., 628123456789)" : "Nomor WhatsApp (contoh: 628123456789)"}
-                    required
-                    pattern="[0-9]{10,15}"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-[#FF5A5F] focus:outline-none transition-all"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitted}
-                  className="px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
-                >
-                  {isSubmitted ? (
-                    <>
-                      <Bell className="w-5 h-5" />
-                      {language === "en" ? "Registered!" : "Terdaftar!"}
-                    </>
-                  ) : (
-                    <>
-                      {language === "en" ? "Notify Me" : "Beritahu Saya"}
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
-              </form>
-              {isSubmitted && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 text-green-600 font-medium"
-                >
-                  {language === "en"
-                    ? "✓ We'll notify you via WhatsApp when the demo is ready!"
-                    : "✓ Kami akan memberitahu Anda via WhatsApp saat demo sudah siap!"}
-                </motion.p>
-              )}
+              <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 p-8 border border-gray-100">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={t.demo.namePlaceholder}
+                      required
+                      minLength={2}
+                      disabled={isLoading}
+                      className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-[#FF5A5F] focus:bg-white focus:ring-4 focus:ring-[#FF5A5F]/10 outline-none transition-all disabled:opacity-50 text-gray-900 placeholder:text-gray-400 group-hover:border-gray-300"
+                    />
+                  </div>
+                  <div className="relative group">
+                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-[#FF5A5F] transition-colors" />
+                    <input
+                      type="tel"
+                      value={whatsapp}
+                      onChange={(e) => setWhatsapp(e.target.value)}
+                      placeholder={t.demo.whatsappPlaceholder}
+                      required
+                      pattern="[0-9]{10,15}"
+                      disabled={isLoading}
+                      className="w-full pl-14 pr-6 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-[#FF5A5F] focus:bg-white focus:ring-4 focus:ring-[#FF5A5F]/10 outline-none transition-all disabled:opacity-50 text-gray-900 placeholder:text-gray-400 group-hover:border-gray-300"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitted || isLoading}
+                    className="w-full px-8 py-4 bg-gradient-to-r from-[#FF5A5F] via-[#FF5A5F] to-[#8B5CF6] text-white font-semibold rounded-2xl hover:shadow-xl hover:shadow-purple-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 text-lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        <span>{t.demo.submitting}</span>
+                      </>
+                    ) : isSubmitted ? (
+                      <>
+                        <Bell className="w-5 h-5 animate-pulse" />
+                        <span>{t.demo.successMessage}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bell className="w-5 h-5" />
+                        <span>{t.demo.notifyMe}</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-5 text-red-600 font-medium text-center"
+                  >
+                    {t.demo.errorPrefix} {error}
+                  </motion.p>
+                )}
+                {isSubmitted && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-5 text-green-600 font-medium text-center"
+                  >
+                    {t.demo.successNotification}
+                  </motion.p>
+                )}
+              </div>
             </motion.div>
           </motion.div>
 
@@ -190,19 +238,17 @@ export default function DemoPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              {language === "en" ? "Meanwhile..." : "Sementara itu..."}
+              {t.demo.meanwhile.title}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 mb-8">
-              {language === "en"
-                ? "Want to learn more about KadaiPOS? Explore our features or contact us directly!"
-                : "Ingin tahu lebih banyak tentang KadaiPOS? Jelajahi fitur kami atau hubungi kami langsung!"}
+              {t.demo.meanwhile.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="/features"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all"
               >
-                {language === "en" ? "Explore Features" : "Jelajahi Fitur"}
+                {t.demo.meanwhile.exploreFeatures}
                 <ArrowRight className="w-5 h-5" />
               </a>
               <a
@@ -211,7 +257,7 @@ export default function DemoPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-[#FF5A5F] hover:shadow-lg transition-all"
               >
-                {language === "en" ? "Contact Us" : "Hubungi Kami"}
+                {t.demo.meanwhile.contactUs}
               </a>
             </div>
           </motion.div>
@@ -228,27 +274,10 @@ export default function DemoPage() {
             className="max-w-3xl mx-auto"
           >
             <h2 className="text-4xl font-bold text-center mb-12">
-              {language === "en" ? "What's Coming" : "Yang Akan Hadir"}
+              {t.demo.whatsComing.title}
             </h2>
             <div className="space-y-6">
-              {[
-                {
-                  title: language === "en" ? "Interactive Product Tour" : "Tur Produk Interaktif",
-                  desc: language === "en" ? "Click through the full KadaiPOS interface" : "Jelajahi seluruh antarmuka KadaiPOS"
-                },
-                {
-                  title: language === "en" ? "Sample Data & Scenarios" : "Data & Skenario Contoh",
-                  desc: language === "en" ? "Try realistic business scenarios" : "Coba skenario bisnis yang realistis"
-                },
-                {
-                  title: language === "en" ? "Video Walkthrough" : "Video Tutorial",
-                  desc: language === "en" ? "Guided video demonstrations" : "Demonstrasi video terpandu"
-                },
-                {
-                  title: language === "en" ? "Live Chat Support" : "Dukungan Live Chat",
-                  desc: language === "en" ? "Get instant help while exploring" : "Dapatkan bantuan instan saat menjelajah"
-                }
-              ].map((item, index) => (
+              {t.demo.whatsComing.items.map((item, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
@@ -265,7 +294,7 @@ export default function DemoPage() {
                       {item.title}
                     </h3>
                     <p className="text-gray-600">
-                      {item.desc}
+                      {item.description}
                     </p>
                   </div>
                 </motion.div>
@@ -292,12 +321,10 @@ export default function DemoPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              {language === "en" ? "Can't Wait?" : "Tidak Sabar?"}
+              {t.demo.cta.title}
             </h2>
             <p className="text-xl text-white/80 mb-8">
-              {language === "en"
-                ? "Talk to our team and get started with KadaiPOS today"
-                : "Bicara dengan tim kami dan mulai dengan KadaiPOS hari ini"}
+              {t.demo.cta.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
@@ -306,13 +333,13 @@ export default function DemoPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold rounded-xl hover:shadow-xl transition-all"
               >
-                {language === "en" ? "Chat on WhatsApp" : "Chat di WhatsApp"}
+                {t.demo.cta.chatOnWhatsApp}
               </a>
               <a
                 href="/pricing"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
               >
-                {language === "en" ? "View Pricing" : "Lihat Harga"}
+                {t.demo.cta.viewPricing}
               </a>
             </div>
           </motion.div>

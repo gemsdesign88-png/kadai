@@ -2,10 +2,11 @@
 
 import * as React from "react"
 import { motion } from "framer-motion"
+import { getMockupTranslator } from "./mockup-i18n"
 
 // Mockup 1: Table Overview (Card-based like mobile app)
 export function TablesOverviewMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -18,20 +19,20 @@ export function TablesOverviewMockup({ color, language }: { color: string; langu
       >
         {/* Header */}
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Restaurant Tables' : 'Meja Restoran'}</h3>
-          <p className="text-sm text-gray-600 mt-1 uppercase tracking-wide">{isEnglish ? 'MONITOR TABLES & ORDERS' : 'PANTAU MEJA & PESANAN'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Store Tables', 'Meja Toko', '店铺桌子')}</h3>
+          <p className="text-sm text-gray-600 mt-1 uppercase tracking-wide">{t('MONITOR TABLES & ORDERS', 'PANTAU MEJA & PESANAN', '监控桌位和订单')}</p>
         </div>
 
         {/* Summary Info */}
         <div className="bg-white rounded-2xl p-4 shadow-md border border-gray-100 mb-4">
           <div className="flex items-center justify-around">
             <div className="text-center">
-              <p className="text-xs text-gray-600 font-semibold mb-1">{isEnglish ? 'Occupied' : 'Terisi'}</p>
+              <p className="text-xs text-gray-600 font-semibold mb-1">{t('Occupied', 'Terisi', '已占用')}</p>
               <p className="text-2xl font-bold text-red-600">5</p>
             </div>
             <div className="w-px h-12 bg-gray-200"></div>
             <div className="text-center">
-              <p className="text-xs text-gray-600 font-semibold mb-1">{isEnglish ? 'Available' : 'Tersedia'}</p>
+              <p className="text-xs text-gray-600 font-semibold mb-1">{t('Available', 'Tersedia', '空闲')}</p>
               <p className="text-2xl font-bold text-green-600">7</p>
             </div>
           </div>
@@ -70,14 +71,14 @@ export function TablesOverviewMockup({ color, language }: { color: string; langu
                   {occupied ? '🍲' : '🍽️'}
                 </div>
                 <p className={`text-sm font-bold ${occupied ? 'text-red-900' : 'text-gray-900'}`}>
-                  {isEnglish ? 'Table' : 'Meja'} {table.number}
+                  {t('Table', 'Meja', '桌号')} {table.number}
                 </p>
                 <p className={`text-[10px] font-semibold mt-1 px-2 py-0.5 rounded-full ${
                   occupied 
                     ? 'text-red-700 bg-red-100 border border-red-300' 
                     : 'text-green-700 bg-green-100 border border-green-300'
                 }`}>
-                  {occupied ? (isEnglish ? 'Occupied' : 'Terisi') : (isEnglish ? 'Available' : 'Tersedia')}
+                  {occupied ? (t('Occupied', 'Terisi', '已占用')) : (t('Available', 'Tersedia', '空闲'))}
                 </p>
                 {occupied && (
                   <div className="mt-2 text-center">
@@ -97,7 +98,7 @@ export function TablesOverviewMockup({ color, language }: { color: string; langu
 
 // Mockup 2: Table Detail with Orders
 export function TableDetailMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -112,11 +113,11 @@ export function TableDetailMockup({ color, language }: { color: string; language
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Table 3' : 'Meja 3'}</h3>
-              <p className="text-sm text-gray-600 mt-1">4 {isEnglish ? 'customers' : 'tamu'} • 15 {isEnglish ? 'min' : 'menit'}</p>
+              <h3 className="text-2xl font-bold text-gray-900">{t('Table 3', 'Meja 3', '3号桌')}</h3>
+              <p className="text-sm text-gray-600 mt-1">4 {t('customers', 'tamu', '位客人')} • 15 {t('min', 'menit', '分钟')}</p>
             </div>
             <div className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-bold">
-              {isEnglish ? 'Occupied' : 'Terisi'}
+              {t('Occupied', 'Terisi', '已占用')}
             </div>
           </div>
         </div>
@@ -124,15 +125,15 @@ export function TableDetailMockup({ color, language }: { color: string; language
         {/* Order Summary */}
         <div className="bg-white rounded-2xl p-5 shadow-md border border-gray-100 mb-4">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="font-bold text-gray-900">{isEnglish ? 'Current Order' : 'Pesanan Aktif'}</h4>
+            <h4 className="font-bold text-gray-900">{t('Current Order', 'Pesanan Aktif', '当前订单')}</h4>
             <span className="text-sm font-semibold text-purple-600">Rp 145k</span>
           </div>
           
           <div className="space-y-3">
             {[
-              { name: 'Nasi Goreng Spesial', qty: 2, price: 50 },
-              { name: 'Es Teh Manis', qty: 4, price: 8 },
-              { name: 'Ayam Bakar', qty: 1, price: 37 },
+              { name: t('Special Fried Rice', 'Nasi Goreng Spesial', '特别炒饭'), qty: 2, price: 50 },
+              { name: t('Sweet Iced Tea', 'Es Teh Manis', '甜冰茶'), qty: 4, price: 8 },
+              { name: t('Grilled Chicken', 'Ayam Bakar', '烤鸡'), qty: 1, price: 37 },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -160,14 +161,14 @@ export function TableDetailMockup({ color, language }: { color: string; language
             whileTap={{ scale: 0.98 }}
             className="py-3 px-4 bg-white border-2 border-purple-200 text-purple-700 rounded-xl font-bold shadow-sm hover:bg-purple-50 transition-colors"
           >
-            {isEnglish ? 'Add Order' : 'Tambah Pesanan'}
+            {t('Add Order', 'Tambah Pesanan', '添加订单')}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold shadow-md"
           >
-            {isEnglish ? 'Process Payment' : 'Proses Bayar'}
+            {t('Process Payment', 'Proses Bayar', '处理付款')}
           </motion.button>
         </div>
 
@@ -175,11 +176,11 @@ export function TableDetailMockup({ color, language }: { color: string; language
         <div className="mt-4 bg-purple-50 rounded-xl p-4 border border-purple-100">
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <p className="text-gray-600 text-xs mb-1">{isEnglish ? 'Waiter' : 'Pelayan'}</p>
+              <p className="text-gray-600 text-xs mb-1">{t('Waiter', 'Pelayan', '服务员')}</p>
               <p className="font-bold text-gray-900">Budi</p>
             </div>
             <div>
-              <p className="text-gray-600 text-xs mb-1">{isEnglish ? 'Started' : 'Dimulai'}</p>
+              <p className="text-gray-600 text-xs mb-1">{t('Started', 'Dimulai', '开始时间')}</p>
               <p className="font-bold text-gray-900">14:30</p>
             </div>
           </div>
@@ -191,7 +192,7 @@ export function TableDetailMockup({ color, language }: { color: string; language
 
 // Mockup 3: Reservation System
 export function TableReservationMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -204,8 +205,8 @@ export function TableReservationMockup({ color, language }: { color: string; lan
       >
         {/* Header */}
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Reservations' : 'Reservasi'}</h3>
-          <p className="text-sm text-gray-600 mt-1">5 {isEnglish ? 'reservations today' : 'reservasi hari ini'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Reservations', 'Reservasi', '预订')}</h3>
+          <p className="text-sm text-gray-600 mt-1">5 {t('reservations today', 'reservasi hari ini', '今日预订')}</p>
         </div>
 
         {/* Reservation List */}
@@ -218,8 +219,8 @@ export function TableReservationMockup({ color, language }: { color: string; lan
           ].map((reservation, i) => {
             const statusColor = reservation.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
             const statusText = reservation.status === 'confirmed' 
-              ? (isEnglish ? 'Confirmed' : 'Dikonfirmasi')
-              : (isEnglish ? 'Pending' : 'Menunggu')
+              ? (t('Confirmed', 'Dikonfirmasi', '已确认'))
+              : (t('Pending', 'Menunggu', '待处理'))
             
             return (
               <motion.div
@@ -233,7 +234,7 @@ export function TableReservationMockup({ color, language }: { color: string; lan
                   <div>
                     <h4 className="font-bold text-gray-900">{reservation.name}</h4>
                     <p className="text-sm text-gray-600 mt-1">
-                      {isEnglish ? 'Table' : 'Meja'} {reservation.table} • {reservation.guests} {isEnglish ? 'guests' : 'tamu'}
+                      {t('Table', 'Meja', '桌号')} {reservation.table} • {reservation.guests} {t('guests', 'tamu', '位客人')}
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusColor}`}>
@@ -255,7 +256,7 @@ export function TableReservationMockup({ color, language }: { color: string; lan
           whileTap={{ scale: 0.98 }}
           className="w-full mt-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold shadow-lg"
         >
-          + {isEnglish ? 'New Reservation' : 'Reservasi Baru'}
+          + {t('New Reservation', 'Reservasi Baru', '新预订')}
         </motion.button>
       </div>
     </div>
@@ -264,7 +265,7 @@ export function TableReservationMockup({ color, language }: { color: string; lan
 
 // Mockup 4: Table Merging
 export function TableMergingMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -277,14 +278,14 @@ export function TableMergingMockup({ color, language }: { color: string; languag
       >
         {/* Header */}
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Merge Tables' : 'Gabung Meja'}</h3>
-          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'For large groups' : 'Untuk grup besar'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Merge Tables', 'Gabung Meja', '合并桌子')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('For large groups', 'Untuk grup besar', '适用于大型团体')}</p>
         </div>
 
         {/* Info Banner */}
         <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
           <p className="text-sm text-purple-700 font-semibold">
-            {isEnglish ? 'Select tables to merge for a party of 12 guests' : 'Pilih meja untuk digabung untuk 12 tamu'}
+            {t('Select tables to merge for a party of 12 guests', 'Pilih meja untuk digabung untuk 12 tamu', '选择要合并的桌子，供 12 位客人使用')}
           </p>
         </div>
 
@@ -337,12 +338,12 @@ export function TableMergingMockup({ color, language }: { color: string; languag
         {/* Summary */}
         <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 mb-4">
           <div className="flex items-center justify-between">
-            <span className="text-gray-600">{isEnglish ? 'Selected Tables:' : 'Meja Terpilih:'}</span>
+            <span className="text-gray-600">{t('Selected Tables:', 'Meja Terpilih:', '已选桌子：')}</span>
             <span className="font-bold text-gray-900">2, 3, 5</span>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <span className="text-gray-600">{isEnglish ? 'Total Capacity:' : 'Kapasitas Total:'}</span>
-            <span className="font-bold text-purple-600">12 {isEnglish ? 'guests' : 'tamu'}</span>
+            <span className="text-gray-600">{t('Total Capacity:', 'Kapasitas Total:', '总容量：')}</span>
+            <span className="font-bold text-purple-600">12 {t('guests', 'tamu', '位客人')}</span>
           </div>
         </div>
 
@@ -352,7 +353,7 @@ export function TableMergingMockup({ color, language }: { color: string; languag
           whileTap={{ scale: 0.98 }}
           className="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold shadow-lg"
         >
-          {isEnglish ? 'Confirm Merge' : 'Konfirmasi Gabung'}
+          {t('Confirm Merge', 'Konfirmasi Gabung', '确认合并')}
         </motion.button>
       </div>
     </div>

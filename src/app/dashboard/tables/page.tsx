@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 import { Plus, Edit2, Trash2, QrCode, Users, TrendingUp, AlertCircle, CheckCircle, Clock, BarChart3 } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line } from 'recharts'
 
@@ -13,6 +14,7 @@ export default function TablesPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
+  const { t: dt, locale } = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [tables, setTables] = useState<any[]>([])
   const [restaurant, setRestaurant] = useState<any>(null)
@@ -152,15 +154,15 @@ export default function TablesPage() {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Table Insights' : 'Insight Meja'}</h1>
-            <p className="text-sm sm:text-base text-gray-600">{language === 'en' ? 'Analyze table performance and statistics' : 'Analisis performa dan statistik meja restoran'}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{dt.tableInsights}</h1>
+            <p className="text-sm sm:text-base text-gray-600">{dt.tableInsightsDesc}</p>
           </div>
           <button
             onClick={() => router.push('/dashboard/tables/manage')}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors w-full sm:w-auto"
           >
             <Edit2 className="w-5 h-5" />
-            {language === 'en' ? 'Manage Tables' : 'Kelola Meja'}
+            {dt.manageTables}
           </button>
         </div>
       </div>
@@ -169,15 +171,15 @@ export default function TablesPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <h3 className="text-3xl font-bold text-gray-900 mb-1">{tables.length}</h3>
-            <p className="text-sm text-gray-600">{language === 'en' ? 'Total Tables' : 'Total Meja'}</p>
+            <p className="text-sm text-gray-600">{dt.totalTables}</p>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <h3 className="text-3xl font-bold text-green-600 mb-1">{availableTables}</h3>
-            <p className="text-sm text-gray-600">{language === 'en' ? 'Available' : 'Tersedia'}</p>
+            <p className="text-sm text-gray-600">{dt.available}</p>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <h3 className="text-3xl font-bold text-red-600 mb-1">{occupiedTables}</h3>
-            <p className="text-sm text-gray-600">{language === 'en' ? 'Occupied' : 'Terisi'}</p>
+            <p className="text-sm text-gray-600">{dt.occupied}</p>
           </div>
         </div>
 
@@ -188,8 +190,8 @@ export default function TablesPage() {
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Table Performance' : 'Performa Meja'}</h3>
-              <p className="text-xs text-gray-600">{language === 'en' ? 'Top 10 tables by revenue' : 'Top 10 meja berdasarkan revenue'}</p>
+              <h3 className="text-lg font-bold text-gray-900">{dt.tablePerformanceTitle}</h3>
+              <p className="text-xs text-gray-600">{dt.top10TablesRevenue}</p>
             </div>
           </div>
           
@@ -197,8 +199,8 @@ export default function TablesPage() {
             {tablePerformance.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <TrendingUp className="w-16 h-16 mb-3 opacity-50" />
-                <p className="text-sm font-medium">{language === 'en' ? 'No transaction data yet' : 'Belum ada data transaksi'}</p>
-                <p className="text-xs">{language === 'en' ? 'Orders with table_id will appear here' : 'Orders dengan table_id akan muncul di sini'}</p>
+                <p className="text-sm font-medium">{dt.noTransactionData}</p>
+                <p className="text-xs">{dt.ordersWithTableAppear}</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -222,14 +224,14 @@ export default function TablesPage() {
                     yAxisId="left"
                     stroke="#10b981" 
                     style={{ fontSize: '11px' }}
-                    label={{ value: language === 'en' ? 'Revenue (Rp)' : 'Pendapatan (Rp)', angle: -90, position: 'insideLeft', style: { fontSize: '12px', fill: '#10b981' } }}
+                    label={{ value: `${dt.revenue} (Rp)`, angle: -90, position: 'insideLeft', style: { fontSize: '12px', fill: '#10b981' } }}
                   />
                   <YAxis 
                     yAxisId="right"
                     orientation="right"
                     stroke="#3b82f6" 
                     style={{ fontSize: '11px' }}
-                    label={{ value: language === 'en' ? 'Orders' : 'Pesanan', angle: 90, position: 'insideRight', style: { fontSize: '12px', fill: '#3b82f6' } }}
+                    label={{ value: dt.orders, angle: 90, position: 'insideRight', style: { fontSize: '12px', fill: '#3b82f6' } }}
                   />
                   <Tooltip 
                     contentStyle={{ 
@@ -239,8 +241,8 @@ export default function TablesPage() {
                       padding: '12px'
                     }}
                     formatter={(value: any, name: string) => {
-                      if (name === 'revenue') return [`Rp ${Number(value).toLocaleString('id-ID')}`, language === 'en' ? 'Revenue' : 'Pendapatan']
-                      if (name === 'orders') return [value, language === 'en' ? 'Orders' : 'Pesanan']
+                      if (name === 'revenue') return [`Rp ${Number(value).toLocaleString(locale)}`, dt.revenue]
+                      if (name === 'orders') return [value, dt.orders]
                       return [value, name]
                     }}
                   />
@@ -252,7 +254,7 @@ export default function TablesPage() {
                     yAxisId="left"
                     dataKey="revenue" 
                     fill="url(#colorRevenue)" 
-                    name={language === 'en' ? 'Revenue (Rp)' : 'Pendapatan (Rp)'} 
+                    name={`${dt.revenue} (Rp)`} 
                     radius={[8, 8, 0, 0]}
                     maxBarSize={50}
                   />
@@ -262,7 +264,7 @@ export default function TablesPage() {
                     dataKey="orders" 
                     stroke="#3b82f6"
                     strokeWidth={3}
-                    name={language === 'en' ? 'Total Orders' : 'Jumlah Pesanan'}
+                    name={dt.totalOrders}
                     dot={{ fill: '#3b82f6', r: 5 }}
                     activeDot={{ r: 7 }}
                   />
@@ -274,24 +276,24 @@ export default function TablesPage() {
           {tablePerformance.length > 0 && (
             <div className="mt-6 grid grid-cols-3 gap-4">
               <div className="p-3 rounded-lg bg-green-50">
-                <p className="text-xs text-green-600 font-medium">{language === 'en' ? 'Total Revenue' : 'Total Pendapatan'}</p>
+                <p className="text-xs text-green-600 font-medium">{dt.totalRevenue}</p>
                 <p className="text-lg font-bold text-green-900">
-                  Rp {tablePerformance.reduce((sum, t) => sum + t.revenue, 0).toLocaleString('id-ID')}
+                  Rp {tablePerformance.reduce((sum, t) => sum + t.revenue, 0).toLocaleString(locale)}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-blue-50">
-                <p className="text-xs text-blue-600 font-medium">{language === 'en' ? 'Total Orders' : 'Total Pesanan'}</p>
+                <p className="text-xs text-blue-600 font-medium">{dt.totalOrders}</p>
                 <p className="text-lg font-bold text-blue-900">
                   {tablePerformance.reduce((sum, t) => sum + t.orders, 0)}
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-purple-50">
-                <p className="text-xs text-purple-600 font-medium">{language === 'en' ? 'Avg per Order' : 'Rata-rata per Pesanan'}</p>
+                <p className="text-xs text-purple-600 font-medium">{dt.avgPerOrder}</p>
                 <p className="text-lg font-bold text-purple-900">
                   Rp {Math.round(
                     tablePerformance.reduce((sum, t) => sum + t.revenue, 0) / 
                     tablePerformance.reduce((sum, t) => sum + t.orders, 0)
-                  ).toLocaleString('id-ID')}
+                  ).toLocaleString(locale)}
                 </p>
               </div>
             </div>
@@ -305,8 +307,8 @@ export default function TablesPage() {
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">{language === 'en' ? 'Occupancy Rate' : 'Tingkat Okupansi'}</h3>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Current occupied table percentage' : 'Persentase meja terisi saat ini'}</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{dt.occupancyRate}</h3>
+                  <p className="text-sm text-gray-600">{dt.currentOccupiedPercentage}</p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-xl">
                   <TrendingUp className="w-6 h-6 text-blue-600" />
@@ -317,7 +319,7 @@ export default function TablesPage() {
                   {tables.length > 0 ? Math.round((occupiedTables / tables.length) * 100) : 0}%
                 </span>
                 <span className="text-sm text-gray-600 mb-2">
-                  ({occupiedTables} {language === 'en' ? 'of' : 'dari'} {tables.length} {language === 'en' ? 'tables' : 'meja'})
+                  ({occupiedTables} {dt.of} {tables.length} {dt.tables})
                 </span>
               </div>
               <div className="w-full bg-blue-200 rounded-full h-3 overflow-hidden">
@@ -332,8 +334,8 @@ export default function TablesPage() {
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">{language === 'en' ? 'Total Capacity' : 'Total Kapasitas'}</h3>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Maximum guest count' : 'Jumlah maksimal tamu'}</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{dt.totalCapacity}</h3>
+                  <p className="text-sm text-gray-600">{dt.maxGuestCount}</p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-xl">
                   <Users className="w-6 h-6 text-purple-600" />
@@ -343,10 +345,10 @@ export default function TablesPage() {
                 <span className="text-4xl font-bold text-purple-600">
                   {tables.reduce((sum, t) => sum + (t.capacity || 0), 0)}
                 </span>
-                <span className="text-sm text-gray-600 mb-2">{language === 'en' ? 'people' : 'orang'}</span>
+                <span className="text-sm text-gray-600 mb-2">{dt.people}</span>
               </div>
               <p className="text-sm text-gray-600">
-                {language === 'en' ? 'Average' : 'Rata-rata'} {tables.length > 0 ? (tables.reduce((sum, t) => sum + (t.capacity || 0), 0) / tables.length).toFixed(1) : 0} {language === 'en' ? 'people per table' : 'orang per meja'}
+                {dt.average} {tables.length > 0 ? (tables.reduce((sum, t) => sum + (t.capacity || 0), 0) / tables.length).toFixed(1) : 0} {dt.peoplePerTable}
               </p>
             </div>
           </div>
@@ -355,7 +357,7 @@ export default function TablesPage() {
         {/* Table Performance Analytics */}
         {tables.length > 0 && Object.keys(tableAnalytics).length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">{language === 'en' ? 'Table Performance Analysis' : 'Analisis Performa Meja'}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{dt.tablePerformanceAnalysis}</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Most Popular Table */}
               {(() => {
@@ -369,36 +371,36 @@ export default function TablesPage() {
                   <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 sm:p-6 border border-emerald-100">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4">
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">🏆 {language === 'en' ? 'Most Popular Table' : 'Meja Terlaris'}</h3>
-                        <p className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Most frequently ordered' : 'Paling sering dipesan'}</p>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">🏆 {dt.mostPopularTable}</h3>
+                        <p className="text-xs sm:text-sm text-gray-600">{dt.mostFrequentlyOrdered}</p>
                       </div>
                       <div className="bg-emerald-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl w-fit">
-                        <span className="text-lg sm:text-2xl font-bold text-emerald-600">{language === 'en' ? 'Table' : 'Meja'} {mostPopular.tableNumber}</span>
+                        <span className="text-lg sm:text-2xl font-bold text-emerald-600">{dt.table} {mostPopular.tableNumber}</span>
                       </div>
                     </div>
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Total Orders:' : 'Total Pesanan:'}</span>
+                        <span className="text-xs sm:text-sm text-gray-600">{dt.totalOrders}:</span>
                         <span className="text-base sm:text-lg font-bold text-emerald-600">{mostPopular.totalOrders}x</span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Total Revenue:' : 'Total Pendapatan:'}</span>
+                        <span className="text-xs sm:text-sm text-gray-600">{dt.totalRevenue}:</span>
                         <span className="text-base sm:text-lg font-bold text-emerald-600 text-right">
-                          Rp {mostPopular.totalRevenue.toLocaleString('id-ID')}
+                          Rp {mostPopular.totalRevenue.toLocaleString(locale)}
                         </span>
                       </div>
                       <div className="flex justify-between items-center gap-2">
-                        <span className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Average per Order:' : 'Rata-rata per Pesanan:'}</span>
+                        <span className="text-xs sm:text-sm text-gray-600">{dt.avgPerOrder}:</span>
                         <span className="text-xs sm:text-sm font-semibold text-emerald-600 text-right">
-                          Rp {Math.round(mostPopular.totalRevenue / mostPopular.totalOrders).toLocaleString('id-ID')}
+                          Rp {Math.round(mostPopular.totalRevenue / mostPopular.totalOrders).toLocaleString(locale)}
                         </span>
                       </div>
                       <div className="mt-4 pt-4 border-t border-emerald-200">
                         <p className="text-sm text-gray-700">
-                          <strong>{language === 'en' ? 'Insight:' : 'Insight:'}</strong> {language === 'en' ? 'This table is very popular!' : 'Meja ini sangat populer!'}
+                          <strong>{dt.insight}:</strong> {dt.tableVeryPopular}
                           {mostPopular.totalOrders > (Object.values(tableAnalytics).reduce((sum: number, t: any) => sum + t.totalOrders, 0) / Object.keys(tableAnalytics).length * 1.5) 
-                            ? (language === 'en' ? ' Consider adding tables with similar characteristics (size, location, view).' : ' Pertimbangkan untuk menambah meja dengan karakteristik serupa (ukuran, lokasi, view).') 
-                            : (language === 'en' ? ' Keep it in top condition and easily accessible.' : ' Pastikan selalu dalam kondisi terbaik dan mudah diakses.')}
+                            ? ` ${dt.considerAddingSimilarTables}` 
+                            : ` ${dt.keepInTopCondition}`}
                         </p>
                       </div>
                     </div>
@@ -432,38 +434,38 @@ export default function TablesPage() {
                   <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 sm:p-6 border border-orange-100">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4">
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">⏱️ {language === 'en' ? 'Longest Occupied Table' : 'Meja Terlama Dihuni'}</h3>
-                        <p className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Currently occupied longest' : 'Sedang terisi paling lama'}</p>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">⏱️ {dt.longestOccupiedTable}</h3>
+                        <p className="text-xs sm:text-sm text-gray-600">{dt.currentlyOccupiedLongest}</p>
                       </div>
                       <div className="bg-orange-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl w-fit">
-                        <span className="text-lg sm:text-2xl font-bold text-orange-600">{language === 'en' ? 'Table' : 'Meja'} {longestOccupied.number}</span>
+                        <span className="text-lg sm:text-2xl font-bold text-orange-600">{dt.table} {longestOccupied.number}</span>
                       </div>
                     </div>
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Occupied Duration:' : 'Durasi Terisi:'}</span>
+                        <span className="text-xs sm:text-sm text-gray-600">{dt.occupiedDuration}:</span>
                         <span className="text-base sm:text-lg font-bold text-orange-600">
-                          {hours > 0 ? `${hours}${language === 'en' ? 'h' : 'j'} ${minutes}${language === 'en' ? 'm' : 'm'}` : `${minutes}${language === 'en' ? 'm' : 'm'}`}
+                          {hours > 0 ? `${hours}${dt.hourShort} ${minutes}${dt.minuteShort}` : `${minutes}${dt.minuteShort}`}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Capacity:' : 'Kapasitas:'}</span>
-                        <span className="text-xs sm:text-sm font-semibold text-orange-600">{longestOccupied.capacity} {language === 'en' ? 'people' : 'orang'}</span>
+                        <span className="text-xs sm:text-sm text-gray-600">{dt.capacity}:</span>
+                        <span className="text-xs sm:text-sm font-semibold text-orange-600">{longestOccupied.capacity} {dt.people}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-gray-600">{language === 'en' ? 'Started At:' : 'Mulai Terisi:'}</span>
+                        <span className="text-xs sm:text-sm text-gray-600">{dt.startedAt}:</span>
                         <span className="text-xs sm:text-sm font-semibold text-orange-600">
-                          {occupiedSince.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                          {occupiedSince.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                       <div className="mt-4 pt-4 border-t border-orange-200">
                         <p className="text-sm text-gray-700">
-                          <strong>{language === 'en' ? 'Insight:' : 'Insight:'}</strong>
+                          <strong>{dt.insight}:</strong>
                           {duration > 120 
-                            ? (language === 'en' ? ' Guest has been here >2 hours. Consider checking status and offering dessert or extra drinks.' : ' Tamu sudah >2 jam. Pertimbangkan untuk check status dan tawarkan dessert atau minuman tambahan.') 
+                            ? ` ${dt.guestBeenHereLong}` 
                             : duration > 60 
-                            ? (language === 'en' ? ' Normal duration. Monitor to ensure smooth service.' : ' Durasi normal. Pantau untuk memastikan pelayanan berjalan lancar.') 
-                            : (language === 'en' ? ' Guest just sat down. Give time to enjoy the meal.' : ' Tamu baru duduk. Berikan waktu untuk menikmati makanan.')}
+                            ? ` ${dt.normalDuration}` 
+                            : ` ${dt.guestJustSatDown}`}
                         </p>
                       </div>
                     </div>
@@ -475,16 +477,16 @@ export default function TablesPage() {
             {/* Table Performance Ranking */}
             {Object.keys(tableAnalytics).length > 2 && (
               <div className="mt-6 bg-white rounded-2xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">📊 {language === 'en' ? 'Table Performance Ranking' : 'Ranking Performa Semua Meja'}</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">📊 {dt.tablePerformanceRanking}</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{language === 'en' ? 'Rank' : 'Peringkat'}</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{language === 'en' ? 'Table' : 'Meja'}</th>
-                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">{language === 'en' ? 'Orders' : 'Pesanan'}</th>
-                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">{language === 'en' ? 'Revenue' : 'Pendapatan'}</th>
-                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">{language === 'en' ? 'Average' : 'Rata-rata'}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{dt.rank}</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{dt.table}</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">{dt.orders}</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">{dt.revenue}</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">{dt.average}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -503,13 +505,13 @@ export default function TablesPage() {
                                 {index + 1}
                               </span>
                             </td>
-                            <td className="py-3 px-4 font-semibold text-gray-900">{language === 'en' ? 'Table' : 'Meja'} {analytics.tableNumber}</td>
+                            <td className="py-3 px-4 font-medium text-gray-900">{dt.table} {analytics.tableNumber}</td>
                             <td className="py-3 px-4 text-right text-gray-900">{analytics.totalOrders}x</td>
                             <td className="py-3 px-4 text-right font-semibold text-emerald-600">
-                              Rp {analytics.totalRevenue.toLocaleString('id-ID')}
+                              Rp {analytics.totalRevenue.toLocaleString(locale)}
                             </td>
                             <td className="py-3 px-4 text-right text-gray-600">
-                              Rp {Math.round(analytics.totalRevenue / analytics.totalOrders).toLocaleString('id-ID')}
+                              Rp {Math.round(analytics.totalRevenue / analytics.totalOrders).toLocaleString(locale)}
                             </td>
                           </tr>
                         ))}
@@ -518,7 +520,7 @@ export default function TablesPage() {
                 </div>
                 {Object.keys(tableAnalytics).length > 5 && (
                   <p className="text-sm text-gray-500 mt-4 text-center">
-                    Menampilkan top 5 dari {Object.keys(tableAnalytics).length} meja
+                    {dt.showingTop5Of} {Object.keys(tableAnalytics).length} {dt.tables}
                   </p>
                 )}
               </div>
@@ -534,9 +536,9 @@ export default function TablesPage() {
               <div className="bg-red-50 border-l-4 border-red-400 rounded-xl p-4 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-red-900 mb-1">Kapasitas Hampir Penuh</h4>
+                  <h4 className="font-semibold text-red-900 mb-1">{dt.capacityAlmostFull}</h4>
                   <p className="text-sm text-red-800">
-                    {Math.round((occupiedTables / tables.length) * 100)}% meja terisi. Pertimbangkan untuk menambah meja atau siapkan waiting list.
+                    {Math.round((occupiedTables / tables.length) * 100)}% {dt.tablesOccupied}. {dt.considerAddingTables}.
                   </p>
                 </div>
               </div>
@@ -547,9 +549,9 @@ export default function TablesPage() {
               <div className="bg-blue-50 border-l-4 border-blue-400 rounded-xl p-4 flex items-start gap-3">
                 <Clock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-blue-900 mb-1">Waktu Sepi Terdeteksi</h4>
+                  <h4 className="font-semibold text-blue-900 mb-1">{dt.lowOccupancyTip}</h4>
                   <p className="text-sm text-blue-800">
-                    Hanya {Math.round((occupiedTables / tables.length) * 100)}% meja terisi. Manfaatkan waktu ini untuk persiapan atau promosi happy hour!
+                    {dt.only} {Math.round((occupiedTables / tables.length) * 100)}% {dt.tablesOccupied}. {dt.lowOccupancyDesc}
                   </p>
                 </div>
               </div>
@@ -560,9 +562,9 @@ export default function TablesPage() {
               <div className="bg-green-50 border-l-4 border-green-400 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-green-900 mb-1">Semua Meja Tersedia</h4>
+                  <h4 className="font-semibold text-green-900 mb-1">{dt.allTablesAvailable}</h4>
                   <p className="text-sm text-green-800">
-                    Semua meja siap menerima tamu. Pastikan QR code sudah terpasang di setiap meja untuk memudahkan pemesanan.
+                    {dt.allTablesReady}. {dt.ensureQrCodes}.
                   </p>
                 </div>
               </div>
@@ -573,16 +575,16 @@ export default function TablesPage() {
               <div className="bg-blue-50 border-l-4 border-blue-400 rounded-xl p-4 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-blue-900 mb-1">Mulai Tambahkan Meja</h4>
+                  <h4 className="font-semibold text-blue-900 mb-1">{dt.startAddingTables}</h4>
                   <p className="text-sm text-blue-800 mb-3">
-                    Belum ada meja yang terdaftar. Klik tombol "Kelola Meja" di atas untuk menambahkan meja pertama Anda.
+                    {dt.noTablesRegistered}. {dt.clickManageTables}.
                   </p>
                   <button
                     onClick={() => router.push('/dashboard/tables/manage')}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    Kelola Meja
+                    {dt.manageTables}
                   </button>
                 </div>
               </div>

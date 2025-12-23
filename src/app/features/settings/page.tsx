@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, CheckCircle2 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/context"
-import { GeneralSettingsMockup, RestaurantInfoMockup, UserProfileMockup, IntegrationsMockup } from "@/components/mockups/settings-mockups"
+import { GeneralSettingsMockup, StoreInfoMockup, UserProfileMockup, IntegrationsMockup } from "@/components/mockups/settings-mockups"
 import { MockupCarousel } from "@/components/ui/mockup-carousel"
 
 
 export default function SettingsFeaturePage() {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const settingsMockups = [
-    GeneralSettingsMockup, RestaurantInfoMockup, UserProfileMockup, IntegrationsMockup
+    GeneralSettingsMockup, StoreInfoMockup, UserProfileMockup, IntegrationsMockup
   ]
 
 
@@ -27,7 +27,7 @@ export default function SettingsFeaturePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-[#FF5A5F] mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            {language === "en" ? "Back to Features" : "Kembali ke Fitur"}
+            {t.featurePages.backToFeatures}
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -38,22 +38,20 @@ export default function SettingsFeaturePage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full mb-6">
                 <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                <span className="text-sm font-bold text-indigo-700">Settings</span>
+                <span className="text-sm font-bold text-indigo-700">{t.featurePages.settings.badge}</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                {language === "en" ? "Complete Settings" : "Pengaturan Lengkap"}
+                {t.featurePages.settings.title}
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                {language === "en"
-                  ? "Customize system to your business needs with comprehensive configuration options for every aspect of operations."
-                  : "Customize sistem sesuai kebutuhan bisnis dengan opsi konfigurasi lengkap untuk setiap aspek operasi."}
+                {t.featurePages.settings.description}
               </p>
 
               <Link href="/demo">
                 <Button size="lg" className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full px-8 py-6 text-lg font-bold shadow-xl">
-                  {language === "en" ? "Try Demo" : "Coba Demo"}
+                  {t.featurePages.tryDemo}
                 </Button>
               </Link>
             </motion.div>
@@ -76,36 +74,11 @@ export default function SettingsFeaturePage() {
       <section className="py-20">
         <Container>
           <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">
-            {language === "en" ? "Key Features" : "Fitur Utama"}
+            {t.featurePages.keyFeatures}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: language === "en" ? "Business Profile" : "Profil Bisnis",
-                desc: language === "en" 
-                  ? "Configure store name, logo, contact info, and business hours"
-                  : "Konfigurasi nama toko, logo, info kontak, dan jam operasi"
-              },
-              {
-                title: language === "en" ? "Tax Settings" : "Pengaturan Pajak",
-                desc: language === "en"
-                  ? "Set up multiple tax rates and automatic calculation"
-                  : "Setup berbagai tarif pajak dan kalkulasi otomatis"
-              },
-              {
-                title: language === "en" ? "Receipt Customization" : "Kustomisasi Struk",
-                desc: language === "en"
-                  ? "Customize receipt layout, footer messages, and branding"
-                  : "Kustomisasi layout struk, pesan footer, dan branding"
-              },
-              {
-                title: language === "en" ? "Notification Preferences" : "Preferensi Notifikasi",
-                desc: language === "en"
-                  ? "Control which notifications you receive and when"
-                  : "Kontrol notifikasi mana yang Anda terima dan kapan"
-              }
-            ].map((feature, i) => (
+            {t.featurePages.settings.features.map((feature, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +90,7 @@ export default function SettingsFeaturePage() {
                 <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}

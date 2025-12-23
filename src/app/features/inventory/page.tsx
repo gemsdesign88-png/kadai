@@ -12,7 +12,7 @@ import { MockupCarousel } from "@/components/ui/mockup-carousel"
 
 
 export default function InventoryFeaturePage() {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const inventoryMockups = [
     InventoryListMockup, LowStockAlertMockup, StockHistoryMockup, PurchaseOrderMockup
   ]
@@ -27,7 +27,7 @@ export default function InventoryFeaturePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-[#FF5A5F] mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            {language === "en" ? "Back to Features" : "Kembali ke Fitur"}
+            {t.featurePages.backToFeatures}
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -38,22 +38,20 @@ export default function InventoryFeaturePage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full mb-6">
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span className="text-sm font-bold text-emerald-700">Inventory Control</span>
+                <span className="text-sm font-bold text-emerald-700">{t.featurePages.inventory.badge}</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                {language === "en" ? "Smart Inventory Control" : "Kontrol Stok Cerdas"}
+                {t.featurePages.inventory.title}
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                {language === "en"
-                  ? "Monitor ingredient stock in real-time with automatic low-stock notifications and smart reorder suggestions."
-                  : "Monitor stok bahan baku real-time dengan notifikasi otomatis saat stok menipis dan saran reorder cerdas."}
+                {t.featurePages.inventory.description}
               </p>
 
               <Link href="/demo">
                 <Button size="lg" className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full px-8 py-6 text-lg font-bold shadow-xl">
-                  {language === "en" ? "Try Demo" : "Coba Demo"}
+                  {t.featurePages.tryDemo}
                 </Button>
               </Link>
             </motion.div>
@@ -76,36 +74,11 @@ export default function InventoryFeaturePage() {
       <section className="py-20">
         <Container>
           <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">
-            {language === "en" ? "Key Features" : "Fitur Utama"}
+            {t.featurePages.keyFeatures}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: language === "en" ? "Real-Time Tracking" : "Tracking Real-Time",
-                desc: language === "en" 
-                  ? "Monitor stock levels in real-time with automatic updates"
-                  : "Monitor level stok real-time dengan update otomatis"
-              },
-              {
-                title: language === "en" ? "Low Stock Alerts" : "Alert Stok Menipis",
-                desc: language === "en"
-                  ? "Get automatic notifications when stock reaches minimum level"
-                  : "Dapatkan notifikasi otomatis saat stok mencapai level minimum"
-              },
-              {
-                title: language === "en" ? "Waste Management" : "Manajemen Waste",
-                desc: language === "en"
-                  ? "Track and reduce food waste with detailed reporting"
-                  : "Track dan kurangi food waste dengan laporan detail"
-              },
-              {
-                title: language === "en" ? "Supplier Management" : "Manajemen Supplier",
-                desc: language === "en"
-                  ? "Manage supplier contacts and purchase orders efficiently"
-                  : "Kelola kontak supplier dan purchase order secara efisien"
-              }
-            ].map((feature, i) => (
+            {t.featurePages.inventory.features.map((feature, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +90,7 @@ export default function InventoryFeaturePage() {
                 <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}

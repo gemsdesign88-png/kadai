@@ -6,7 +6,7 @@ import { MessageCircle, Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-rea
 import { useState } from 'react';
 
 export default function ContactPage() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const [whatsapp, setWhatsapp] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -20,26 +20,20 @@ export default function ContactPage() {
   const contactMethods = [
     {
       icon: MessageCircle,
-      title: language === "en" ? "WhatsApp" : "WhatsApp",
-      description: language === "en"
-        ? "Chat with us instantly on WhatsApp"
-        : "Chat dengan kami langsung di WhatsApp",
+      title: t.contact.contactMethods.whatsapp.title,
+      description: t.contact.contactMethods.whatsapp.description,
       action: "https://wa.me/6281339765775"
     },
     {
       icon: Mail,
-      title: language === "en" ? "Email" : "Email",
-      description: language === "en"
-        ? "Send us an email anytime"
-        : "Kirim email kapan saja",
-      action: "mailto:hello@kadaipos.id"
+      title: t.contact.contactMethods.email.title,
+      description: t.contact.contactMethods.email.description,
+      action: "mailto:mamak@kadaipos.id"
     },
     {
       icon: Phone,
-      title: language === "en" ? "Phone" : "Telepon",
-      description: language === "en"
-        ? "Call us during business hours"
-        : "Telepon kami saat jam kerja",
+      title: t.contact.contactMethods.phone.title,
+      description: t.contact.contactMethods.phone.description,
       action: "tel:+6281339765775"
     }
   ];
@@ -70,7 +64,7 @@ export default function ContactPage() {
             >
               <Send className="w-5 h-5 text-[#FF5A5F]" />
               <span className="text-sm font-semibold bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "CONTACT FORM COMING SOON" : "FORM KONTAK SEGERA HADIR"}
+                {t.contact.badge}
               </span>
             </motion.div>
 
@@ -81,9 +75,9 @@ export default function ContactPage() {
               transition={{ delay: 0.3 }}
               className="text-5xl md:text-7xl font-bold mb-6"
             >
-              {language === "en" ? "Get in" : "Hubungi"}{" "}
+              {t.contact.title}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "Touch" : "Kami"}
+                {t.contact.titleHighlight}
               </span>
             </motion.h1>
 
@@ -94,9 +88,7 @@ export default function ContactPage() {
               transition={{ delay: 0.4 }}
               className="text-xl text-gray-600 mb-12 leading-relaxed"
             >
-              {language === "en"
-                ? "We're building a beautiful contact form for you. Meanwhile, reach out to us directly via WhatsApp, email, or phone!"
-                : "Kami sedang membangun form kontak yang indah untuk Anda. Sementara itu, hubungi kami langsung via WhatsApp, email, atau telepon!"}
+              {t.contact.subtitle}
             </motion.p>
 
             {/* WhatsApp Quick Contact */}
@@ -113,7 +105,7 @@ export default function ContactPage() {
                     type="tel"
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder={language === "en" ? "WhatsApp number (e.g., 628123456789)" : "Nomor WhatsApp (contoh: 628123456789)"}
+                    placeholder={t.contact.whatsappPlaceholder}
                     required
                     pattern="[0-9]{10,15}"
                     className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-[#FF5A5F] focus:outline-none transition-all"
@@ -127,11 +119,11 @@ export default function ContactPage() {
                   {isSubmitted ? (
                     <>
                       <MessageCircle className="w-5 h-5" />
-                      {language === "en" ? "Registered!" : "Terdaftar!"}
+                      {t.contact.registered}
                     </>
                   ) : (
                     <>
-                      {language === "en" ? "Contact Me" : "Hubungi Saya"}
+                      {t.contact.contactMe}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -143,9 +135,7 @@ export default function ContactPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-4 text-green-600 font-medium"
                 >
-                  {language === "en"
-                    ? "✓ We'll contact you via WhatsApp soon!"
-                    : "✓ Kami akan menghubungi Anda via WhatsApp segera!"}
+                  {t.contact.successMessage}
                 </motion.p>
               )}
             </motion.div>
@@ -197,16 +187,14 @@ export default function ContactPage() {
               <MapPin className="w-8 h-8 text-[#FF5A5F]" />
             </div>
             <h2 className="text-4xl font-bold mb-4">
-              {language === "en" ? "Visit Us" : "Kunjungi Kami"}
+              {t.contact.visitUs.title}
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              {language === "en"
-                ? "We're based in Indonesia, serving businesses across the archipelago"
-                : "Kami berbasis di Indonesia, melayani bisnis di seluruh nusantara"}
+              {t.contact.visitUs.subtitle}
             </p>
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full text-gray-700 font-semibold">
               <MapPin className="w-5 h-5" />
-              {language === "en" ? "Indonesia" : "Indonesia"}
+              {t.contact.visitUs.location}
             </div>
           </motion.div>
         </div>
@@ -229,12 +217,10 @@ export default function ContactPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              {language === "en" ? "Ready to Start?" : "Siap Memulai?"}
+              {t.contact.cta.title}
             </h2>
             <p className="text-xl text-white/80 mb-8">
-              {language === "en"
-                ? "Don't wait! Contact us now and transform your business"
-                : "Jangan menunggu! Hubungi kami sekarang dan transformasi bisnis Anda"}
+              {t.contact.cta.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
@@ -244,13 +230,13 @@ export default function ContactPage() {
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold rounded-xl hover:shadow-xl transition-all"
               >
                 <MessageCircle className="w-5 h-5" />
-                {language === "en" ? "Chat on WhatsApp" : "Chat di WhatsApp"}
+                {t.contact.cta.chatOnWhatsApp}
               </a>
               <a
                 href="/pricing"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
               >
-                {language === "en" ? "View Pricing" : "Lihat Harga"}
+                {t.contact.cta.viewPricing}
               </a>
             </div>
           </motion.div>

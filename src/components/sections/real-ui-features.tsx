@@ -4,39 +4,23 @@ import * as React from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Container } from "@/components/ui/container"
 import { useLanguage } from "@/lib/i18n/context"
-import { TablesOverviewMockup } from "@/components/mockups/tables-mockups"
-import { OrdersListMockup } from "@/components/mockups/orders-mockups"
-import { MenuListMockup } from "@/components/mockups/menu-mockups"
-import { AnalyticsDashboardMockup } from "@/components/mockups/analytics-mockups"
-import { StaffListMockup } from "@/components/mockups/staff-mockups"
-import { PaymentCheckoutMockup } from "@/components/mockups/payment-mockups"
-import { InventoryListMockup } from "@/components/mockups/inventory-mockups"
-import { KitchenQueueMockup } from "@/components/mockups/kitchen-mockups"
-import { QRMenuDisplayMockup } from "@/components/mockups/qr-mockups"
-import { PromoListMockup } from "@/components/mockups/promo-mockups"
-import { CustomerListMockup } from "@/components/mockups/crm-mockups"
-import { GeneralSettingsMockup } from "@/components/mockups/settings-mockups"
-import { InteractiveThemeMockup } from "@/components/mockups/theme-mockups"
+import { MockupCarousel } from "@/components/ui/mockup-carousel"
+
+// Import all mockup components
+import { TablesOverviewMockup, TableDetailMockup, TableReservationMockup, TableMergingMockup } from "@/components/mockups/tables-mockups"
+import { OrdersListMockup, OrderDetailMockup, NewOrderMockup, KitchenDisplayMockup } from "@/components/mockups/orders-mockups"
+import { MenuListMockup, MenuEditorMockup, MenuCategoriesMockup, MenuModifiersMockup } from "@/components/mockups/menu-mockups"
+import { AnalyticsDashboardMockup, TopProductsMockup, SalesReportMockup, CustomerInsightsMockup } from "@/components/mockups/analytics-mockups"
+import { StaffListMockup, StaffDetailMockup, AttendanceMockup, PerformanceMockup } from "@/components/mockups/staff-mockups"
+import { PaymentCheckoutMockup, SplitBillMockup, QRISPaymentMockup, ReceiptMockup } from "@/components/mockups/payment-mockups"
+import { InventoryListMockup, LowStockAlertMockup, StockHistoryMockup, PurchaseOrderMockup } from "@/components/mockups/inventory-mockups"
+import { KitchenQueueMockup, OrderDetailKitchenMockup, ReadyItemsMockup, KitchenStatsMockup } from "@/components/mockups/kitchen-mockups"
+import { QRMenuDisplayMockup, QRMenuCustomerMockup, QROrderCartMockup, QRAnalyticsMockup } from "@/components/mockups/qr-mockups"
+import { PromoListMockup, CreatePromoMockup, ActivePromosMockup, PromoPerformanceMockup } from "@/components/mockups/promo-mockups"
+import { CustomerListMockup, CustomerDetailMockup, LoyaltyProgramMockup, CustomerInsightsCRMMockup } from "@/components/mockups/crm-mockups"
+import { GeneralSettingsMockup, StoreInfoMockup, UserProfileMockup, IntegrationsMockup } from "@/components/mockups/settings-mockups"
+import { InteractiveThemeMockup, ThemeSelectionMockup, ColorPickerMockup, ThemePreviewMockup } from "@/components/mockups/theme-mockups"
 import Link from "next/link"
-
-// =============================================================================
-// INDIVIDUAL MOCKUP COMPONENTS
-// =============================================================================
-
-// Use imported mockups
-const OrdersMockup = OrdersListMockup
-const TablesMockup = TablesOverviewMockup
-const MenuMockup = MenuListMockup
-const AnalyticsMockup = AnalyticsDashboardMockup
-const StaffMockup = StaffListMockup
-const PaymentMockup = PaymentCheckoutMockup
-const StockMockup = InventoryListMockup
-const KitchenMockup = KitchenQueueMockup
-const QRMockup = QRMenuDisplayMockup
-const PromoMockup = PromoListMockup
-const CRMMockup = CustomerListMockup
-const SettingsMockup = GeneralSettingsMockup
-const ThemeMockup = InteractiveThemeMockup
 
 // =============================================================================
 // FEATURE SECTION WITH SCROLL TRACKING
@@ -46,14 +30,14 @@ interface Feature {
   title: string
   subtitle: string
   description: string
-  mockup: React.ComponentType<{ color: string; language: string }>
+  mockups: React.ComponentType<{ color: string; language: string }>[]
   color: string
   slug: string
 }
 
 function FeatureSection({ feature, index }: { feature: Feature; index: number }) {
   const ref = React.useRef<HTMLDivElement>(null)
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
@@ -88,7 +72,7 @@ function FeatureSection({ feature, index }: { feature: Feature; index: number })
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full font-bold shadow-lg transition-all"
           >
-            {language === "en" ? "Learn More" : "Pelajari Lebih Lanjut"}
+            {t.features.learnMore}
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -97,7 +81,7 @@ function FeatureSection({ feature, index }: { feature: Feature; index: number })
       </div>
 
       <div className={isEven ? "lg:order-2" : "lg:order-1"}>
-        <feature.mockup color={feature.color} language={language} />
+        <MockupCarousel mockups={feature.mockups} color={feature.color} language={language} />
       </div>
     </motion.div>
   )
@@ -108,136 +92,110 @@ function FeatureSection({ feature, index }: { feature: Feature; index: number })
 // =============================================================================
 
 export function RealUIFeatures() {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   
   const features: Feature[] = [
     {
-      title: language === "en" ? "Real-Time Order Management" : "Kelola Pesanan Real-Time",
-      subtitle: "Order Management",
-      description: language === "en"
-        ? "Monitor all orders in one dashboard. Track status from pending to completed with instant notifications to kitchen and cashier."
-        : "Pantau semua pesanan dalam satu dashboard. Track status dari pending hingga completed dengan notifikasi instant ke dapur dan kasir.",
-      mockup: OrdersMockup,
+      title: t.features.realTimeOrder.title,
+      subtitle: t.nav.orderManagement,
+      description: t.features.realTimeOrder.description,
+      mockups: [OrdersListMockup, OrderDetailMockup, NewOrderMockup, KitchenDisplayMockup],
       color: "#FF5A5F",
       slug: "orders",
     },
     {
-      title: language === "en" ? "Flexible Menu Management" : "Manajemen Menu Fleksibel",
-      subtitle: "Menu Management",
-      description: language === "en"
-        ? "Manage menu with ease. Add, edit, or delete items instantly. Automatic categorization and real-time availability control."
-        : "Atur menu dengan mudah. Tambah, edit, atau hapus item dalam sekejap. Kategorisasi otomatis dan control availability real-time.",
-      mockup: MenuMockup,
+      title: t.features.flexibleMenu.title,
+      subtitle: t.nav.menuManagement,
+      description: t.features.flexibleMenu.description,
+      mockups: [MenuListMockup, MenuEditorMockup, MenuCategoriesMockup, MenuModifiersMockup],
       color: "#0066FF",
       slug: "menu",
     },
     {
-      title: "Analytics & Insights",
-      subtitle: "Business Intelligence",
-      description: language === "en"
-        ? "Get deep insights about your business performance. View sales trends, popular menu items, and revenue growth in one dashboard."
-        : "Dapatkan insights mendalam tentang performa bisnis Anda. Lihat tren penjualan, menu terpopuler, dan revenue growth dalam satu dashboard.",
-      mockup: AnalyticsMockup,
+      title: t.features.analyticsInsights.title,
+      subtitle: t.nav.analytics,
+      description: t.features.analyticsInsights.description,
+      mockups: [AnalyticsDashboardMockup, TopProductsMockup, SalesReportMockup, CustomerInsightsMockup],
       color: "#00D4AA",
       slug: "analytics",
     },
     {
-      title: language === "en" ? "Efficient Team Management" : "Manajemen Tim Efisien",
-      subtitle: "Staff Management",
-      description: language === "en"
-        ? "Manage team with role-based access control. Track attendance, performance, and easily assign tasks for each employee."
-        : "Kelola tim dengan role-based access control. Track kehadiran, performa, dan assign tugas dengan mudah untuk setiap karyawan.",
-      mockup: StaffMockup,
+      title: t.features.teamManagement.title,
+      subtitle: t.nav.staffManagement,
+      description: t.features.teamManagement.description,
+      mockups: [StaffListMockup, StaffDetailMockup, AttendanceMockup, PerformanceMockup],
       color: "#FFB020",
       slug: "staff",
     },
     {
-      title: language === "en" ? "Smart Table System" : "Sistem Meja Pintar",
-      subtitle: "Table Management",
-      description: language === "en"
-        ? "Monitor table status in real-time. See which tables are empty, occupied, or reserved. Optimize layout to maximize restaurant capacity."
-        : "Monitor status meja real-time. Lihat meja mana yang kosong, terisi, atau reserved. Optimasi layout untuk maksimalkan kapasitas restoran.",
-      mockup: TablesMockup,
+      title: t.features.tableSystem.title,
+      subtitle: t.nav.tableManagement,
+      description: t.features.tableSystem.description,
+      mockups: [TablesOverviewMockup, TableDetailMockup, TableReservationMockup, TableMergingMockup],
       color: "#8B5CF6",
       slug: "tables",
     },
     {
-      title: language === "en" ? "Multi-Method Payment" : "Pembayaran Multi-Metode",
-      subtitle: "Payment System",
-      description: language === "en"
-        ? "Accept payments with various methods: cash, QRIS, debit, transfer. Automatic split bill and print digital or physical receipts."
-        : "Terima pembayaran dengan berbagai metode: cash, QRIS, debit, transfer. Split bill otomatis dan cetak struk digital atau fisik.",
-      mockup: PaymentMockup,
+      title: t.features.multiPayment.title,
+      subtitle: t.nav.paymentSystem,
+      description: t.features.multiPayment.description,
+      mockups: [PaymentCheckoutMockup, SplitBillMockup, QRISPaymentMockup, ReceiptMockup],
       color: "#EC4899",
       slug: "payment",
     },
     {
-      title: language === "en" ? "Smart Inventory Control" : "Kontrol Stok Cerdas",
-      subtitle: "Inventory Control",
-      description: language === "en"
-        ? "Monitor ingredient stock in real-time. Get automatic notifications when stock is low. Track inventory value and forecast needs."
-        : "Monitor stok bahan baku real-time. Dapat notifikasi otomatis saat stok menipis. Lacak nilai inventaris dan forecast kebutuhan.",
-      mockup: StockMockup,
+      title: t.features.inventoryControl.title,
+      subtitle: t.nav.inventoryControl,
+      description: t.features.inventoryControl.description,
+      mockups: [InventoryListMockup, LowStockAlertMockup, StockHistoryMockup, PurchaseOrderMockup],
       color: "#10B981",
       slug: "inventory",
     },
     {
-      title: "Kitchen Display System",
-      subtitle: "Kitchen Operations",
-      description: language === "en"
-        ? "Dedicated kitchen dashboard to track items to be made. Automatic priority for urgent orders and notifications to waiters when ready."
-        : "Dashboard khusus dapur untuk track item yang harus dibuat. Prioritas otomatis untuk urgent orders dan notifikasi ke pelayan saat siap.",
-      mockup: KitchenMockup,
+      title: t.features.kitchenDisplay.title,
+      subtitle: t.nav.kitchenDisplay,
+      description: t.features.kitchenDisplay.description,
+      mockups: [KitchenQueueMockup, OrderDetailKitchenMockup, ReadyItemsMockup, KitchenStatsMockup],
       color: "#F59E0B",
       slug: "kitchen",
     },
     {
-      title: language === "en" ? "Digital QR Menu" : "QR Menu Digital",
-      subtitle: "Contactless Ordering",
-      description: language === "en"
-        ? "Customers scan QR at table to view menu and order directly. Reduce physical contact, increase efficiency, and speed up service."
-        : "Pelanggan scan QR di meja untuk lihat menu dan order langsung. Kurangi kontak fisik, tingkatkan efisiensi, dan percepat layanan.",
-      mockup: QRMockup,
+      title: t.features.qrMenu.title,
+      subtitle: t.nav.qrMenu,
+      description: t.features.qrMenu.description,
+      mockups: [QRMenuDisplayMockup, QRMenuCustomerMockup, QROrderCartMockup, QRAnalyticsMockup],
       color: "#06B6D4",
       slug: "qr-menu",
     },
     {
-      title: language === "en" ? "Promo & Campaign Manager" : "Promo & Campaign Manager",
-      subtitle: "Marketing Tools",
-      description: language === "en"
-        ? "Create and manage vouchers, coupons, and bundles. Set promo periods, track redemption rate, and increase repeat orders."
-        : "Buat dan kelola voucher, kupon, dan bundling. Atur periode promo, track redemption rate, dan tingkatkan repeat orders.",
-      mockup: PromoMockup,
+      title: t.features.promoManager.title,
+      subtitle: t.nav.promoManager,
+      description: t.features.promoManager.description,
+      mockups: [PromoListMockup, CreatePromoMockup, ActivePromosMockup, PromoPerformanceMockup],
       color: "#EF4444",
       slug: "promo",
     },
     {
-      title: language === "en" ? "Customer Relationship" : "Customer Relationship",
-      subtitle: "CRM System",
-      description: language === "en"
-        ? "Manage customer database. Track spending history, favorite items, and give loyalty rewards to improve customer retention."
-        : "Kelola database pelanggan. Track spending history, favorite items, dan berikan loyalty rewards untuk meningkatkan customer retention.",
-      mockup: CRMMockup,
+      title: t.features.crmSystem.title,
+      subtitle: t.nav.customerCRM,
+      description: t.features.crmSystem.description,
+      mockups: [CustomerListMockup, CustomerDetailMockup, LoyaltyProgramMockup, CustomerInsightsCRMMockup],
       color: "#3B82F6",
       slug: "crm",
     },
     {
-      title: language === "en" ? "Complete Settings" : "Pengaturan Lengkap",
-      subtitle: "System Settings",
-      description: language === "en"
-        ? "Customize system to restaurant needs. Set theme, notifications, timezone, backup data, and access 24/7 support help."
-        : "Customize sistem sesuai kebutuhan restoran. Atur tema, notifikasi, zona waktu, backup data, dan akses bantuan support 24/7.",
-      mockup: SettingsMockup,
+      title: t.features.settings.title,
+      subtitle: t.nav.systemSettings,
+      description: t.features.settings.description,
+      mockups: [GeneralSettingsMockup, StoreInfoMockup, UserProfileMockup, IntegrationsMockup],
       color: "#6366F1",
       slug: "settings",
     },
     {
-      title: language === "en" ? "Custom Interface Theme" : "Tema Interface Custom",
-      subtitle: "Brand Customization",
-      description: language === "en"
-        ? "Choose from 12 preset theme colors or create your own custom color with color picker. Match interface with your restaurant brand identity."
-        : "Pilih dari 12 warna tema preset atau buat warna custom sendiri dengan color picker. Sesuaikan interface dengan identitas brand restoran Anda.",
-      mockup: ThemeMockup,
+      title: t.features.theme.title,
+      subtitle: t.nav.themeCustomization,
+      description: t.features.theme.description,
+      mockups: [InteractiveThemeMockup, ThemeSelectionMockup, ColorPickerMockup, ThemePreviewMockup],
       color: "#9C27B0",
       slug: "theme",
     },
@@ -264,18 +222,16 @@ export function RealUIFeatures() {
             <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full mb-6">
               <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse" />
               <span className="text-sm font-bold text-gray-900">
-                {language === "en" ? "Real UI Preview" : "Tampilan UI Asli"}
+                {t.hero.realUiPreview}
               </span>
             </div>
 
             <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-              {language === "en" ? "See The Real Interface" : "Lihat Langsung Tampilan Asli"}
+              {t.hero.realUiTitle}
             </h2>
 
             <p className="text-xl sm:text-2xl leading-relaxed text-gray-600 max-w-2xl mx-auto">
-              {language === "en" 
-                ? "These aren't empty mockups. Every component displays real UI from our mobile app with actual data and interactions."
-                : "Ini bukan mockup kosong. Setiap komponen menampilkan UI asli dari aplikasi mobile kami dengan data dan interaksi real."}
+              {t.hero.realUi}
             </p>
           </motion.div>
         </div>
@@ -325,7 +281,7 @@ export function RealUIFeatures() {
                         <span className="text-xl">⚡</span>
                       </motion.div>
                       <span className="text-white font-bold text-sm md:text-base">
-                        {language === "en" ? "Works Everywhere, Anytime" : "Bekerja Dimana Saja, Kapan Saja"}
+                        {t.realUiFeatures.badge}
                       </span>
                     </div>
                   </motion.div>
@@ -338,21 +294,11 @@ export function RealUIFeatures() {
                     transition={{ delay: 0.3 }}
                     className="text-4xl md:text-6xl lg:text-7xl font-black text-center mb-6 text-white leading-tight"
                   >
-                    {language === "en" ? (
-                      <>
-                        One Platform.<br />
-                        <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                          Every Device.
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        Satu Platform.<br />
-                        <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                          Semua Perangkat.
-                        </span>
-                      </>
-                    )}
+                    {t.realUiFeatures.title}
+                    <br />
+                    <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
+                      {t.realUiFeatures.titleHighlight}
+                    </span>
                   </motion.h3>
                   
                   {/* Description */}
@@ -363,9 +309,7 @@ export function RealUIFeatures() {
                     transition={{ delay: 0.4 }}
                     className="text-xl md:text-2xl text-white/90 text-center mb-12 max-w-3xl mx-auto leading-relaxed"
                   >
-                    {language === "en" 
-                      ? "Mobile app for staff on the go. Tablet for kitchen display. Web dashboard for owners. All synced in real-time with zero lag."
-                      : "Aplikasi mobile untuk staff yang bergerak. Tablet untuk display dapur. Web dashboard untuk owner. Semua sinkron real-time tanpa lag."}
+                    {t.realUiFeatures.description}
                   </motion.p>
                   
                   {/* Device Grid */}
@@ -373,20 +317,20 @@ export function RealUIFeatures() {
                     {[
                       {
                         icon: "📱",
-                        title: language === "en" ? "Mobile App" : "Aplikasi Mobile",
-                        desc: language === "en" ? "iOS & Android" : "iOS & Android",
+                        title: t.realUiFeatures.devices.mobile.title,
+                        desc: t.realUiFeatures.devices.mobile.subtitle,
                         gradient: "from-pink-500 to-rose-500"
                       },
                       {
                         icon: "💻",
-                        title: language === "en" ? "Web Browser" : "Web Browser",
-                        desc: language === "en" ? "Any device, anywhere" : "Perangkat apapun, dimana saja",
+                        title: t.realUiFeatures.devices.web.title,
+                        desc: t.realUiFeatures.devices.web.subtitle,
                         gradient: "from-blue-500 to-cyan-500"
                       },
                       {
                         icon: "🖥️",
-                        title: "Tablet",
-                        desc: language === "en" ? "Perfect for kitchen" : "Sempurna untuk dapur",
+                        title: t.realUiFeatures.devices.tablet.title,
+                        desc: t.realUiFeatures.devices.tablet.subtitle,
                         gradient: "from-purple-500 to-indigo-500"
                       }
                     ].map((device, i) => (
@@ -419,7 +363,7 @@ export function RealUIFeatures() {
                           <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full border border-green-400/30">
                             <span className="text-green-300 text-xl">✓</span>
                             <span className="text-green-300 font-bold text-sm">
-                              {language === "en" ? "Real-time Sync" : "Sinkron Real-time"}
+                              {t.realUiFeatures.realTimeSync}
                             </span>
                           </div>
                         </div>
@@ -436,9 +380,9 @@ export function RealUIFeatures() {
                     className="flex flex-wrap justify-center gap-8 md:gap-12 mb-12"
                   >
                     {[
-                      { number: "< 50ms", label: language === "en" ? "Sync Speed" : "Kecepatan Sinkron" },
-                      { number: "99.9%", label: "Uptime" },
-                      { number: "24/7", label: "Support" }
+                      { number: "< 50ms", label: t.realUiFeatures.stats.syncSpeed },
+                      { number: "99.9%", label: t.realUiFeatures.stats.uptime },
+                      { number: "24/7", label: t.realUiFeatures.stats.support }
                     ].map((stat, i) => (
                       <div key={i} className="text-center">
                         <div className="text-3xl md:text-4xl font-black text-white mb-1">
@@ -460,7 +404,7 @@ export function RealUIFeatures() {
                     className="text-center"
                   >
                     <p className="text-white/80 font-semibold mb-6 text-lg">
-                      {language === "en" ? "Still got 7 more features to show you 👇" : "Masih ada 7 fitur lagi yang mau kami tunjukkan 👇"}
+                      {t.realUiFeatures.cta.moreFeatures}
                     </p>
                     
                     <motion.div
@@ -474,7 +418,7 @@ export function RealUIFeatures() {
                         </svg>
                       </div>
                       <span className="text-sm font-bold text-white/60 uppercase tracking-wider">
-                        {language === "en" ? "Keep Scrolling" : "Lanjutkan Scroll"}
+                        {t.realUiFeatures.cta.keepScrolling}
                       </span>
                     </motion.div>
                   </motion.div>

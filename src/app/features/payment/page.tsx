@@ -12,7 +12,7 @@ import { MockupCarousel } from "@/components/ui/mockup-carousel"
 
 
 export default function PaymentFeaturePage() {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const paymentMockups = [
     PaymentCheckoutMockup, SplitBillMockup, QRISPaymentMockup, ReceiptMockup
   ]
@@ -27,7 +27,7 @@ export default function PaymentFeaturePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-[#FF5A5F] mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            {language === "en" ? "Back to Features" : "Kembali ke Fitur"}
+            {t.featurePages.backToFeatures}
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -38,22 +38,20 @@ export default function PaymentFeaturePage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-100 rounded-full mb-6">
                 <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                <span className="text-sm font-bold text-pink-700">Payment System</span>
+                <span className="text-sm font-bold text-pink-700">{t.featurePages.payment.badge}</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                {language === "en" ? "Multi-Method Payment" : "Pembayaran Multi-Metode"}
+                {t.featurePages.payment.title}
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                {language === "en"
-                  ? "Accept payments with various methods: cash, QRIS, debit, credit card, and transfer with automatic split bill functionality."
-                  : "Terima pembayaran dengan berbagai metode: cash, QRIS, debit, credit card, dan transfer dengan split bill otomatis."}
+                {t.featurePages.payment.description}
               </p>
 
               <Link href="/demo">
                 <Button size="lg" className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full px-8 py-6 text-lg font-bold shadow-xl">
-                  {language === "en" ? "Try Demo" : "Coba Demo"}
+                  {t.featurePages.tryDemo}
                 </Button>
               </Link>
             </motion.div>
@@ -76,36 +74,11 @@ export default function PaymentFeaturePage() {
       <section className="py-20">
         <Container>
           <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">
-            {language === "en" ? "Key Features" : "Fitur Utama"}
+            {t.featurePages.keyFeatures}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: language === "en" ? "QRIS Integration" : "Integrasi QRIS",
-                desc: language === "en" 
-                  ? "Accept all e-wallet payments through QRIS standard"
-                  : "Terima semua e-wallet melalui standar QRIS"
-              },
-              {
-                title: language === "en" ? "Split Bill" : "Split Bill",
-                desc: language === "en"
-                  ? "Divide bills easily among multiple customers"
-                  : "Bagi tagihan dengan mudah untuk beberapa pelanggan"
-              },
-              {
-                title: language === "en" ? "Multiple Payments" : "Pembayaran Ganda",
-                desc: language === "en"
-                  ? "Accept combination of different payment methods in one transaction"
-                  : "Terima kombinasi berbagai metode pembayaran dalam satu transaksi"
-              },
-              {
-                title: language === "en" ? "Auto Reconciliation" : "Rekonsiliasi Otomatis",
-                desc: language === "en"
-                  ? "Automatic payment reconciliation and reporting"
-                  : "Rekonsiliasi dan pelaporan pembayaran otomatis"
-              }
-            ].map((feature, i) => (
+            {t.featurePages.payment.features.map((feature, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +90,7 @@ export default function PaymentFeaturePage() {
                 <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}

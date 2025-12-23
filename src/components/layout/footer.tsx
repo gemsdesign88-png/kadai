@@ -7,47 +7,47 @@ import { Container } from "@/components/ui/container"
 import { useLanguage } from "@/lib/i18n/context"
 import { Facebook, Twitter, Instagram, Linkedin, Heart } from "lucide-react"
 
-const navigation = {
-  product: [
-    { name: "Features", href: "/features" },
-    { name: "Pricing", href: "/pricing" },
-  ],
-  company: [
-    { name: "About", href: "/about" },
-    { name: "Contact", href: "/contact" },
-  ],
-  legal: [
-    { name: "Privacy", href: "/privacy" },
-    { name: "Terms", href: "/terms" },
-    { name: "Cookie Policy", href: "/cookies" },
-  ],
-  social: [
-    {
-      name: "Facebook",
-      href: "#",
-      icon: Facebook,
-    },
-    {
-      name: "Instagram",
-      href: "#",
-      icon: Instagram,
-    },
-    {
-      name: "Twitter",
-      href: "#",
-      icon: Twitter,
-    },
-    {
-      name: "LinkedIn",
-      href: "#",
-      icon: Linkedin,
-    },
-  ],
-}
-
 export function Footer() {
   const { t, language } = useLanguage()
   const pathname = usePathname()
+
+  const navigation = {
+    product: [
+      { name: t.nav.features, href: "/features" },
+      { name: t.nav.pricing, href: "/pricing" },
+    ],
+    company: [
+      { name: t.nav.about, href: "/about" },
+      { name: t.nav.contact, href: "/contact" },
+    ],
+    legal: [
+      { name: t.footer.privacy, href: "/privacy" },
+      { name: t.footer.terms, href: "/terms" },
+      { name: t.footer.cookiePolicy, href: "/cookies" },
+    ],
+    social: [
+      {
+        name: "Facebook",
+        href: "#",
+        icon: Facebook,
+      },
+      {
+        name: "Instagram",
+        href: "#",
+        icon: Instagram,
+      },
+      {
+        name: "Twitter",
+        href: "#",
+        icon: Twitter,
+      },
+      {
+        name: "LinkedIn",
+        href: "#",
+        icon: Linkedin,
+      },
+    ],
+  }
 
   if (pathname?.startsWith('/order')) {
     return null
@@ -158,23 +158,23 @@ export function Footer() {
           <div className="mt-12 border-t border-white/10 pt-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-sm font-bold text-gray-400 flex items-center gap-2">
-                &copy; {new Date().getFullYear()} KadaiPOS. {language === "en" ? "Made with" : "Dibuat dengan"}{" "}
+                &copy; {new Date().getFullYear()} Kadai. {t.footer.madeWith}{" "}
                 <Heart className="h-4 w-4 text-[#FF5A5F] fill-[#FF5A5F] inline" />{" "}
-                {language === "en" ? "in Indonesia" : "di Indonesia"}
+                {t.footer.inIndonesia}
               </p>
               <div className="flex items-center gap-4">
                 <Link 
                   href="/privacy" 
                   className="text-sm font-bold text-gray-400 hover:text-white transition-colors px-3 py-1 hover:bg-white/10 rounded-full"
                 >
-                  {language === "en" ? "Privacy" : "Privasi"}
+                  {t.footer.privacy}
                 </Link>
                 <div className="w-1 h-1 bg-gray-600 rounded-full" />
                 <Link 
                   href="/terms" 
                   className="text-sm font-bold text-gray-400 hover:text-white transition-colors px-3 py-1 hover:bg-white/10 rounded-full"
                 >
-                  {language === "en" ? "Terms" : "Ketentuan"}
+                  {t.footer.terms}
                 </Link>
               </div>
             </div>

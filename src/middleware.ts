@@ -5,12 +5,35 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
   
+  // Redirect kadaipos.id login/register to sibos.kadaipos.id
+  if (host === 'kadaipos.id' && (pathname === '/login' || pathname === '/register')) {
+    const targetUrl = new URL(`https://sibos.kadaipos.id${pathname}`);
+    return NextResponse.redirect(targetUrl);
+  }
+  
+  // Redirect sibos.kadaipos.id to dashboard
+  if (host.includes('sibos.kadaipos.id')) {
+    // If not already on dashboard/login/auth/register routes, redirect to dashboard
+    if (pathname === '/' || 
+        (!pathname.startsWith('/dashboard') && 
+         !pathname.startsWith('/login') && 
+         !pathname.startsWith('/auth') &&
+         !pathname.startsWith('/register') &&
+         !pathname.startsWith('/onboarding') &&
+         !pathname.startsWith('/_next'))) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return await updateSession(request);
+  }
+  
   // Public routes that don't require authentication
   const publicRoutes = [
     '/order',
     '/privacy',
     '/terms',
     '/cookies',
+    '/api/demo-request',
+    '/register',
   ];
   
   // Check if the path starts with any public route

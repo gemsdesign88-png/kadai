@@ -17,7 +17,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [activeRestaurant, setActiveRestaurant] = useState<any>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -70,14 +70,14 @@ export default function DashboardLayout({ children, user, profile, restaurants }
   const isActive = (path: string) => pathname === path;
 
   const menuItems = [
-    { path: '/dashboard', icon: Home, label: language === 'en' ? 'Dashboard' : 'Dashboard' },
-    { path: '/dashboard/analytics', icon: BarChart3, label: language === 'en' ? 'Analytics' : 'Analitik' },
-    { path: '/dashboard/orders', icon: ShoppingCart, label: language === 'en' ? 'Orders' : 'Pesanan' },
-    { path: '/dashboard/menu', icon: UtensilsCrossed, label: language === 'en' ? 'Menu' : 'Menu' },
-    { path: '/dashboard/customers', icon: Users, label: language === 'en' ? 'Customers' : 'Pelanggan' },
-    { path: '/dashboard/staff', icon: Users, label: language === 'en' ? 'Staff' : 'Staff' },
-    { path: '/dashboard/inventory', icon: Archive, label: language === 'en' ? 'Inventory' : 'Stok' },
-    { path: '/dashboard/tables', icon: Building2, label: language === 'en' ? 'Tables' : 'Meja' },
+    { path: '/dashboard', icon: Home, label: t.nav.dashboard },
+    { path: '/dashboard/analytics', icon: BarChart3, label: t.nav.analyticsShort },
+    { path: '/dashboard/orders', icon: ShoppingCart, label: t.nav.orders },
+    { path: '/dashboard/menu', icon: UtensilsCrossed, label: t.nav.menu },
+    { path: '/dashboard/customers', icon: Users, label: t.nav.customers },
+    { path: '/dashboard/staff', icon: Users, label: t.nav.staff },
+    { path: '/dashboard/inventory', icon: Archive, label: t.nav.inventory },
+    { path: '/dashboard/tables', icon: Building2, label: t.nav.tables },
   ];
 
   return (
@@ -212,7 +212,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
               {/* Navigation Menu */}
               <nav className="px-4 py-4">
                 <p className="px-3 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  {language === 'en' ? 'Menu' : 'Menu'}
+                  {t.nav.menu}
                 </p>
                 <div className="space-y-1">
                   {menuItems.map((item) => {
@@ -242,7 +242,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
               {/* Quick Actions */}
               <div className="px-4 py-4 border-t border-gray-200">
                 <p className="px-3 mb-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  {language === 'en' ? 'Settings' : 'Pengaturan'}
+                  {t.nav.settings}
                 </p>
                 <div className="space-y-1">
                   <button
@@ -253,17 +253,20 @@ export default function DashboardLayout({ children, user, profile, restaurants }
                     className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl transition-all"
                   >
                     <Users className="w-5 h-5 flex-shrink-0" />
-                    <span className="font-semibold">{language === 'en' ? 'Owner Profile' : 'Profil Owner'}</span>
+                    <span className="font-semibold">{t.nav.ownerProfile}</span>
                   </button>
                   <button
                     onClick={() => {
-                      setLanguage(language === 'en' ? 'id' : 'en');
+                      const nextLang = language === 'en' ? 'id' : language === 'id' ? 'zh' : 'en';
+                      setLanguage(nextLang);
                       setMobileMenuOpen(false);
                     }}
                     className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl transition-all"
                   >
                     <Globe className="w-5 h-5 flex-shrink-0" />
-                    <span className="font-semibold">{language === 'en' ? '🇬🇧 English' : '🇮🇩 Bahasa'}</span>
+                    <span className="font-semibold">
+                      {language === 'en' ? '🇬🇧 English' : language === 'id' ? '🇮🇩 Bahasa' : '🇨🇳 中文'}
+                    </span>
                   </button>
                   <button
                     onClick={handleSignOut}
@@ -271,7 +274,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
                     className="w-full flex items-center gap-4 px-4 py-3.5 text-red-600 hover:bg-red-50 active:bg-red-100 rounded-xl transition-all disabled:opacity-50"
                   >
                     <LogOut className="w-5 h-5 flex-shrink-0" />
-                    <span className="font-semibold">{language === 'en' ? 'Logout' : 'Keluar'}</span>
+                    <span className="font-semibold">{t.nav.logout}</span>
                   </button>
                 </div>
               </div>
@@ -292,7 +295,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
           {restaurants.length > 0 && (
             <div className="p-4 border-b border-gray-200">
               <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
-                {language === 'en' ? 'Active Restaurant' : 'Restoran Aktif'}
+                {t.nav.activeRestaurant}
               </label>
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -390,16 +393,19 @@ export default function DashboardLayout({ children, user, profile, restaurants }
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-semibold text-gray-900 truncate">{profile?.full_name || user.email}</p>
-                <p className="text-xs text-[var(--color-accent)] font-medium">👤 {language === 'en' ? 'Owner Profile' : 'Profil Owner'}</p>
+                <p className="text-xs text-[var(--color-accent)] font-medium">👤 {t.nav.ownerProfile}</p>
               </div>
             </button>
             <div className="space-y-1">
               <button
-                onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                onClick={() => {
+                  const nextLang = language === 'en' ? 'id' : language === 'id' ? 'zh' : 'en';
+                  setLanguage(nextLang);
+                }}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-[var(--color-accent)] hover:bg-gray-50 rounded-lg transition-all"
               >
                 <Globe className="w-4 h-4" />
-                {language === 'en' ? '🇬🇧 English' : '🇮🇩 Bahasa'}
+                {language === 'en' ? '🇬🇧 English' : language === 'id' ? '🇮🇩 Bahasa' : '🇨🇳 中文'}
               </button>
               <button
                 onClick={handleSignOut}
@@ -407,7 +413,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-[var(--color-accent)] hover:bg-gray-50 rounded-lg transition-all disabled:opacity-50"
               >
                 <LogOut className="w-4 h-4" />
-                {language === 'en' ? 'Logout' : 'Keluar'}
+                {t.nav.logout}
               </button>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { useLanguage } from "@/lib/i18n/context"
 import { TrendingUp, DollarSign, ShoppingCart, Clock, UtensilsCrossed, CreditCard, Building2, Users, Download, Calendar, TrendingUp as TrendingUpIcon, BarChart3, Percent, Gift, XCircle, Star } from "lucide-react"
 import { ThemeColorPicker } from "@/components/dashboard/ThemeColorPicker"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Bar, Area, AreaChart, BarChart } from 'recharts'
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 
 type PeriodType = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
@@ -35,7 +36,13 @@ interface TopItem {
 export default function AnalyticsPage() {
   const router = useRouter()
   const supabase = createClient()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
+  const { t: dt } = createDashboardTranslator(language)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState<any>(null)
@@ -43,6 +50,8 @@ export default function AnalyticsPage() {
   const [period, setPeriod] = useState<PeriodType>('daily')
   const [dates, setDates] = useState<DateRange[]>([])
   const [selected, setSelected] = useState(0)
+
+  if (!mounted) return null
   
   const [stats, setStats] = useState({
     revenue: 0,
@@ -475,36 +484,36 @@ export default function AnalyticsPage() {
   const exportToCSV = () => {
     const range = dates[selected]
     const csvData = [
-      ['Analytics Report'],
-      ['Restaurant', restaurant?.name || ''],
-      ['Period', range?.fullLabel || ''],
-      ['Generated', new Date().toLocaleString('id-ID')],
+      [dt("analyticsReport")],
+      [dt("store"), restaurant?.name || ''],
+      [dt("period"), range?.fullLabel || ''],
+      [dt("generated"), new Date().toLocaleString(language === 'id' ? 'id-ID' : language === 'zh' ? 'zh-CN' : 'en-US')],
       [''],
-      ['Summary'],
-      ['Total Revenue', stats.revenue],
-      ['Total Orders', stats.orders],
-      ['Average Order', stats.avgOrder],
+      [dt("summary")],
+      [dt("revenue"), stats.revenue],
+      [dt("orders"), stats.orders],
+      [dt("avgOrder"), stats.avgOrder],
       [''],
-      ['Payment Methods'],
-      ['Cash', stats.cashRevenue, `${stats.revenue > 0 ? ((stats.cashRevenue / stats.revenue) * 100).toFixed(1) : 0}%`],
+      [dt("paymentMethods")],
+      [dt("cash"), stats.cashRevenue, `${stats.revenue > 0 ? ((stats.cashRevenue / stats.revenue) * 100).toFixed(1) : 0}%`],
       ['QRIS', stats.qrisRevenue, `${stats.revenue > 0 ? ((stats.qrisRevenue / stats.revenue) * 100).toFixed(1) : 0}%`],
-      ['Transfer', stats.transferRevenue, `${stats.revenue > 0 ? ((stats.transferRevenue / stats.revenue) * 100).toFixed(1) : 0}%`],
+      [dt("bankTransfer"), stats.transferRevenue, `${stats.revenue > 0 ? ((stats.transferRevenue / stats.revenue) * 100).toFixed(1) : 0}%`],
       [''],
-      ['Top Items'],
-      ['Rank', 'Item Name', 'Quantity Sold', 'Revenue'],
+      [dt("topSellingItems")],
+      [dt("rank"), dt("itemName"), dt("quantitySold"), dt("revenue")],
       ...topItems.map((item, idx) => [idx + 1, item.name, item.count, item.revenue]),
       [''],
-      ['Table Performance'],
-      ['Rank', 'Table', 'Orders', 'Customers', 'Revenue', 'Avg Order'],
-      ...tableAnalytics.map((t, idx) => [idx + 1, `Meja ${t.tableNumber}`, t.orders, t.customers, t.revenue, t.avgOrder]),
+      [dt("tablePerformance")],
+      [dt("rank"), dt("table"), dt("orders"), dt("customers"), dt("revenue"), dt("avgOrder")],
+      ...tableAnalytics.map((t, idx) => [idx + 1, `${dt("table")} ${t.tableNumber}`, t.orders, t.customers, t.revenue, t.avgOrder]),
       [''],
-      ['All Orders'],
-      ['Table', 'Total', 'Payment Method', 'Paid At', 'Items Count'],
+      [dt("allOrders")],
+      [dt("table"), dt("total"), dt("paymentMethods"), dt("paidAt"), dt("itemsCount")],
       ...ordersRaw.map(o => [
         o.tables?.number || 'Takeaway',
         o.total || 0,
         o.payment_method || '',
-        o.paid_at ? new Date(o.paid_at).toLocaleString('id-ID') : '',
+        o.paid_at ? new Date(o.paid_at).toLocaleString(language === 'id' ? 'id-ID' : language === 'zh' ? 'zh-CN' : 'en-US') : '',
         o.order_items?.length || 0
       ])
     ]
@@ -521,7 +530,7 @@ export default function AnalyticsPage() {
   const getBusiestDay = () => {
     const dayCounts: Record<string, number> = ordersRaw.reduce((acc, o) => {
       if (o.paid_at) {
-        const day = new Date(o.paid_at).toLocaleDateString('id-ID', { weekday: 'long' })
+        const day = new Date(o.paid_at).toLocaleDateString(language === 'id' ? 'id-ID' : language === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'long' })
         acc[day] = (acc[day] || 0) + 1
       }
       return acc
@@ -578,22 +587,22 @@ export default function AnalyticsPage() {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Analytics' : 'Analitik'}</h1>
-            <p className="text-sm sm:text-base text-gray-600">{language === 'en' ? 'Performance & revenue summary' : 'Ringkasan performa & pendapatan'}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{dt("analytics")}</h1>
+            <p className="text-sm sm:text-base text-gray-600">{dt("performanceSummary")}</p>
           </div>
           <button
             onClick={() => setShowExportModal(true)}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors w-full sm:w-auto"
           >
             <Download className="w-5 h-5" />
-            Export
+            {dt("exportCsv")}
           </button>
         </div>
       </div>
 
       {/* Period Selector */}
       <div className="mb-6">
-        <p className="text-sm font-semibold text-gray-500 mb-3">{language === 'en' ? 'PERIOD' : 'PERIODE'}</p>
+        <p className="text-sm font-semibold text-gray-500 mb-3">{dt("period")}</p>
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {(['daily', 'weekly', 'monthly', 'yearly'] as PeriodType[]).map((p) => (
             <button
@@ -605,10 +614,10 @@ export default function AnalyticsPage() {
                   : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
               }`}
             >
-              {p === 'daily' && (language === 'en' ? 'Daily' : 'Harian')}
-              {p === 'weekly' && (language === 'en' ? 'Weekly' : 'Mingguan')}
-              {p === 'monthly' && (language === 'en' ? 'Monthly' : 'Bulanan')}
-              {p === 'yearly' && (language === 'en' ? 'Yearly' : 'Tahunan')}
+              {p === 'daily' && dt("daily")}
+              {p === 'weekly' && dt("weekly")}
+              {p === 'monthly' && dt("monthly")}
+              {p === 'yearly' && dt("yearly")}
             </button>
           ))}
         </div>
@@ -617,7 +626,7 @@ export default function AnalyticsPage() {
       {/* Date Selector */}
       <div className="mb-8 -mx-8">
         <p className="text-sm font-semibold text-gray-500 mb-3 px-8">
-          {period === 'daily' ? 'TANGGAL' : period === 'weekly' ? 'MINGGU' : period === 'monthly' ? 'BULAN' : 'TAHUN'}
+          {period === 'daily' ? dt("daily").toUpperCase() : period === 'weekly' ? dt("weekly").toUpperCase() : period === 'monthly' ? dt("monthly").toUpperCase() : dt("yearly").toUpperCase()}
         </p>
         <div id="date-scroll" className="px-8 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory" style={{ overscrollBehavior: 'contain' }}>
           <div className="inline-flex gap-3">
@@ -662,38 +671,38 @@ export default function AnalyticsPage() {
               <div className="flex items-center gap-8">
                 <div>
                   <p className="text-2xl font-bold">{stats.orders}</p>
-                  <p className="text-sm opacity-90">{language === 'en' ? 'Orders' : 'Pesanan'}</p>
+                  <p className="text-sm opacity-90">{dt("orders")}</p>
                 </div>
                 <div className="w-px h-12 bg-white/20"></div>
                 <div>
                   <p className="text-2xl font-bold">{formatCurrency(stats.avgOrder)}</p>
-                  <p className="text-sm opacity-90">{language === 'en' ? 'Average' : 'Rata-rata'}</p>
+                  <p className="text-sm opacity-90">{dt("average")}</p>
                 </div>
               </div>
             </div>
 
             {/* Insights */}
             <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-500 mb-4">{language === 'en' ? 'INSIGHTS' : 'INSIGHT'}</h3>
+              <h3 className="text-sm font-semibold text-gray-500 mb-4">{dt("analytics")}</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div className="p-4 bg-yellow-50 rounded-xl text-center">
                   <Clock className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-gray-900">{stats.peakHour}</p>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Peak Hour' : 'Waktu Tersibuk'}</p>
+                  <p className="text-sm text-gray-600">{dt("peakHour")}</p>
                 </div>
 
                 <div className="p-4 bg-blue-50 rounded-xl text-center">
                   <Building2 className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-gray-900">
-                    {stats.topTable > 0 ? `${language === 'en' ? 'Table' : 'Meja'} ${stats.topTable}` : '-'}
+                    {stats.topTable > 0 ? `${dt("table")} ${stats.topTable}` : '-'}
                   </p>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Top Table' : 'Meja Terlaris'}</p>
+                  <p className="text-sm text-gray-600">{dt("topTable")}</p>
                 </div>
 
                 <div className="p-4 bg-green-50 rounded-xl text-center">
                   <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.avgOrder)}</p>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Avg Order' : 'Rata-rata Pesanan'}</p>
+                  <p className="text-sm text-gray-600">{dt("avgOrder")}</p>
                 </div>
 
                 <div className="p-4 bg-purple-50 rounded-xl text-center">
@@ -701,7 +710,7 @@ export default function AnalyticsPage() {
                   <p className="text-2xl font-bold text-gray-900">
                     {getAvgTableTime()} min
                   </p>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Time Per Table' : 'Waktu Per Meja'}</p>
+                  <p className="text-sm text-gray-600">{dt("timePerTable")}</p>
                 </div>
 
                 <div className="p-4 bg-pink-50 rounded-xl text-center">
@@ -709,7 +718,7 @@ export default function AnalyticsPage() {
                   <p className="text-2xl font-bold text-gray-900">
                     {getBusiestDay()}
                   </p>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Busiest Day' : 'Hari Tersibuk'}</p>
+                  <p className="text-sm text-gray-600">{dt("busiestDay")}</p>
                 </div>
 
                 <div className="p-4 bg-orange-50 rounded-xl text-center">
@@ -717,14 +726,14 @@ export default function AnalyticsPage() {
                   <p className="text-2xl font-bold text-gray-900">
                     {getTopPaymentMethod()}
                   </p>
-                  <p className="text-sm text-gray-600">{language === 'en' ? 'Most Popular' : 'Metode Terpopuler'}</p>
+                  <p className="text-sm text-gray-600">{dt("mostPopular")}</p>
                 </div>
               </div>
             </div>
 
             {/* Payment Methods */}
             <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-500 mb-4">{language === 'en' ? 'PAYMENT METHODS' : 'METODE PEMBAYARAN'}</h3>
+              <h3 className="text-sm font-semibold text-gray-500 mb-4">{dt("paymentMethods")}</h3>
               
               {/* Donut Chart */}
               <div className="flex flex-col md:flex-row items-center gap-8 mb-6">
@@ -808,7 +817,7 @@ export default function AnalyticsPage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900">{stats.orders}</p>
-                      <p className="text-xs text-gray-500">{language === 'en' ? 'Transactions' : 'Transaksi'}</p>
+                      <p className="text-xs text-gray-500">{dt("transactions")}</p>
                     </div>
                   </div>
                 </div>
@@ -819,7 +828,7 @@ export default function AnalyticsPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                       <div>
-                        <p className="font-semibold text-gray-900">💵 {language === 'en' ? 'Cash' : 'Tunai'}</p>
+                        <p className="font-semibold text-gray-900">💵 {dt("cash")}</p>
                         <p className="text-xs text-gray-600">
                           {stats.revenue > 0 ? `${((stats.cashRevenue / stats.revenue) * 100).toFixed(1)}%` : '0%'}
                         </p>
@@ -849,7 +858,7 @@ export default function AnalyticsPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
                       <div>
-                        <p className="font-semibold text-gray-900">🏦 Transfer</p>
+                        <p className="font-semibold text-gray-900">🏦 {dt("transfer")}</p>
                         <p className="text-xs text-gray-600">
                           {stats.revenue > 0 ? `${((stats.transferRevenue / stats.revenue) * 100).toFixed(1)}%` : '0%'}
                         </p>
@@ -865,11 +874,11 @@ export default function AnalyticsPage() {
 
             {/* Top Items */}
             <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-500 mb-4">{language === 'en' ? 'TOP SELLING ITEMS' : 'ITEM TERLARIS'}</h3>
+              <h3 className="text-sm font-semibold text-gray-500 mb-4">{dt("topSellingItems")}</h3>
               {topItems.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <UtensilsCrossed className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{language === 'en' ? 'No item data for this period' : 'Tidak ada data item untuk periode ini'}</p>
+                  <p>{dt("noItemData")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -883,7 +892,7 @@ export default function AnalyticsPage() {
                             </span>
                             <p className="font-semibold text-gray-900 line-clamp-1">{item.name}</p>
                           </div>
-                          <p className="text-sm text-gray-600">{item.count} {language === 'en' ? 'sold' : 'terjual'}</p>
+                          <p className="text-sm text-gray-600">{item.count} {dt("sold")}</p>
                         </div>
                         <p className="text-lg font-bold text-[var(--color-accent)] ml-4">
                           {formatCurrency(item.revenue)}
@@ -897,11 +906,11 @@ export default function AnalyticsPage() {
 
             {/* Table Analytics */}
             <div className="bg-white rounded-2xl p-6 mb-8 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-500 mb-4">{language === 'en' ? 'TABLE PERFORMANCE' : 'PERFORMA MEJA'}</h3>
+              <h3 className="text-sm font-semibold text-gray-500 mb-4">{dt("tablePerformance")}</h3>
               {tableAnalytics.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Building2 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>{language === 'en' ? 'No table data for this period' : 'Tidak ada data meja untuk periode ini'}</p>
+                  <p>{dt("noTableData")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -913,12 +922,12 @@ export default function AnalyticsPage() {
                             <span className="w-6 h-6 bg-[var(--color-accent)] text-white rounded-full flex items-center justify-center text-xs font-bold">
                               {idx + 1}
                             </span>
-                            <p className="font-semibold text-gray-900">{language === 'en' ? 'Table' : 'Meja'} {table.tableNumber}</p>
+                            <p className="font-semibold text-gray-900">{dt("table")} {table.tableNumber}</p>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span>{table.customers} {language === 'en' ? 'customers' : 'pelanggan'}</span>
+                            <span>{table.customers} {dt("customers")}</span>
                             <span>•</span>
-                            <span>{table.orders} {language === 'en' ? 'orders' : 'pesanan'}</span>
+                            <span>{table.orders} {dt("orders")}</span>
                           </div>
                         </div>
                         <p className="text-lg font-bold text-[var(--color-accent)] ml-4">
@@ -940,8 +949,8 @@ export default function AnalyticsPage() {
                     <Percent className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'COGS & Gross Margin' : 'COGS & Margin Kotor'}</h3>
-                    <p className="text-xs text-gray-600">{language === 'en' ? 'Cost of goods sold vs profit margin' : 'Harga pokok vs margin keuntungan'}</p>
+                    <h3 className="text-lg font-bold text-gray-900">{dt("cogsMarginTitle")}</h3>
+                    <p className="text-xs text-gray-600">{dt("cogsMarginDesc")}</p>
                   </div>
                 </div>
                 <div className="w-full h-80">
@@ -967,12 +976,12 @@ export default function AnalyticsPage() {
                           border: '1px solid #e5e7eb', 
                           borderRadius: '8px' 
                         }}
-                        formatter={(value: any, name: string, props: any) => {
-                          const dataKey = props.dataKey
-                          if (dataKey === 'cogs') return [formatCurrency(Number(value)), language === 'en' ? 'COGS (30%)' : 'HPP (30%)']
-                          if (dataKey === 'margin') return [formatCurrency(Number(value)), language === 'en' ? 'Gross Margin (70%)' : 'Margin Kotor (70%)']
-                          if (dataKey === 'revenue') return [formatCurrency(Number(value)), language === 'en' ? 'Revenue' : 'Pendapatan']
-                          return [formatCurrency(Number(value)), name]
+                        formatter={(value: any, name?: string, props?: any) => {
+                          const dataKey = props?.dataKey
+                          if (dataKey === 'cogs') return [formatCurrency(Number(value)), `${dt("cogs")} (30%)`]
+                          if (dataKey === 'margin') return [formatCurrency(Number(value)), `${dt("grossMargin")} (70%)`]
+                          if (dataKey === 'revenue') return [formatCurrency(Number(value)), dt("revenue")]
+                          return [formatCurrency(Number(value)), name || '']
                         }}
                       />
                       <Legend />
@@ -980,14 +989,14 @@ export default function AnalyticsPage() {
                         dataKey="cogs" 
                         stackId="a"
                         fill="#ef4444" 
-                        name={language === 'en' ? 'COGS' : 'HPP'}
+                        name={dt("cogs")}
                         radius={[0, 0, 0, 0]}
                       />
                       <Bar 
                         dataKey="margin" 
                         stackId="a"
                         fill="#10b981" 
-                        name={language === 'en' ? 'Gross Margin' : 'Margin Kotor'}
+                        name={dt("grossMargin")}
                         radius={[8, 8, 0, 0]}
                       />
                       <Line 
@@ -995,7 +1004,7 @@ export default function AnalyticsPage() {
                         dataKey="revenue" 
                         stroke="#3b82f6" 
                         strokeWidth={2}
-                        name={language === 'en' ? 'Revenue' : 'Pendapatan'}
+                        name={dt("revenue")}
                         dot={{ fill: '#3b82f6', r: 4 }}
                       />
                     </ComposedChart>
@@ -1003,13 +1012,13 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
                   <div className="p-2 bg-red-50 rounded-lg text-center">
-                    <p className="text-red-700 font-semibold">{language === 'en' ? 'COGS: 30%' : 'HPP: 30%'}</p>
+                    <p className="text-red-700 font-semibold">{dt("cogsPercent")}</p>
                   </div>
                   <div className="p-2 bg-green-50 rounded-lg text-center">
-                    <p className="text-green-700 font-semibold">{language === 'en' ? 'Margin: 70%' : 'Margin: 70%'}</p>
+                    <p className="text-green-700 font-semibold">{dt("marginPercent")}</p>
                   </div>
                   <div className="p-2 bg-blue-50 rounded-lg text-center">
-                    <p className="text-blue-700 font-semibold">{language === 'en' ? 'Revenue' : 'Pendapatan'}</p>
+                    <p className="text-blue-700 font-semibold">{dt("revenue")}</p>
                   </div>
                 </div>
               </div>
@@ -1021,8 +1030,8 @@ export default function AnalyticsPage() {
                     <Gift className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Promo Performance' : 'Performa Promo'}</h3>
-                    <p className="text-xs text-gray-600">{language === 'en' ? 'Revenue vs discount cost analysis' : 'Analisis pendapatan vs biaya diskon'}</p>
+                    <h3 className="text-lg font-bold text-gray-900">{dt("promoPerformance")}</h3>
+                    <p className="text-xs text-gray-600">{dt("discountCostAnalysis")}</p>
                   </div>
                 </div>
                 <div className="w-full h-80">
@@ -1048,10 +1057,10 @@ export default function AnalyticsPage() {
                           border: '1px solid #e5e7eb', 
                           borderRadius: '8px' 
                         }}
-                        formatter={(value: any, name: string) => {
-                          if (name === 'discount') return [formatCurrency(Number(value)), language === 'en' ? 'Discount Given' : 'Diskon Diberikan']
-                          if (name === 'netRevenue') return [formatCurrency(Number(value)), language === 'en' ? 'Net Revenue' : 'Pendapatan Bersih']
-                          return [formatCurrency(Number(value)), name]
+                        formatter={(value: any, name?: string) => {
+                          if (name === 'discount') return [formatCurrency(Number(value)), dt("discountGiven")]
+                          if (name === 'netRevenue') return [formatCurrency(Number(value)), dt("netRevenue")]
+                          return [formatCurrency(Number(value)), name || '']
                         }}
                       />
                       <Legend />
@@ -1059,21 +1068,21 @@ export default function AnalyticsPage() {
                         dataKey="netRevenue" 
                         stackId="a"
                         fill="#10b981" 
-                        name={language === 'en' ? 'Net Revenue' : 'Pendapatan Bersih'}
+                        name={dt("netRevenue")}
                         radius={[0, 0, 0, 0]}
                       />
                       <Bar 
                         dataKey="discount" 
                         stackId="a"
                         fill="#f59e0b" 
-                        name={language === 'en' ? 'Discount' : 'Diskon'}
+                        name={dt("discountGiven")}
                         radius={[8, 8, 0, 0]}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-4 text-xs text-gray-600">
-                  <p>💡 {language === 'en' ? 'Compare discount costs vs incremental revenue to optimize promotions' : 'Bandingkan biaya diskon vs peningkatan pendapatan untuk optimasi promo'}</p>
+                  <p>💡 {dt("compareDiscount")}</p>
                 </div>
               </div>
 
@@ -1084,8 +1093,8 @@ export default function AnalyticsPage() {
                     <XCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Loss Analysis' : 'Analisis Kerugian'}</h3>
-                    <p className="text-xs text-gray-600">{language === 'en' ? 'Voids, discounts, and refunds breakdown' : 'Rincian void, diskon, dan refund'}</p>
+                    <h3 className="text-lg font-bold text-gray-900">{dt("lossAnalysis")}</h3>
+                    <p className="text-xs text-gray-600">{dt("voidsDiscounts")}</p>
                   </div>
                 </div>
                 <div className="w-full h-80">
@@ -1115,9 +1124,9 @@ export default function AnalyticsPage() {
                           border: '1px solid #e5e7eb', 
                           borderRadius: '8px' 
                         }}
-                        formatter={(value: any, name: string) => {
-                          if (name === 'amount') return [formatCurrency(Number(value)), language === 'en' ? 'Total Amount' : 'Total Jumlah']
-                          return [value, language === 'en' ? 'Count' : 'Jumlah']
+                        formatter={(value: any, name?: string) => {
+                          if (name === 'amount') return [formatCurrency(Number(value)), dt("totalAmount")]
+                          return [value, dt("count")]
                         }}
                       />
                       <Legend />
@@ -1125,7 +1134,7 @@ export default function AnalyticsPage() {
                         yAxisId="left"
                         dataKey="count" 
                         fill="#3b82f6" 
-                        name={language === 'en' ? 'Count' : 'Jumlah'}
+                        name={dt("count")}
                         radius={[8, 8, 0, 0]}
                       />
                       <Line 
@@ -1134,7 +1143,7 @@ export default function AnalyticsPage() {
                         dataKey="amount" 
                         stroke="#ef4444" 
                         strokeWidth={3}
-                        name={language === 'en' ? 'Amount' : 'Jumlah'}
+                        name={dt("amount")}
                         dot={{ fill: '#ef4444', r: 5 }}
                       />
                     </BarChart>
@@ -1196,7 +1205,7 @@ export default function AnalyticsPage() {
                           border: '1px solid #e5e7eb', 
                           borderRadius: '8px' 
                         }}
-                        formatter={(value: any, name: string) => {
+                        formatter={(value: any, name: any) => {
                           if (name === 'rating') return [`⭐ ${value}/5`, 'Average Rating']
                           return [value, 'Reviews']
                         }}
@@ -1239,18 +1248,18 @@ export default function AnalyticsPage() {
         {showExportModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4">Export Data Analytics</h2>
+            <h2 className="text-2xl font-bold mb-4">{dt("exportDataAnalytics")}</h2>
             <p className="text-gray-600 mb-6">
-              Unduh laporan analitik untuk periode <span className="font-semibold">{dates[selected]?.fullLabel}</span> dalam format CSV.
+              {dt("downloadReportDesc")} <span className="font-semibold">{dates[selected]?.fullLabel}</span> {dt("inCsvFormat")}
             </p>
             <div className="bg-gray-50 p-4 rounded-lg mb-6">
-              <p className="text-sm text-gray-700 mb-2">Data yang akan di-export:</p>
+              <p className="text-sm text-gray-700 mb-2">{dt("dataToExport")}:</p>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>✓ Ringkasan pendapatan & pesanan</li>
-                <li>✓ Breakdown metode pembayaran</li>
-                <li>✓ Item terlaris</li>
-                <li>✓ Performa meja</li>
-                <li>✓ Detail semua transaksi</li>
+                <li>✓ {dt("revenueOrderSummary")}</li>
+                <li>✓ {dt("paymentMethodBreakdown")}</li>
+                <li>✓ {dt("topSellingItems")}</li>
+                <li>✓ {dt("tablePerformance")}</li>
+                <li>✓ {dt("allTransactionsDetail")}</li>
               </ul>
             </div>
             <div className="flex gap-2">
@@ -1258,14 +1267,14 @@ export default function AnalyticsPage() {
                 onClick={() => setShowExportModal(false)}
                 className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
               >
-                Batal
+                {dt("cancel")}
               </button>
               <button
                 onClick={exportToCSV}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Export CSV
+                {dt("exportCsv")}
               </button>
             </div>
           </div>

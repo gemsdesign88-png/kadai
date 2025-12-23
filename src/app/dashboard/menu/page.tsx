@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { TrendingUp, DollarSign, Star, AlertTriangle, ThumbsUp, ThumbsDown, TrendingDown, Zap, Plus, Settings, PieChart as PieChartIcon } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 
 interface MenuItem {
@@ -33,6 +34,7 @@ export default function MenuPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
+  const { t: dt, locale } = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState<MenuAnalytics[]>([])
   const [stars, setStars] = useState<MenuAnalytics[]>([])
@@ -215,10 +217,10 @@ export default function MenuPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              {language === 'en' ? 'Menu Performance' : 'Performa Menu'}
+              {dt.menuPerformance}
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              {language === 'en' ? 'Optimize your menu for maximum profitability' : 'Optimalkan menu Anda untuk profitabilitas maksimal'}
+              {dt.menuPerformanceDesc}
             </p>
           </div>
           <button
@@ -226,7 +228,7 @@ export default function MenuPage() {
             className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors w-full sm:w-auto"
           >
             <Settings className="w-5 h-5" />
-            {language === 'en' ? 'Manage Menu' : 'Kelola Menu'}
+            {dt.manageMenu}
           </button>
         </div>
       </div>
@@ -246,20 +248,20 @@ export default function MenuPage() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">
-                {language === 'en' ? 'Stars' : 'Bintang'}
+                {dt.stars}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'High profit & popular' : 'Untung tinggi & populer'}
+                {dt.starsDesc}
               </p>
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900">{stars.length}</p>
           <p className="text-sm text-gray-600 mt-2">
-            {language === 'en' ? 'items' : 'item'}
+            {dt.items}
           </p>
           {selectedCategory === 'star' && (
             <p className="text-xs text-yellow-700 font-medium mt-2">
-              {language === 'en' ? '✓ Filtered' : '✓ Difilter'}
+              ✓ {dt.filtered}
             </p>
           )}
         </button>
@@ -277,20 +279,20 @@ export default function MenuPage() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">
-                {language === 'en' ? 'Workhorses' : 'Andalan'}
+                {dt.workhorses}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'Popular, lower profit' : 'Populer, untung rendah'}
+                {dt.workhorsesDesc}
               </p>
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900">{plowHorses.length}</p>
           <p className="text-sm text-gray-600 mt-2">
-            {language === 'en' ? 'items' : 'item'}
+            {dt.items}
           </p>
           {selectedCategory === 'plow-horse' && (
             <p className="text-xs text-green-700 font-medium mt-2">
-              {language === 'en' ? '✓ Filtered' : '✓ Difilter'}
+              ✓ {dt.filtered}
             </p>
           )}
         </button>
@@ -308,20 +310,20 @@ export default function MenuPage() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">
-                {language === 'en' ? 'Puzzles' : 'Teka-teki'}
+                {dt.puzzles}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'High profit, low sales' : 'Untung tinggi, kurang laku'}
+                {dt.puzzlesDesc}
               </p>
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900">{puzzles.length}</p>
           <p className="text-sm text-gray-600 mt-2">
-            {language === 'en' ? 'items' : 'item'}
+            {dt.items}
           </p>
           {selectedCategory === 'puzzle' && (
             <p className="text-xs text-blue-700 font-medium mt-2">
-              {language === 'en' ? '✓ Filtered' : '✓ Difilter'}
+              ✓ {dt.filtered}
             </p>
           )}
         </button>
@@ -339,20 +341,20 @@ export default function MenuPage() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">
-                {language === 'en' ? 'Dogs' : 'Lemah'}
+                {dt.dogs}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'Low profit & unpopular' : 'Untung & penjualan rendah'}
+                {dt.dogsDesc}
               </p>
             </div>
           </div>
           <p className="text-3xl font-bold text-gray-900">{dogs.length}</p>
           <p className="text-sm text-gray-600 mt-2">
-            {language === 'en' ? 'items' : 'item'}
+            {dt.items}
           </p>
           {selectedCategory === 'dog' && (
             <p className="text-xs text-red-700 font-medium mt-2">
-              {language === 'en' ? '✓ Filtered' : '✓ Difilter'}
+              ✓ {dt.filtered}
             </p>
           )}
         </button>
@@ -368,10 +370,10 @@ export default function MenuPage() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
-                {language === 'en' ? 'Top 10 Revenue by Product' : 'Top 10 Pendapatan per Produk'}
+                {dt.topRevenueByProduct}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'Pareto analysis: focus on top performers' : 'Analisis Pareto: fokus pada performa teratas'}
+                {dt.paretoAnalysis}
               </p>
             </div>
           </div>
@@ -402,8 +404,8 @@ export default function MenuPage() {
                     fontSize: '12px'
                   }}
                   formatter={(value: any, name: string) => {
-                    if (name === 'revenue') return [formatCurrency(Number(value)), language === 'en' ? 'Revenue' : 'Pendapatan']
-                    if (name === 'quantity') return [value, language === 'en' ? 'Sold' : 'Terjual']
+                    if (name === 'revenue') return [formatCurrency(Number(value)), dt.revenue]
+                    if (name === 'quantity') return [value, dt.sold]
                     return [value, name]
                   }}
                 />
@@ -423,9 +425,7 @@ export default function MenuPage() {
             </ResponsiveContainer>
           </div>
           <div className="mt-4 text-xs text-gray-600">
-            <p>💡 {language === 'en' 
-              ? 'The 80/20 rule: 80% of revenue often comes from 20% of products'
-              : 'Aturan 80/20: 80% pendapatan sering datang dari 20% produk'}</p>
+            <p>💡 {dt.paretoRule}</p>
           </div>
         </div>
 
@@ -437,10 +437,10 @@ export default function MenuPage() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
-                {language === 'en' ? 'Category Mix' : 'Mix Kategori'}
+                {dt.categoryMixTitle}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'Revenue breakdown by category' : 'Breakdown pendapatan per kategori'}
+                {dt.categoryMixDesc}
               </p>
             </div>
           </div>
@@ -470,7 +470,7 @@ export default function MenuPage() {
                     border: '1px solid #e5e7eb', 
                     borderRadius: '8px' 
                   }}
-                  formatter={(value: any) => [formatCurrency(Number(value)), language === 'en' ? 'Revenue' : 'Pendapatan']}
+                  formatter={(value: any) => [formatCurrency(Number(value)), dt.revenue]}
                 />
                 <Legend 
                   verticalAlign="bottom" 
@@ -496,7 +496,7 @@ export default function MenuPage() {
                 <div key={idx} className={`p-3 rounded-lg ${colors[idx]}`}>
                   <p className="text-xs font-medium">{category.name}</p>
                   <p className="text-lg font-bold">{formatCurrency(category.value)}</p>
-                  <p className="text-xs">{category.items} {language === 'en' ? 'items' : 'item'}</p>
+                  <p className="text-xs">{category.items} {dt.items}</p>
                 </div>
               )
             })}
@@ -512,10 +512,10 @@ export default function MenuPage() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {language === 'en' ? 'Smart Recommendations' : 'Rekomendasi Cerdas'}
+              {dt.smartRecommendations}
             </h2>
             <p className="text-gray-600">
-              {language === 'en' ? 'Data-driven strategies to boost your menu performance' : 'Strategi berbasis data untuk meningkatkan performa menu'}
+              {dt.smartRecommendationsDesc}
             </p>
           </div>
         </div>
@@ -528,12 +528,10 @@ export default function MenuPage() {
                 <Star className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">
-                    {language === 'en' ? 'Promote Your Stars!' : 'Promosikan Bintang Anda!'}
+                    {dt.promoteStars}
                   </h3>
                   <p className="text-sm text-gray-700 mb-3">
-                    {language === 'en' 
-                      ? `You have ${stars.length} star items with high profit and popularity. Feature these prominently!`
-                      : `Anda punya ${stars.length} item bintang dengan untung tinggi dan populer. Tampilkan di posisi utama!`}
+                    {dt.promoteStarsDesc.replace('{count}', stars.length.toString())}
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1">
                     {stars.slice(0, 3).map(item => (
@@ -552,17 +550,15 @@ export default function MenuPage() {
                 <TrendingUp className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">
-                    {language === 'en' ? 'Improve Profit Margins' : 'Tingkatkan Margin Untung'}
+                    {dt.improveMargins}
                   </h3>
                   <p className="text-sm text-gray-700 mb-2">
-                    {language === 'en' 
-                      ? `${plowHorses.length} popular items have lower margins. Try:`
-                      : `${plowHorses.length} item populer margin rendah. Coba:`}
+                    {dt.improveMarginsDesc.replace('{count}', plowHorses.length.toString())}
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• {language === 'en' ? 'Slight price increase (5-10%)' : 'Naikkan harga sedikit (5-10%)'}</li>
-                    <li>• {language === 'en' ? 'Reduce portion sizes slightly' : 'Kurangi porsi sedikit'}</li>
-                    <li>• {language === 'en' ? 'Find cheaper suppliers' : 'Cari supplier lebih murah'}</li>
+                    <li>• {dt.priceIncrease}</li>
+                    <li>• {dt.reducePortion}</li>
+                    <li>• {dt.cheaperSuppliers}</li>
                   </ul>
                 </div>
               </div>
@@ -576,18 +572,16 @@ export default function MenuPage() {
                 <Zap className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">
-                    {language === 'en' ? 'Boost Sales of High-Profit Items' : 'Tingkatkan Penjualan Item Untung Tinggi'}
+                    {dt.boostPuzzleSales}
                   </h3>
                   <p className="text-sm text-gray-700 mb-2">
-                    {language === 'en' 
-                      ? `${puzzles.length} profitable items need more visibility:`
-                      : `${puzzles.length} item menguntungkan butuh lebih terlihat:`}
+                    {dt.boostPuzzleSalesDesc.replace('{count}', puzzles.length.toString())}
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• {language === 'en' ? 'Staff recommendations' : 'Rekomendasi staff'}</li>
-                    <li>• {language === 'en' ? 'Better menu placement' : 'Posisi menu lebih baik'}</li>
-                    <li>• {language === 'en' ? 'Create combo deals' : 'Buat paket combo'}</li>
-                    <li>• {language === 'en' ? 'Add attractive photos' : 'Tambah foto menarik'}</li>
+                    <li>• {dt.staffRecommendations}</li>
+                    <li>• {dt.betterPlacement}</li>
+                    <li>• {dt.comboDeals}</li>
+                    <li>• {dt.addPhotos}</li>
                   </ul>
                 </div>
               </div>
@@ -601,17 +595,15 @@ export default function MenuPage() {
                 <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">
-                    {language === 'en' ? 'Consider Removing Low Performers' : 'Pertimbangkan Hapus Item Lemah'}
+                    {dt.removeDogs}
                   </h3>
                   <p className="text-sm text-gray-700 mb-2">
-                    {language === 'en' 
-                      ? `${dogs.length} items have low sales and profit:`
-                      : `${dogs.length} item dengan penjualan & untung rendah:`}
+                    {dt.removeDogsDesc.replace('{count}', dogs.length.toString())}
                   </p>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• {language === 'en' ? 'Replace with better options' : 'Ganti dengan opsi lebih baik'}</li>
-                    <li>• {language === 'en' ? 'Revamp recipe & pricing' : 'Ubah resep & harga'}</li>
-                    <li>• {language === 'en' ? 'Run clearance promo' : 'Buat promo clearance'}</li>
+                    <li>• {dt.replaceOptions}</li>
+                    <li>• {dt.revampRecipe}</li>
+                    <li>• {dt.clearancePromo}</li>
                   </ul>
                 </div>
               </div>
@@ -624,13 +616,13 @@ export default function MenuPage() {
               <ThumbsUp className="w-6 h-6 text-purple-500 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">
-                  {language === 'en' ? 'Menu Engineering Tips' : 'Tips Rekayasa Menu'}
+                  {dt.menuEngineeringTips}
                 </h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• {language === 'en' ? 'Review menu quarterly' : 'Review menu tiap 3 bulan'}</li>
-                  <li>• {language === 'en' ? 'Test new items seasonally' : 'Tes item baru per musim'}</li>
-                  <li>• {language === 'en' ? 'Highlight stars visually' : 'Tonjolkan bintang secara visual'}</li>
-                  <li>• {language === 'en' ? 'Train staff on upselling' : 'Latih staff untuk upsell'}</li>
+                  <li>• {dt.reviewQuarterly}</li>
+                  <li>• {dt.testSeasonal}</li>
+                  <li>• {dt.highlightStars}</li>
+                  <li>• {dt.trainUpselling}</li>
                 </ul>
               </div>
             </div>
@@ -642,13 +634,13 @@ export default function MenuPage() {
               <DollarSign className="w-6 h-6 text-indigo-500 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-bold text-gray-900 mb-2">
-                  {language === 'en' ? 'Pricing Psychology' : 'Psikologi Harga'}
+                  {dt.pricingPsychology}
                 </h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• {language === 'en' ? 'Use charm pricing (Rp 49k vs 50k)' : 'Pakai harga charm (Rp 49rb vs 50rb)'}</li>
-                  <li>• {language === 'en' ? 'Anchor with premium items' : 'Anchor dengan item premium'}</li>
-                  <li>• {language === 'en' ? 'Bundle complementary items' : 'Bundle item pelengkap'}</li>
-                  <li>• {language === 'en' ? 'Avoid price wars' : 'Hindari perang harga'}</li>
+                  <li>• {dt.charmPricing}</li>
+                  <li>• {dt.anchorPremium}</li>
+                  <li>• {dt.bundleComplementary}</li>
+                  <li>• {dt.avoidPriceWars}</li>
                 </ul>
               </div>
             </div>
@@ -661,14 +653,14 @@ export default function MenuPage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {selectedCategory === 'all' 
-              ? (language === 'en' ? 'Top Performers by Revenue' : 'Performa Teratas Berdasarkan Revenue')
+              ? dt.topPerformersByRevenue
               : selectedCategory === 'star'
-              ? (language === 'en' ? '⭐ Star Items' : '⭐ Item Bintang')
+              ? `⭐ ${dt.starItems}`
               : selectedCategory === 'plow-horse'
-              ? (language === 'en' ? '📈 Workhorse Items' : '📈 Item Andalan')
+              ? `📈 ${dt.workhorseItems}`
               : selectedCategory === 'puzzle'
-              ? (language === 'en' ? '⚡ Puzzle Items' : '⚡ Item Teka-teki')
-              : (language === 'en' ? '📉 Dog Items' : '📉 Item Lemah')
+              ? `⚡ ${dt.puzzleItems}`
+              : `📉 ${dt.dogItems}`
             }
           </h2>
           {selectedCategory !== 'all' && (
@@ -676,7 +668,7 @@ export default function MenuPage() {
               onClick={() => setSelectedCategory('all')}
               className="text-sm text-gray-600 hover:text-gray-900 font-medium"
             >
-              {language === 'en' ? '← Show All' : '← Tampilkan Semua'}
+              ← {dt.showAll}
             </button>
           )}
         </div>
@@ -705,13 +697,13 @@ export default function MenuPage() {
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <span>
-                    {language === 'en' ? 'Sold' : 'Terjual'}: <strong>{item.quantitySold}</strong>
+                    {dt.sold}: <strong>{item.quantitySold}</strong>
                   </span>
                   <span>
-                    {language === 'en' ? 'Revenue' : 'Revenue'}: <strong>{formatCurrency(item.revenue)}</strong>
+                    {dt.revenue}: <strong>{formatCurrency(item.revenue)}</strong>
                   </span>
                   <span>
-                    {language === 'en' ? 'Margin' : 'Margin'}: <strong>{item.profitMargin.toFixed(1)}%</strong>
+                    {dt.margin}: <strong>{item.profitMargin.toFixed(1)}%</strong>
                   </span>
                 </div>
               </div>
@@ -722,10 +714,10 @@ export default function MenuPage() {
                   item.menuClass === 'puzzle' ? 'bg-blue-100 text-blue-700' :
                   'bg-red-100 text-red-700'
                 }`}>
-                  {item.menuClass === 'star' && (language === 'en' ? 'Star' : 'Bintang')}
-                  {item.menuClass === 'plow-horse' && (language === 'en' ? 'Workhorse' : 'Andalan')}
-                  {item.menuClass === 'puzzle' && (language === 'en' ? 'Puzzle' : 'Teka-teki')}
-                  {item.menuClass === 'dog' && (language === 'en' ? 'Dog' : 'Lemah')}
+                  {item.menuClass === 'star' && dt.starLabel}
+                  {item.menuClass === 'plow-horse' && dt.workhorseLabel}
+                  {item.menuClass === 'puzzle' && dt.puzzleLabel}
+                  {item.menuClass === 'dog' && dt.dogLabel}
                 </div>
               </div>
             </div>
@@ -736,7 +728,7 @@ export default function MenuPage() {
              selectedCategory === 'puzzle' ? puzzles : dogs
             ).length === 0 && (
               <p className="text-center py-8 text-gray-500">
-                {language === 'en' ? 'No items in this category yet' : 'Belum ada item di kategori ini'}
+                {dt.noItemsInCategory}
               </p>
             )
           )}

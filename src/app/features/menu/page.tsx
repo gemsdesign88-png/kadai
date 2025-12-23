@@ -12,7 +12,7 @@ import { MockupCarousel } from "@/components/ui/mockup-carousel"
 
 
 export default function MenuFeaturePage() {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const menuMockups = [
     MenuListMockup, MenuEditorMockup, MenuCategoriesMockup, MenuModifiersMockup
   ]
@@ -27,7 +27,7 @@ export default function MenuFeaturePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-[#FF5A5F] mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            {language === "en" ? "Back to Features" : "Kembali ke Fitur"}
+            {t.featurePages.backToFeatures}
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -38,22 +38,20 @@ export default function MenuFeaturePage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-6">
                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                <span className="text-sm font-bold text-blue-700">Menu Management</span>
+                <span className="text-sm font-bold text-blue-700">{t.featurePages.menu.badge}</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                {language === "en" ? "Flexible Menu Management" : "Manajemen Menu Fleksibel"}
+                {t.featurePages.menu.title}
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                {language === "en"
-                  ? "Manage menu with ease. Add, edit, or delete items instantly with automatic categorization and pricing updates."
-                  : "Atur menu dengan mudah. Tambah, edit, atau hapus item dalam sekejap dengan kategorisasi dan update harga otomatis."}
+                {t.featurePages.menu.description}
               </p>
 
               <Link href="/demo">
                 <Button size="lg" className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full px-8 py-6 text-lg font-bold shadow-xl">
-                  {language === "en" ? "Try Demo" : "Coba Demo"}
+                  {t.featurePages.tryDemo}
                 </Button>
               </Link>
             </motion.div>
@@ -76,36 +74,11 @@ export default function MenuFeaturePage() {
       <section className="py-20">
         <Container>
           <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">
-            {language === "en" ? "Key Features" : "Fitur Utama"}
+            {t.featurePages.keyFeatures}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: language === "en" ? "Drag & Drop Organization" : "Organisasi Drag & Drop",
-                desc: language === "en" 
-                  ? "Arrange menu items easily with intuitive drag and drop interface"
-                  : "Atur item menu dengan mudah menggunakan drag and drop"
-              },
-              {
-                title: language === "en" ? "Category Management" : "Manajemen Kategori",
-                desc: language === "en"
-                  ? "Create unlimited categories and subcategories for better organization"
-                  : "Buat kategori dan subkategori unlimited untuk organisasi lebih baik"
-              },
-              {
-                title: language === "en" ? "Variant Options" : "Opsi Varian",
-                desc: language === "en"
-                  ? "Add variants like size, toppings, or customizations with different pricing"
-                  : "Tambahkan varian seperti ukuran, topping, atau kustomisasi dengan harga berbeda"
-              },
-              {
-                title: language === "en" ? "Image Upload" : "Upload Gambar",
-                desc: language === "en"
-                  ? "Upload high-quality images for each menu item to increase appeal"
-                  : "Upload gambar berkualitas tinggi untuk setiap item menu"
-              }
-            ].map((feature, i) => (
+            {t.featurePages.menu.features.map((feature, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +90,7 @@ export default function MenuFeaturePage() {
                 <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}

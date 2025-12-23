@@ -12,7 +12,7 @@ import { MockupCarousel } from "@/components/ui/mockup-carousel"
 
 
 export default function PromoFeaturePage() {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const promoMockups = [
     PromoListMockup, CreatePromoMockup, ActivePromosMockup, PromoPerformanceMockup
   ]
@@ -27,7 +27,7 @@ export default function PromoFeaturePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-[#FF5A5F] mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            {language === "en" ? "Back to Features" : "Kembali ke Fitur"}
+            {t.featurePages.backToFeatures}
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -38,22 +38,20 @@ export default function PromoFeaturePage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-rose-100 rounded-full mb-6">
                 <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-                <span className="text-sm font-bold text-rose-700">Promo & Campaign</span>
+                <span className="text-sm font-bold text-rose-700">{t.featurePages.promo.badge}</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                {language === "en" ? "Promo & Campaign Manager" : "Promo & Campaign Manager"}
+                {t.featurePages.promo.title}
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                {language === "en"
-                  ? "Create and manage vouchers, coupons, and bundles to increase repeat orders and boost customer loyalty."
-                  : "Buat dan kelola voucher, kupon, dan bundling untuk tingkatkan repeat orders dan boost loyalitas pelanggan."}
+                {t.featurePages.promo.description}
               </p>
 
               <Link href="/demo">
                 <Button size="lg" className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full px-8 py-6 text-lg font-bold shadow-xl">
-                  {language === "en" ? "Try Demo" : "Coba Demo"}
+                  {t.featurePages.tryDemo}
                 </Button>
               </Link>
             </motion.div>
@@ -76,36 +74,11 @@ export default function PromoFeaturePage() {
       <section className="py-20">
         <Container>
           <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">
-            {language === "en" ? "Key Features" : "Fitur Utama"}
+            {t.featurePages.keyFeatures}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: language === "en" ? "Flexible Discounts" : "Diskon Fleksibel",
-                desc: language === "en" 
-                  ? "Create percentage or fixed amount discounts for items or orders"
-                  : "Buat diskon persentase atau nominal tetap untuk item atau order"
-              },
-              {
-                title: language === "en" ? "Bundle Deals" : "Paket Bundling",
-                desc: language === "en"
-                  ? "Create special bundle packages to increase average order value"
-                  : "Buat paket bundling spesial untuk tingkatkan nilai order rata-rata"
-              },
-              {
-                title: language === "en" ? "Time-Based Promos" : "Promo Berbasis Waktu",
-                desc: language === "en"
-                  ? "Schedule promotions for specific days, hours, or happy hours"
-                  : "Jadwalkan promosi untuk hari, jam, atau happy hour tertentu"
-              },
-              {
-                title: language === "en" ? "Coupon Codes" : "Kode Kupon",
-                desc: language === "en"
-                  ? "Generate unique coupon codes for marketing campaigns"
-                  : "Generate kode kupon unik untuk kampanye marketing"
-              }
-            ].map((feature, i) => (
+            {t.featurePages.promo.features.map((feature, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +90,7 @@ export default function PromoFeaturePage() {
                 <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}

@@ -251,7 +251,7 @@ export default function StaffClient() {
   }
 
   async function deleteStaff(id: string) {
-    if (!confirm('Hapus staff ini?')) return
+    if (!confirm(language === 'id' ? 'Hapus staff ini?' : language === 'zh' ? '删除该员工？' : 'Delete this staff?')) return
 
     try {
       await supabase
@@ -266,7 +266,7 @@ export default function StaffClient() {
   }
 
   const getRoleLabel = (role: string) => {
-    return role || 'Tidak ada peran'
+    return role || dt("noRole")
   }
 
   const getRoleColor = (role: string) => {
@@ -393,7 +393,7 @@ export default function StaffClient() {
               </p>
             </div>
             <div className="p-3 rounded-lg bg-purple-50">
-              <p className="text-xs text-purple-600 font-medium">Avg per Pesanan</p>
+              <p className="text-xs text-purple-600 font-medium">{dt("avgPerOrder")}</p>
               <p className="text-lg font-bold text-purple-900">
                 Rp {Math.round(
                   staffPerformance.reduce((sum, s) => sum + s.revenue, 0) / 
@@ -413,7 +413,7 @@ export default function StaffClient() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Cari staff..."
+                placeholder={dt("searchStaff")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
@@ -424,7 +424,7 @@ export default function StaffClient() {
               onChange={(e) => setSelectedRole(e.target.value)}
               className="px-4 py-2.5 border-2 border-gray-200 rounded-xl font-medium focus:outline-none focus:border-gray-400 hover:border-gray-300 transition-all cursor-pointer"
             >
-              <option value="all">Semua Peran</option>
+              <option value="all">{dt("allRoles")}</option>
               {availableRoles.map(role => (
                 <option key={role.value} value={role.value}>{role.label}</option>
               ))}
@@ -438,12 +438,12 @@ export default function StaffClient() {
             <div className="col-span-full bg-white rounded-2xl p-12 text-center border border-gray-100">
               <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {staff.length === 0 ? 'Belum Ada Staff' : 'Tidak ada staff ditemukan'}
+                {staff.length === 0 ? dt("noStaff") : dt("noStaffFound")}
               </h3>
               <p className="text-gray-500 mb-6">
                 {staff.length === 0 
-                  ? 'Tambahkan staff pertama untuk mulai mengelola tim Anda'
-                  : 'Coba ubah filter atau kata kunci pencarian'}
+                  ? dt("addFirstStaffDesc")
+                  : dt("changeFilterOrSearch")}
               </p>
               {staff.length === 0 && (
                 <button
@@ -451,7 +451,7 @@ export default function StaffClient() {
                   className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
                 >
                   <Plus className="w-5 h-5" />
-                  Tambah Staff Pertama
+                  {dt("addFirstStaff")}
                 </button>
               )}
             </div>
@@ -483,7 +483,7 @@ export default function StaffClient() {
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
-                    Edit
+                    {dt("edit")}
                   </button>
                   <button
                     onClick={() => deleteStaff(member.id)}
@@ -504,7 +504,7 @@ export default function StaffClient() {
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
               <h3 className="text-xl font-bold text-gray-900">
-                {editingStaff ? 'Edit Staff' : 'Tambah Staff Baru'}
+                {editingStaff ? dt("editStaff") : dt("addNewStaff")}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -516,43 +516,43 @@ export default function StaffClient() {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{dt("fullName")}</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  placeholder="Contoh: Budi Santoso"
+                  placeholder={dt("exampleName")}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Nomor Telepon</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{dt("phoneNumber")}</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  placeholder="Contoh: 08123456789"
+                  placeholder={dt("examplePhone")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Peran / Jabatan</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{dt("roleJob")}</label>
                 <input
                   type="text"
                   required
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  placeholder="Contoh: Kasir, Waiter, Manager"
+                  placeholder={dt("exampleRole")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  PIN Login {editingStaff && <span className="text-xs font-normal text-gray-500">(Kosongkan jika tidak ingin diubah)</span>}
+                  {dt("pinLogin")} {editingStaff && <span className="text-xs font-normal text-gray-500">({dt("leaveEmptyToKeep")})</span>}
                 </label>
                 <input
                   type="password"
@@ -562,7 +562,7 @@ export default function StaffClient() {
                   value={formData.pin}
                   onChange={(e) => setFormData({ ...formData, pin: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  placeholder="6 Digit Angka"
+                  placeholder={dt("sixDigitPin")}
                 />
               </div>
 
@@ -572,13 +572,13 @@ export default function StaffClient() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                 >
-                  Batal
+                  {dt("cancel")}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
                 >
-                  {editingStaff ? 'Simpan Perubahan' : 'Tambah Staff'}
+                  {editingStaff ? dt("saveChanges") : dt("addStaff")}
                 </button>
               </div>
             </form>

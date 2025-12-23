@@ -49,7 +49,7 @@ const testimonials = [
 ]
 
 export function Testimonials() {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
 
   return (
     <section className="py-20 sm:py-32 relative overflow-hidden">
@@ -79,26 +79,24 @@ export function Testimonials() {
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-8">
             <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
             <span className="text-sm font-bold text-white">
-              {language === "en" ? "Launch Special Offer" : "Penawaran Spesial Peluncuran"}
+              {t.cta.launchSpecialOffer}
             </span>
           </div>
           
           {/* Heading */}
           <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight mb-6">
             <span className="bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
-              {language === "en" ? "Ready to Transform" : "Siap Transformasi"}
+              {t.cta.readyToTransform}
             </span>
             <br />
             <span className="bg-gradient-to-r from-[#FF5A5F] to-[#E8484D] bg-clip-text text-transparent">
-              {language === "en" ? "Your Business?" : "Bisnis Anda?"}
+              {t.cta.yourBusiness}
             </span>
           </h2>
           
           {/* Description */}
           <p className="text-xl sm:text-2xl leading-relaxed text-gray-400 max-w-3xl mx-auto mb-12">
-            {language === "en" 
-              ? "Experience the future of restaurant management with KadaiPOS"
-              : "Rasakan masa depan manajemen restoran dengan KadaiPOS"}
+            {t.cta.futureOfRestaurant}
           </p>
 
           {/* CTA Buttons */}
@@ -109,7 +107,7 @@ export function Testimonials() {
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center justify-center text-base md:text-lg px-10 md:px-12 py-5 md:py-6 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full font-bold shadow-2xl shadow-[#FF5A5F]/30 transition-all group"
             >
-              {language === "en" ? "Start Free Trial" : "Mulai Gratis"}
+              {t.cta.startFreeTrial}
               <svg className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -121,7 +119,7 @@ export function Testimonials() {
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center justify-center text-base md:text-lg px-10 md:px-12 py-5 md:py-6 bg-white/5 hover:bg-white/10 border-2 border-white/20 hover:border-white/30 text-white rounded-full font-bold backdrop-blur-xl transition-all"
             >
-              {language === "en" ? "Contact Sales" : "Hubungi Sales"}
+              {t.cta.contactSales}
             </motion.a>
           </div>
 
@@ -129,17 +127,17 @@ export function Testimonials() {
           <div className="mt-12 flex flex-wrap justify-center gap-8 text-center">
             <div className="px-6">
               <div className="text-3xl md:text-4xl font-bold text-white mb-1">13+</div>
-              <div className="text-sm text-gray-500">{language === "en" ? "Features" : "Fitur Lengkap"}</div>
+              <div className="text-sm text-gray-500">{t.cta.features}</div>
             </div>
             <div className="px-6">
               <div className="text-3xl md:text-4xl font-bold text-white mb-1">
                 <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">Real-time</span>
               </div>
-              <div className="text-sm text-gray-500">{language === "en" ? "Data Sync" : "Sinkronisasi Data"}</div>
+              <div className="text-sm text-gray-500">{t.cta.dataSync}</div>
             </div>
             <div className="px-6">
               <div className="text-3xl md:text-4xl font-bold text-white mb-1">24/7</div>
-              <div className="text-sm text-gray-500">{language === "en" ? "Support" : "Dukungan"}</div>
+              <div className="text-sm text-gray-500">{t.cta.support}</div>
             </div>
           </div>
         </motion.div>

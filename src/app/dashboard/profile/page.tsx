@@ -4,10 +4,14 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { User, Mail, Phone, MapPin, Save, ArrowLeft } from "lucide-react"
+import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 
 export default function ProfilePage() {
   const router = useRouter()
   const supabase = createClient()
+  const { language } = useLanguage()
+  const { t: dt } = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -63,11 +67,11 @@ export default function ProfilePage() {
 
       if (error) throw error
 
-      alert('Profil berhasil diperbarui!')
+      alert(dt('profileUpdated'))
       router.push('/dashboard')
     } catch (error) {
       console.error('Error updating profile:', error)
-      alert('Gagal memperbarui profil')
+      alert(dt('failedUpdateProfile'))
     } finally {
       setSaving(false)
     }
@@ -93,8 +97,8 @@ export default function ProfilePage() {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Profil Saya</h1>
-              <p className="text-sm text-gray-500 mt-1">Kelola informasi akun Anda</p>
+              <h1 className="text-2xl font-bold text-gray-900">{dt('myProfile')}</h1>
+              <p className="text-sm text-gray-500 mt-1">{dt('manageAccountInfo')}</p>
             </div>
           </div>
         </div>
@@ -108,7 +112,7 @@ export default function ProfilePage() {
               {(formData.full_name || user?.email)?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{formData.full_name || 'Nama Belum Diisi'}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{formData.full_name || dt('nameNotSet')}</h2>
               <p className="text-gray-600 flex items-center gap-2 mt-1">
                 <Mail className="w-4 h-4" />
                 {user?.email}
@@ -121,7 +125,7 @@ export default function ProfilePage() {
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <User className="w-4 h-4" />
-                Nama Lengkap
+                {dt('fullName')}
               </label>
               <input
                 type="text"
@@ -129,35 +133,35 @@ export default function ProfilePage() {
                 value={formData.full_name}
                 onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[var(--color-accent)] transition-colors"
-                placeholder="Masukkan nama lengkap"
+                placeholder={dt('enterFullName')}
               />
             </div>
 
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <Phone className="w-4 h-4" />
-                Nomor Telepon
+                {dt('phoneNumber')}
               </label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[var(--color-accent)] transition-colors"
-                placeholder="Contoh: 08123456789"
+                placeholder={dt('phoneExample')}
               />
             </div>
 
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                 <MapPin className="w-4 h-4" />
-                Alamat
+                {dt('address')}
               </label>
               <textarea
                 value={formData.address}
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
                 rows={4}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[var(--color-accent)] transition-colors resize-none"
-                placeholder="Masukkan alamat lengkap"
+                placeholder={dt('enterAddress')}
               />
             </div>
 
@@ -167,7 +171,7 @@ export default function ProfilePage() {
                 onClick={() => router.push('/dashboard')}
                 className="flex-1 px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
-                Batal
+                {dt('cancel')}
               </button>
               <button
                 type="submit"
@@ -175,7 +179,7 @@ export default function ProfilePage() {
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50"
               >
                 <Save className="w-5 h-5" />
-                {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                {saving ? dt('saving') : dt('saveChanges')}
               </button>
             </div>
           </form>

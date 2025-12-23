@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/context"
 import { ArrowRight, ShoppingCart, BarChart3, Users, CreditCard, Package, Receipt, TrendingUp, Clock, Zap, Shield, Smartphone } from "lucide-react"
 import Link from "next/link"
-import { InteractiveDashboard } from "./interactive-dashboard"
+import dynamic from "next/dynamic"
+
+const InteractiveDashboard = dynamic(() => import("./interactive-dashboard").then(mod => mod.InteractiveDashboard), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-[16/10] bg-white/5 rounded-3xl animate-pulse border border-white/10" />
+  )
+})
 
 export function Hero() {
   const { t, language } = useLanguage()
@@ -63,7 +70,7 @@ export function Hero() {
             >
               <Zap className="h-4 w-4 text-[#FF5A5F]" />
               <span className="text-sm font-semibold text-white">
-                {language === "en" ? "The Best POS System" : "Sistem POS Terbaik"}
+                {t.hero.badge}
               </span>
             </motion.div>
             
@@ -86,7 +93,7 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 text-white"
             >
-              {language === "en" ? "Excellence. Built in." : "Keunggulan demi keunggulan."}
+              {t.hero.heading}
             </motion.p>
             
             {/* Subtitle */}
@@ -94,12 +101,20 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7 }}
-              className="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl mx-auto font-medium"
+              className="text-lg md:text-xl text-gray-400 mb-2 max-w-3xl mx-auto font-medium"
             >
-              {language === "en" 
-                ? "The most powerful POS system designed end-to-end for restaurant and store owner. Fast, intuitive, and built for growth."
-                : "Sistem POS paling powerful yang dirancang menyeluruh untuk pemilik restoran dan toko. Cepat, intuitif, dan dibangun untuk pertumbuhan."}
+              {t.hero.tagline}
             </motion.p>
+            {t.hero.realUi && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                className="text-base md:text-lg text-gray-300 mb-8 max-w-2xl mx-auto font-normal"
+              >
+                {t.hero.realUi}
+              </motion.p>
+            )}
             
             {/* CTA Buttons */}
             <motion.div
@@ -112,14 +127,14 @@ export function Hero() {
                 href="/demo"
                 className="inline-flex items-center justify-center text-base md:text-lg px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full font-semibold shadow-2xl shadow-[#FF5A5F]/20 transition-all hover:scale-105 active:scale-95 group"
               >
-                {language === "en" ? "Try Demo" : "Coba Demo"}
+                {t.hero.watchDemo}
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link 
                 href="#features"
                 className="inline-flex items-center justify-center text-base md:text-lg px-8 md:px-10 py-4 md:py-5 bg-white/5 hover:bg-white/10 border-2 border-white/20 hover:border-white/30 text-white rounded-full font-semibold backdrop-blur-xl transition-all hover:scale-105 active:scale-95"
               >
-                {language === "en" ? "Learn More" : "Pelajari Lebih Lanjut"}
+                {t.hero.learnMore}
               </Link>
             </motion.div>
             
@@ -133,32 +148,32 @@ export function Hero() {
               {[
                 { 
                   icon: Zap, 
-                  title: language === "en" ? "Real-time Sync" : "Sinkron Real-time",
+                  title: t.hero.realtimeSync,
                   color: "#10B981"
                 },
                 { 
                   icon: Shield, 
-                  title: language === "en" ? "100% Secure" : "100% Aman",
+                  title: t.hero.secure,
                   color: "#FF5A5F"
                 },
                 { 
                   icon: Clock, 
-                  title: language === "en" ? "24/7 Support" : "Dukungan 24/7",
+                  title: t.hero.support24x7,
                   color: "#EC4899"
                 },
                 { 
                   icon: Users, 
-                  title: language === "en" ? "Easy to Use" : "Mudah Dipakai",
+                  title: t.hero.easyToUse,
                   color: "#F59E0B"
                 },
                 { 
                   icon: Zap, 
-                  title: language === "en" ? "Lightning Fast" : "Super Cepat",
+                  title: t.hero.lightningFast,
                   color: "#8B5CF6"
                 },
                 { 
                   icon: Smartphone, 
-                  title: language === "en" ? "Multi-Device" : "Multi-Perangkat",
+                  title: t.hero.multiDevice,
                   color: "#3B82F6"
                 }
               ].map((feature, i) => (
@@ -209,7 +224,7 @@ export function Hero() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-gray-500">{language === "en" ? "Scroll to explore" : "Gulir untuk melihat"}</span>
+            <span className="text-xs text-gray-500">{t.hero.scrollExplore}</span>
             <div className="w-6 h-10 border-2 border-white/20 rounded-full flex items-start justify-center p-2">
               <motion.div
                 animate={{ y: [0, 12, 0] }}

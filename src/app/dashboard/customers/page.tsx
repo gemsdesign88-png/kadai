@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Users, TrendingUp, Award, Calendar, DollarSign, ShoppingCart, ChevronRight, X } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 
 interface Customer {
   id: string
@@ -30,6 +31,7 @@ export default function CustomersPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
+  const { t: dt, locale } = createDashboardTranslator(language)
   
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState<any>(null)
@@ -257,16 +259,16 @@ export default function CustomersPage() {
   }
 
   function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: locale === 'id-ID' ? 'IDR' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
   }
 
   function formatDate(dateString: string) {
-    return new Date(dateString).toLocaleDateString(language === 'en' ? 'en-US' : 'id-ID')
+    return new Date(dateString).toLocaleDateString(locale)
   }
 
   return (
@@ -277,10 +279,10 @@ export default function CustomersPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                {language === 'en' ? 'Customers' : 'Pelanggan'}
+                {dt.customers}
               </h1>
               <p className="text-sm sm:text-base text-gray-600">
-                {language === 'en' ? 'Customer insights and analytics' : 'Wawasan dan analitik pelanggan'}
+                {dt.customerInsights}
               </p>
             </div>
             <button 
@@ -288,7 +290,7 @@ export default function CustomersPage() {
               className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors w-full sm:w-auto"
             >
               <Users className="w-5 h-5" />
-              {language === 'en' ? 'View All Customers' : 'Lihat Semua Pelanggan'}
+              {dt.viewAllCustomers}
             </button>
           </div>
         </div>
@@ -307,7 +309,7 @@ export default function CustomersPage() {
                 <div className="flex items-center justify-between mb-3">
                   <Users className="w-5 h-5 text-blue-600" />
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Customers' : 'Total Pelanggan'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt.totalCustomersLabel}</p>
                 <h3 className="text-2xl font-bold text-gray-900">{metrics.totalCustomers}</h3>
               </div>
 
@@ -315,7 +317,7 @@ export default function CustomersPage() {
                 <div className="flex items-center justify-between mb-3">
                   <TrendingUp className="w-5 h-5 text-green-600" />
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Active (7 Days)' : 'Aktif (7 Hari)'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt.active7Days}</p>
                 <h3 className="text-2xl font-bold text-gray-900">{metrics.activeCustomers}</h3>
               </div>
 
@@ -323,7 +325,7 @@ export default function CustomersPage() {
                 <div className="flex items-center justify-between mb-3">
                   <Award className="w-5 h-5 text-purple-600" />
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Loyal Customers' : 'Pelanggan Setia'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt.loyalLabel}</p>
                 <h3 className="text-2xl font-bold text-gray-900">{metrics.repeatingCustomers}</h3>
               </div>
 
@@ -331,7 +333,7 @@ export default function CustomersPage() {
                 <div className="flex items-center justify-between mb-3">
                   <ShoppingCart className="w-5 h-5 text-orange-600" />
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Loyalty Rate' : 'Tingkat Loyalitas'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt.loyaltyRateLabel}</p>
                 <h3 className="text-2xl font-bold text-gray-900">{metrics.repeatingRate}%</h3>
               </div>
 
@@ -339,7 +341,7 @@ export default function CustomersPage() {
                 <div className="flex items-center justify-between mb-3">
                   <DollarSign className="w-5 h-5 text-green-600" />
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Revenue' : 'Total Pendapatan'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt.revenueTrend}</p>
                 <h3 className="text-xl font-bold text-gray-900">{formatCurrency(metrics.totalRevenue).substring(0, 15)}</h3>
               </div>
 
@@ -347,7 +349,7 @@ export default function CustomersPage() {
                 <div className="flex items-center justify-between mb-3">
                   <Calendar className="w-5 h-5 text-pink-600" />
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Avg Order Value' : 'Nilai Pesan Rata'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt.avgOrder}</p>
                 <h3 className="text-xl font-bold text-gray-900">{formatCurrency(metrics.avgOrderValue).substring(0, 15)}</h3>
               </div>
             </div>
@@ -359,7 +361,7 @@ export default function CustomersPage() {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-5">
                     <DollarSign className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Spenders' : 'Pembeli Terbanyak'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt.topSpenders}</h3>
                   </div>
                   <div className="space-y-3">
                     {topCustomers.map((customer, idx) => (
@@ -371,7 +373,7 @@ export default function CustomersPage() {
                             </span>
                             <div>
                               <p className="font-semibold text-gray-900">{customer.customerName}</p>
-                              <p className="text-xs text-gray-600">{customer.totalOrders} {language === 'en' ? 'orders' : 'pesanan'} • {language === 'en' ? 'Avg' : 'Rata'}: {formatCurrency(customer.avgOrderValue)}</p>
+                              <p className="text-xs text-gray-600">{customer.totalOrders} {dt.orders} • {dt.avgShort}: {formatCurrency(customer.avgOrderValue)}</p>
                             </div>
                           </div>
                         </div>
@@ -390,14 +392,14 @@ export default function CustomersPage() {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-5">
                     <Users className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'New Customers' : 'Pelanggan Baru'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt.newCustomers}</h3>
                   </div>
                   <div className="space-y-3">
                     {newCustomers.map((customer, idx) => (
                       <div key={customer.customerId} className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-0 rounded-lg hover:shadow-md transition-all border border-green-100">
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900">{customer.customerName}</p>
-                          <p className="text-xs text-gray-600">{formatDate(customer.lastOrder)} • {customer.totalOrders} {language === 'en' ? 'order' : 'pesanan'}</p>
+                          <p className="text-xs text-gray-600">{formatDate(customer.lastOrder)} • {customer.totalOrders} {dt.orderSingle}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-bold text-green-600">{formatCurrency(customer.totalSpent)}</p>
@@ -415,10 +417,10 @@ export default function CustomersPage() {
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-2">
                       <Award className="w-5 h-5 text-[var(--color-accent)]" />
-                      <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Loyal Customers' : 'Pelanggan Setia'}</h3>
+                      <h3 className="text-lg font-bold text-gray-900">{dt.loyalLabel}</h3>
                       {metrics.repeatingCustomers > 5 && (
                         <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                          {metrics.repeatingCustomers} {language === 'en' ? 'total' : 'total'}
+                          {metrics.repeatingCustomers} {dt.totalLabel}
                         </span>
                       )}
                     </div>
@@ -428,7 +430,7 @@ export default function CustomersPage() {
                       <div key={customer.customerId} className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-0 rounded-lg hover:shadow-md transition-all border border-purple-100">
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900">{customer.customerName}</p>
-                          <p className="text-xs text-gray-600">{customer.totalOrders} {language === 'en' ? 'orders' : 'pesanan'} • {formatCurrency(customer.avgOrderValue)}/pesanan</p>
+                          <p className="text-xs text-gray-600">{customer.totalOrders} {dt.orders} • {formatCurrency(customer.avgOrderValue)}/{dt.orderSingle}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-purple-600">⭐</p>
@@ -445,7 +447,7 @@ export default function CustomersPage() {
                       }}
                       className="w-full py-2 text-center text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors font-medium"
                     >
-                      {language === 'en' ? 'View All' : 'Lihat Semua'} →
+                      {dt.viewAll} →
                     </button>
                   )}
                 </div>
@@ -463,7 +465,7 @@ export default function CustomersPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200">
               <h2 className="text-2xl font-bold text-gray-900">
-                {language === 'en' ? 'All Customers' : 'Semua Pelanggan'}
+                {dt.allCustomers}
               </h2>
               <button
                 onClick={() => setShowAllCustomersModal(false)}
@@ -483,7 +485,7 @@ export default function CustomersPage() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {language === 'en' ? 'All' : 'Semua'} ({allCustomers.length})
+                {dt.all} ({allCustomers.length})
               </button>
               <button
                 onClick={() => setSelectedCustomerFilter('top')}
@@ -493,7 +495,7 @@ export default function CustomersPage() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {language === 'en' ? 'Top Spenders' : 'Pembeli Terbanyak'} ({allCustomers.filter(c => c.totalOrders >= 1).length})
+                {dt.topSpendersTab} ({allCustomers.filter(c => c.totalOrders >= 1).length})
               </button>
               <button
                 onClick={() => setSelectedCustomerFilter('loyal')}
@@ -503,7 +505,7 @@ export default function CustomersPage() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {language === 'en' ? 'Loyal' : 'Setia'} ({allCustomers.filter(c => c.totalOrders >= 3).length})
+                {dt.loyalTab} ({allCustomers.filter(c => c.totalOrders >= 3).length})
               </button>
             </div>
 
@@ -523,7 +525,7 @@ export default function CustomersPage() {
                       <div>
                         <h3 className="text-lg font-bold text-gray-900">{customer.customerName}</h3>
                         <p className="text-xs text-gray-600 mt-1">
-                          {language === 'en' ? 'Customer ID' : 'ID Pelanggan'}: {customer.customerId?.substring(0, 12)}
+                          {dt.customerID}: {customer.customerId?.substring(0, 12)}
                         </p>
                       </div>
                       <span className="text-2xl font-bold text-blue-600">{formatCurrency(customer.totalSpent)}</span>
@@ -532,19 +534,19 @@ export default function CustomersPage() {
                     {/* Customer Stats Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Orders' : 'Total Pesanan'}</p>
+                        <p className="text-xs text-gray-600 mb-1">{dt.totalOrders}</p>
                         <p className="text-xl font-bold text-blue-600">{customer.totalOrders}</p>
                       </div>
                       <div className="bg-green-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Avg Order' : 'Pesanan Rata'}</p>
+                        <p className="text-xs text-gray-600 mb-1">{dt.avgOrder}</p>
                         <p className="text-lg font-bold text-green-600">{formatCurrency(customer.avgOrderValue)}</p>
                       </div>
                       <div className="bg-purple-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Last Order' : 'Pesanan Terakhir'}</p>
+                        <p className="text-xs text-gray-600 mb-1">{dt.lastOrder}</p>
                         <p className="text-sm font-semibold text-purple-600">{formatDate(customer.lastOrder)}</p>
                       </div>
                       <div className="bg-orange-50 p-3 rounded-lg">
-                        <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Favorite Item' : 'Item Favorit'}</p>
+                        <p className="text-xs text-gray-600 mb-1">{dt.favoriteItem}</p>
                         <p className="text-sm font-semibold text-orange-600 truncate">{customer.favoriteItem}</p>
                       </div>
                     </div>
@@ -559,7 +561,7 @@ export default function CustomersPage() {
                 onClick={() => setShowAllCustomersModal(false)}
                 className="px-6 py-2 bg-gray-200 text-gray-900 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               >
-                {language === 'en' ? 'Close' : 'Tutup'}
+                {dt.close}
               </button>
             </div>
           </div>

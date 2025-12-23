@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
 import { motion } from "framer-motion"
+import { getMockupTranslator } from "./mockup-i18n"
 
 // Mockup 1: Menu List
 export function MenuListMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -18,16 +18,16 @@ export function MenuListMockup({ color, language }: { color: string; language: s
       >
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Manage Menu' : 'Kelola Menu'}</h3>
-            <p className="text-sm text-gray-600 mt-1">{isEnglish ? '24 menus available' : '24 menu tersedia'}</p>
+            <h3 className="text-2xl font-bold text-gray-900">{t('Manage Menu', 'Kelola Menu', '管理菜单')}</h3>
+            <p className="text-sm text-gray-600 mt-1">{t('24 menus available', '24 menu tersedia', '24 个可用菜单')}</p>
           </div>
         </div>
 
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
           {[
-            { name: isEnglish ? 'All' : 'Semua', active: true },
-            { name: isEnglish ? 'Food' : 'Makanan', active: false },
-            { name: isEnglish ? 'Drinks' : 'Minuman', active: false },
+            { name: t('All', 'Semua', '全部'), active: true },
+            { name: t('Food', 'Makanan', '食物'), active: false },
+            { name: t('Drinks', 'Minuman', '饮料'), active: false },
           ].map((cat, i) => (
             <button
               key={i}
@@ -42,10 +42,10 @@ export function MenuListMockup({ color, language }: { color: string; language: s
 
         <div className="space-y-3">
           {[
-            { name: 'Nasi Goreng', price: 25, available: true, image: '🍚' },
-            { name: 'Mie Goreng', price: 22, available: true, image: '🍜' },
-            { name: 'Es Teh', price: 5, available: false, image: '🥤' },
-            { name: 'Ayam Bakar', price: 35, available: true, image: '🍗' },
+            { name: t('Fried Rice', 'Nasi Goreng', '炒饭'), price: 25, available: true, image: '🍚' },
+            { name: t('Fried Noodles', 'Mie Goreng', '炒面'), price: 22, available: true, image: '🍜' },
+            { name: t('Iced Tea', 'Es Teh', '冰茶'), price: 5, available: false, image: '🥤' },
+            { name: t('Grilled Chicken', 'Ayam Bakar', '烤鸡'), price: 35, available: true, image: '🍗' },
           ].map((item, i) => (
             <motion.div
               key={i}
@@ -66,7 +66,7 @@ export function MenuListMockup({ color, language }: { color: string; language: s
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                 item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
               }`}>
-                {item.available ? (isEnglish ? 'Available' : 'Tersedia') : (isEnglish ? 'Out of Stock' : 'Habis')}
+                {item.available ? t('Available', 'Tersedia', '有货') : t('Out of Stock', 'Habis', '缺货')}
               </span>
             </motion.div>
           ))}
@@ -78,7 +78,7 @@ export function MenuListMockup({ color, language }: { color: string; language: s
 
 // Mockup 2: Add/Edit Menu Item
 export function MenuEditorMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -90,8 +90,8 @@ export function MenuEditorMockup({ color, language }: { color: string; language:
         }}
       >
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Edit Menu Item' : 'Edit Item Menu'}</h3>
-          <p className="text-sm text-gray-600 mt-1">Nasi Goreng Spesial</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Edit Menu Item', 'Edit Item Menu', '编辑菜单项')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('Special Fried Rice', 'Nasi Goreng Spesial', '特别炒饭')}</p>
         </div>
 
         <div className="space-y-4">
@@ -100,28 +100,28 @@ export function MenuEditorMockup({ color, language }: { color: string; language:
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Item Name' : 'Nama Item'}</label>
+            <label className="text-xs font-bold text-gray-600 mb-2 block">{t('Item Name', 'Nama Item', '项目名称')}</label>
             <div className="bg-white rounded-xl p-3 border-2 border-blue-200">
-              <p className="font-semibold text-gray-900">Nasi Goreng Spesial</p>
+              <p className="font-semibold text-gray-900">{t('Special Fried Rice', 'Nasi Goreng Spesial', '特别炒饭')}</p>
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Price' : 'Harga'}</label>
+            <label className="text-xs font-bold text-gray-600 mb-2 block">{t('Price', 'Harga', '价格')}</label>
             <div className="bg-white rounded-xl p-3 border-2 border-blue-200">
               <p className="font-semibold text-gray-900">Rp 25.000</p>
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-600 mb-2 block">{isEnglish ? 'Category' : 'Kategori'}</label>
+            <label className="text-xs font-bold text-gray-600 mb-2 block">{t('Category', 'Kategori', '类别')}</label>
             <div className="bg-white rounded-xl p-3 border-2 border-blue-200">
-              <p className="font-semibold text-gray-900">{isEnglish ? 'Main Course' : 'Makanan Utama'}</p>
+              <p className="font-semibold text-gray-900">{t('Main Course', 'Makanan Utama', '主菜')}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between bg-white rounded-xl p-4 border border-gray-200">
-            <span className="font-bold text-gray-900">{isEnglish ? 'Available' : 'Tersedia'}</span>
+            <span className="font-bold text-gray-900">{t('Available', 'Tersedia', '有货')}</span>
             <div className="w-12 h-6 bg-green-500 rounded-full relative">
               <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
             </div>
@@ -133,7 +133,7 @@ export function MenuEditorMockup({ color, language }: { color: string; language:
           whileTap={{ scale: 0.98 }}
           className="w-full mt-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold shadow-lg"
         >
-          {isEnglish ? 'Save Changes' : 'Simpan Perubahan'}
+          {t('Save Changes', 'Simpan Perubahan', '保存更改')}
         </motion.button>
       </div>
     </div>
@@ -142,7 +142,7 @@ export function MenuEditorMockup({ color, language }: { color: string; language:
 
 // Mockup 3: Menu Categories
 export function MenuCategoriesMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -154,18 +154,18 @@ export function MenuCategoriesMockup({ color, language }: { color: string; langu
         }}
       >
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Menu Categories' : 'Kategori Menu'}</h3>
-          <p className="text-sm text-gray-600 mt-1">6 {isEnglish ? 'categories' : 'kategori'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Menu Categories', 'Kategori Menu', '菜单类别')}</h3>
+          <p className="text-sm text-gray-600 mt-1">6 {t('categories', 'kategori', '类别')}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { name: isEnglish ? 'Main Course' : 'Makanan Utama', count: 12, icon: '🍽️', color: 'from-red-500 to-orange-500' },
-            { name: isEnglish ? 'Drinks' : 'Minuman', count: 8, icon: '🥤', color: 'from-blue-500 to-cyan-500' },
-            { name: isEnglish ? 'Desserts' : 'Pencuci Mulut', count: 6, icon: '🍰', color: 'from-pink-500 to-rose-500' },
-            { name: isEnglish ? 'Appetizers' : 'Pembuka', count: 5, icon: '🥗', color: 'from-green-500 to-emerald-500' },
-            { name: isEnglish ? 'Snacks' : 'Camilan', count: 10, icon: '🍿', color: 'from-yellow-500 to-amber-500' },
-            { name: isEnglish ? 'Coffee' : 'Kopi', count: 7, icon: '☕', color: 'from-amber-700 to-amber-900' },
+            { name: t('Main Course', 'Makanan Utama', '主菜'), count: 12, icon: '🍽️', color: 'from-red-500 to-orange-500' },
+            { name: t('Drinks', 'Minuman', '饮料'), count: 8, icon: '🥤', color: 'from-blue-500 to-cyan-500' },
+            { name: t('Desserts', 'Pencuci Mulut', '甜点'), count: 6, icon: '🍰', color: 'from-pink-500 to-rose-500' },
+            { name: t('Appetizers', 'Pembuka', '前菜'), count: 5, icon: '🥗', color: 'from-green-500 to-emerald-500' },
+            { name: t('Snacks', 'Camilan', '小吃'), count: 10, icon: '🍿', color: 'from-yellow-500 to-amber-500' },
+            { name: t('Coffee', 'Kopi', '咖啡'), count: 7, icon: '☕', color: 'from-amber-700 to-amber-900' },
           ].map((category, i) => (
             <motion.div
               key={i}
@@ -179,7 +179,7 @@ export function MenuCategoriesMockup({ color, language }: { color: string; langu
                 {category.icon}
               </div>
               <p className="font-bold text-gray-900 text-sm mb-1">{category.name}</p>
-              <p className="text-xs text-gray-600">{category.count} {isEnglish ? 'items' : 'item'}</p>
+              <p className="text-xs text-gray-600">{category.count} {t('items', 'item', '项')}</p>
             </motion.div>
           ))}
         </div>
@@ -190,7 +190,7 @@ export function MenuCategoriesMockup({ color, language }: { color: string; langu
 
 // Mockup 4: Menu Modifiers
 export function MenuModifiersMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -202,18 +202,18 @@ export function MenuModifiersMockup({ color, language }: { color: string; langua
         }}
       >
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Customize Order' : 'Sesuaikan Pesanan'}</h3>
-          <p className="text-sm text-gray-600 mt-1">Nasi Goreng Spesial</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Customize Order', 'Sesuaikan Pesanan', '自定义订单')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('Special Fried Rice', 'Nasi Goreng Spesial', '特别炒饭')}</p>
         </div>
 
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-4 shadow-md border border-gray-100">
-            <p className="font-bold text-gray-900 mb-3">{isEnglish ? 'Spice Level' : 'Tingkat Pedas'}</p>
+            <p className="font-bold text-gray-900 mb-3">{t('Spice Level', 'Tingkat Pedas', '辣度')}</p>
             <div className="space-y-2">
               {[
-                { name: isEnglish ? 'Mild' : 'Tidak Pedas', selected: false },
-                { name: isEnglish ? 'Medium' : 'Sedang', selected: true },
-                { name: isEnglish ? 'Spicy' : 'Pedas', selected: false },
+                { name: t('Mild', 'Tidak Pedas', '微辣'), selected: false },
+                { name: t('Medium', 'Sedang', '中辣'), selected: true },
+                { name: t('Spicy', 'Pedas', '大辣'), selected: false },
               ].map((option, i) => (
                 <div key={i} className={`flex items-center gap-3 p-2 rounded-lg ${option.selected ? 'bg-blue-50' : ''}`}>
                   <div className={`w-5 h-5 rounded-full border-2 ${option.selected ? 'border-blue-600 bg-blue-600' : 'border-gray-300'} flex items-center justify-center`}>
@@ -226,12 +226,12 @@ export function MenuModifiersMockup({ color, language }: { color: string; langua
           </div>
 
           <div className="bg-white rounded-2xl p-4 shadow-md border border-gray-100">
-            <p className="font-bold text-gray-900 mb-3">{isEnglish ? 'Add-ons' : 'Tambahan'}</p>
+            <p className="font-bold text-gray-900 mb-3">{t('Add-ons', 'Tambahan', '加料')}</p>
             <div className="space-y-2">
               {[
-                { name: isEnglish ? 'Extra Egg' : 'Telur Tambahan', price: 5, selected: true },
-                { name: isEnglish ? 'Extra Chicken' : 'Ayam Tambahan', price: 10, selected: false },
-                { name: isEnglish ? 'Crackers' : 'Kerupuk', price: 2, selected: true },
+                { name: t('Extra Egg', 'Telur Tambahan', '加蛋'), price: 5, selected: true },
+                { name: t('Extra Chicken', 'Ayam Tambahan', '加鸡肉'), price: 10, selected: false },
+                { name: t('Crackers', 'Kerupuk', '虾饼'), price: 2, selected: true },
               ].map((addon, i) => (
                 <div key={i} className="flex items-center justify-between p-2">
                   <div className="flex items-center gap-3">

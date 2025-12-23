@@ -28,6 +28,7 @@ import {
   Target,
 } from 'lucide-react'
 import { translations } from "@/lib/i18n/translations"
+import { createDashboardTranslator } from '@/lib/i18n/dashboard-translator'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, BarChart, Bar, Legend } from 'recharts'
 
 type TransactionType = 'income' | 'expense' | 'debt'
@@ -158,203 +159,11 @@ const debtStatusIcons = {
   overdue: AlertTriangle
 }
 
-const copy = {
-  en: {
-    headerTitle: 'Cash Flow',
-    headerSubtitle: 'Monitor financial health, net worth, and orders at a glance.',
-    restaurantLabel: 'Restaurant',
-    netWorth: 'Net Worth',
-    monthlyCashFlow: 'Monthly Cash Flow',
-    totalIncome: 'Total Income',
-    totalExpenses: 'Total Expenses',
-    totalDebt: 'Total Debt',
-    netWorthHelper: 'Income - Expenses - Debt',
-    monthlyHelper: 'This month',
-    incomeHelper: 'Including paid orders',
-    debtHelper: 'Active & overdue',
-    overviewTab: 'Overview',
-    transactionsTab: 'Transactions',
-    debtsTab: 'Debts',
-    trendTitle: 'Cash Flow Trend',
-    trendSubtitle: 'Track income, expenses, and net over time.',
-    trendEmpty: 'No trend data yet. Add transactions or orders to see cash flow.',
-    incomeBreakdown: 'Income Breakdown',
-    expenseBreakdown: 'Expense Breakdown',
-    searchTransactions: 'Search transactions...',
-    allCategories: 'All Categories',
-    noTransactionsTitle: 'No transactions found',
-    noTransactionsDesc: 'Try adjusting your search or filter criteria.',
-    startTransactionsDesc: 'Get started by adding your first transaction.',
-    addTransaction: 'Add Transaction',
-    addSampleExpenses: 'Add Sample Expenses',
-    addSampleOrders: 'Add Sample Orders',
-    recordDebt: 'Record Debt',
-    addCashFlow: 'Add Cash Flow',
-    editCashFlow: 'Edit Cash Flow',
-    selectedRange: 'Selected Range',
-    periodSelected: 'Period Selected',
-    today: 'Today',
-    thisWeek: 'This Week',
-    thisMonth: 'This Month',
-    sixMonths: '6 Months',
-    thisYear: 'This Year',
-    active: 'Active',
-    inactive: 'Inactive',
-    cashFlowHelper: 'Quickly log income, costs, or stock purchases. Orders already flow in automatically.',
-    orderIncome: 'Order Income',
-    incomePill: 'Money In',
-    incomeDesc: 'Sales, investments, orders',
-    expensePill: 'Money Out',
-    expenseDesc: 'Operational, stock, salary',
-    transactionType: 'Transaction Type',
-    category: 'Category',
-    amount: 'Amount',
-    date: 'Date',
-    description: 'Description',
-    descriptionPlaceholder: 'What is this for?',
-    ingredient: 'Ingredient *',
-    quantity: 'Quantity *',
-    employeeName: 'Employee Name *',
-    cancel: 'Cancel',
-    save: 'Save',
-    update: 'Update',
-    debtTitleNew: 'Add Debt',
-    debtTitleEdit: 'Edit Debt',
-    debtSubtitle: 'Track liabilities and due dates clearly.',
-    creditor: 'Creditor Name *',
-    dueDate: 'Due Date',
-    status: 'Status'
-  },
-  id: {
-    headerEyebrow: 'Keuangan',
-    headerTitle: 'Arus Kas',
-    headerSubtitle: 'Pantau kesehatan finansial, kekayaan bersih, dan pesanan.',
-    restaurantLabel: 'Restoran',
-    netWorth: 'Kekayaan Bersih',
-    monthlyCashFlow: 'Arus Kas Bulanan',
-    totalIncome: 'Total Pendapatan',
-    totalExpenses: 'Total Pengeluaran',
-    totalDebt: 'Total Utang',
-    netWorthHelper: 'Pendapatan - Pengeluaran - Utang',
-    monthlyHelper: 'Bulan ini',
-    incomeHelper: 'Termasuk pesanan dibayar',
-    debtHelper: 'Aktif & jatuh tempo',
-    overviewTab: 'Ringkasan',
-    transactionsTab: 'Transaksi',
-    debtsTab: 'Utang',
-    trendTitle: 'Tren Arus Kas',
-    trendSubtitle: 'Lacak pendapatan, pengeluaran, dan neto dari waktu ke waktu.',
-    trendEmpty: 'Belum ada data. Tambahkan transaksi atau pesanan untuk melihat arus kas.',
-    incomeBreakdown: 'Rincian Pendapatan',
-    expenseBreakdown: 'Rincian Pengeluaran',
-    searchTransactions: 'Cari transaksi...',
-    allCategories: 'Semua Kategori',
-    noTransactionsTitle: 'Tidak ada transaksi',
-    noTransactionsDesc: 'Sesuaikan pencarian atau filter Anda.',
-    startTransactionsDesc: 'Mulai dengan menambahkan transaksi pertama.',
-    addTransaction: 'Tambah Transaksi',
-    addSampleExpenses: 'Tambah Contoh Beban',
-    addSampleOrders: 'Tambah Contoh Pesanan',
-    recordDebt: 'Catat Utang',
-    addCashFlow: 'Tambah Arus Kas',
-    editCashFlow: 'Ubah Arus Kas',
-    selectedRange: 'Periode Dipilih',
-    periodSelected: 'Periode Dipilih',
-    today: 'Hari Ini',
-    thisWeek: 'Minggu Ini',
-    thisMonth: 'Bulan Ini',
-    sixMonths: '6 Bulan',
-    thisYear: 'Tahun Ini',
-    active: 'Aktif',
-    inactive: 'Tidak Aktif',
-    cashFlowHelper: 'Catat pendapatan, biaya, atau pembelian stok. Pesanan sudah otomatis masuk.',
-    orderIncome: 'Pendapatan Pesanan',
-    incomePill: 'Uang Masuk',
-    incomeDesc: 'Penjualan, investasi, pesanan',
-    expensePill: 'Uang Keluar',
-    expenseDesc: 'Operasional, stok, gaji',
-    transactionType: 'Jenis Transaksi',
-    category: 'Kategori',
-    amount: 'Jumlah',
-    date: 'Tanggal',
-    description: 'Deskripsi',
-    descriptionPlaceholder: 'Untuk apa ini?',
-    ingredient: 'Bahan *',
-    quantity: 'Jumlah *',
-    employeeName: 'Nama Karyawan *',
-    cancel: 'Batal',
-    save: 'Simpan',
-    update: 'Perbarui',
-    debtTitleNew: 'Tambah Utang',
-    debtTitleEdit: 'Ubah Utang',
-    debtSubtitle: 'Catat kewajiban dan jatuh tempo dengan jelas.',
-    creditor: 'Nama Kreditur *',
-    dueDate: 'Jatuh Tempo',
-    status: 'Status'
-  },
-  zh: {
-    headerEyebrow: '财务',
-    headerTitle: '现金流',
-    headerSubtitle: '一眼掌握财务健康、净资产和订单。',
-    restaurantLabel: '餐厅',
-    netWorth: '净资产',
-    monthlyCashFlow: '月度现金流',
-    totalIncome: '总收入',
-    totalExpenses: '总支出',
-    totalDebt: '总负债',
-    netWorthHelper: '收入 - 支出 - 负债',
-    monthlyHelper: '本月',
-    incomeHelper: '包含已支付订单',
-    debtHelper: '未结清与逾期',
-    overviewTab: '概览',
-    transactionsTab: '交易',
-    debtsTab: '负债',
-    trendTitle: '现金流趋势',
-    trendSubtitle: '跟踪收入、支出与净额。',
-    trendEmpty: '暂无趋势数据，请添加交易或订单。',
-    incomeBreakdown: '收入构成',
-    expenseBreakdown: '支出构成',
-    searchTransactions: '搜索交易...',
-    allCategories: '全部分类',
-    noTransactionsTitle: '暂无交易',
-    noTransactionsDesc: '请调整搜索或筛选。',
-    startTransactionsDesc: '添加第一笔交易以开始。',
-    addTransaction: '新增交易',
-    addSampleExpenses: '添加示例支出',
-    addSampleOrders: '添加示例订单',
-    recordDebt: '记录负债',
-    addCashFlow: '新增现金流',
-    editCashFlow: '编辑现金流',
-    cashFlowHelper: '记录收入、成本或备货。订单会自动流入。',
-    incomePill: '记录收入',
-    expensePill: '记录支出',
-    transactionType: '交易类型',
-    category: '分类',
-    amount: '金额',
-    date: '日期',
-    description: '描述',
-    descriptionPlaceholder: '这笔资金用途？',
-    ingredient: '食材 *',
-    quantity: '数量 *',
-    employeeName: '员工姓名 *',
-    cancel: '取消',
-    save: '保存',
-    update: '更新',
-    debtTitleNew: '新增负债',
-    debtTitleEdit: '编辑负债',
-    debtSubtitle: '清晰跟踪负债与到期日。',
-    creditor: '债权人 *',
-    dueDate: '到期日',
-    status: '状态',
-    orderIncome: '订单收入'
-  }
-}
-
 export default function CashFlowClient() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
-  const t = (copy as any)[language] || copy.en
+  const { t: dt, locale } = createDashboardTranslator(language)
   const cashFlowTranslations = translations[language].expenses
 
   const [loading, setLoading] = useState(true)
@@ -801,17 +610,17 @@ export default function CashFlowClient() {
 
     const amount = parseFloat(formData.amount)
     if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid amount')
+      alert(dt.alertValidAmount)
       return
     }
 
     if (formData.transaction_type === 'expense' && formData.category === 'stock_purchase') {
       if (!formData.ingredientId.trim()) {
-        alert('Please select an ingredient for stock purchases')
+        alert(dt.alertSelectIngredient)
         return
       }
       if (!formData.quantity.trim() || parseFloat(formData.quantity) <= 0) {
-        alert('Please enter a valid quantity for stock purchases')
+        alert(dt.alertValidQuantity)
         return
       }
     }
@@ -930,7 +739,7 @@ export default function CashFlowClient() {
       loadData()
     } catch (error) {
       console.error('Error deleting transaction:', error)
-      alert('Error deleting transaction. Please try again.')
+      alert(dt.alertDeleteError)
     }
   }
 
@@ -940,12 +749,12 @@ export default function CashFlowClient() {
 
     const amount = parseFloat(debtFormData.amount)
     if (isNaN(amount) || amount <= 0) {
-      alert('Please enter a valid amount')
+      alert(dt.alertValidAmount)
       return
     }
 
     if (!debtFormData.creditor_name.trim()) {
-      alert('Please enter creditor name')
+      alert(dt.alertEnterCreditor)
       return
     }
 
@@ -1014,12 +823,12 @@ export default function CashFlowClient() {
 
     const paymentAmount = parseFloat(paymentFormData.amount)
     if (isNaN(paymentAmount) || paymentAmount <= 0) {
-      alert('Please enter a valid payment amount')
+      alert(dt.alertValidPayment)
       return
     }
 
     if (paymentAmount > selectedDebtForPayment.remaining_amount) {
-      alert(`Payment amount cannot exceed remaining debt (IDR ${selectedDebtForPayment.remaining_amount.toLocaleString()})`)
+      alert(`${dt.alertPaymentExceed} (IDR ${selectedDebtForPayment.remaining_amount.toLocaleString()})`)
       return
     }
 
@@ -1123,12 +932,12 @@ export default function CashFlowClient() {
       loadData()
     } catch (error) {
       console.error('Error deleting debt:', error)
-      alert('Error deleting debt. Please try again.')
+      alert(dt.alertDeleteDebtError)
     }
   }
 
   function formatCurrency(amount: number) {
-    const formatted = new Intl.NumberFormat(language === 'id' ? 'id-ID' : 'en-US', {
+    const formatted = new Intl.NumberFormat(language === 'id' ? 'id-ID' : language === 'zh' ? 'zh-CN' : 'en-US', {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
@@ -1212,8 +1021,8 @@ export default function CashFlowClient() {
         <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t.headerTitle}</h1>
-              <p className="text-sm sm:text-base text-gray-600">{t.headerSubtitle}</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{dt.headerTitle}</h1>
+              <p className="text-sm sm:text-base text-gray-600">{dt.headerSubtitle}</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -1221,26 +1030,26 @@ export default function CashFlowClient() {
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 border border-gray-200 rounded-xl font-semibold hover:shadow-sm transition-colors"
               >
                 <AlertTriangle className="w-4 h-4 text-red-500" />
-                {t.recordDebt}
+                {dt.recordDebt}
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                {t.addTransaction}
+                {dt.addTransaction}
               </button>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {([
-              { key: '1D', label: 'Harian' },
-              { key: '1W', label: 'Mingguan' },
-              { key: '1M', label: 'Bulanan' },
-              { key: '6M', label: '6 Bulan' },
-              { key: '1Y', label: 'Tahunan' },
-              { key: 'ALL', label: 'Semua' }
+              { key: '1D', label: dt.today },
+              { key: '1W', label: dt.thisWeek },
+              { key: '1M', label: dt.thisMonth },
+              { key: '6M', label: dt.sixMonths },
+              { key: '1Y', label: dt.thisYear },
+              { key: 'ALL', label: dt.allCategories }
             ] as const).map(range => (
               <button
                 key={range.key}
@@ -1272,7 +1081,7 @@ export default function CashFlowClient() {
                   <TrendingDown className="w-5 h-5 opacity-60" />
                 )}
               </div>
-              <p className="text-sm font-medium opacity-90 mb-1">{t.netWorth}</p>
+              <p className="text-sm font-medium opacity-90 mb-1">{dt.netWorth}</p>
               <p className="text-3xl font-bold">{formatCurrency(stats.netWorth)}</p>
             </div>
           </div>
@@ -1284,13 +1093,13 @@ export default function CashFlowClient() {
               </div>
               <div className="flex items-center gap-1 px-3 py-1 bg-green-100 rounded-full">
                 <TrendingUp className="w-3 h-3 text-green-700" />
-                <span className="text-xs font-bold text-green-700">{trendRange === '1D' ? t.today : trendRange === '1W' ? t.thisWeek : trendRange === '1M' ? t.thisMonth : trendRange === '6M' ? t.sixMonths : t.thisYear}</span>
+                <span className="text-xs font-bold text-green-700">{trendRange === '1D' ? dt.today : trendRange === '1W' ? dt.thisWeek : trendRange === '1M' ? dt.thisMonth : trendRange === '6M' ? dt.sixMonths : dt.thisYear}</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-600 mb-1">{t.totalIncome}</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">{dt.totalIncome}</p>
             <p className="text-2xl font-bold text-gray-900 mb-3">{formatCurrency(stats.totalIncome)}</p>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">{t.selectedRange}:</span>
+              <span className="text-gray-500">{dt.selectedRange}:</span>
               <span className="font-semibold text-gray-700">{trendRange}</span>
             </div>
           </div>
@@ -1302,13 +1111,13 @@ export default function CashFlowClient() {
               </div>
               <div className="flex items-center gap-1 px-3 py-1 bg-red-100 rounded-full">
                 <TrendingDown className="w-3 h-3 text-red-700" />
-                <span className="text-xs font-bold text-red-700">{trendRange === '1D' ? t.today : trendRange === '1W' ? t.thisWeek : trendRange === '1M' ? t.thisMonth : trendRange === '6M' ? t.sixMonths : t.thisYear}</span>
+                <span className="text-xs font-bold text-red-700">{trendRange === '1D' ? dt.today : trendRange === '1W' ? dt.thisWeek : trendRange === '1M' ? dt.thisMonth : trendRange === '6M' ? dt.sixMonths : dt.thisYear}</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-gray-600 mb-1">{t.totalExpenses}</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">{dt.totalExpenses}</p>
             <p className="text-2xl font-bold text-gray-900 mb-3">{formatCurrency(stats.totalExpenses)}</p>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">{t.selectedRange}:</span>
+              <span className="text-gray-500">{dt.selectedRange}:</span>
               <span className="font-semibold text-gray-700">{trendRange}</span>
             </div>
           </div>
@@ -1319,12 +1128,12 @@ export default function CashFlowClient() {
                 <AlertTriangle className="w-6 h-6 text-orange-600" />
               </div>
               <span className="px-3 py-1 bg-orange-50 rounded-full text-xs font-medium text-orange-600">
-                {debts.filter(d => d.status !== 'paid').length} {t.active}
+                {debts.filter(d => d.status !== 'paid').length} {dt.active}
               </span>
             </div>
-            <p className="text-sm font-medium text-gray-600 mb-1">{t.totalDebt}</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">{dt.totalDebt}</p>
             <p className="text-2xl font-bold text-gray-900 mb-1">{formatCurrency(stats.totalDebt)}</p>
-            <p className="text-xs text-gray-500">{t.debtHelper}</p>
+            <p className="text-xs text-gray-500">{dt.debtHelper}</p>
           </div>
         </div>
 
@@ -1333,8 +1142,8 @@ export default function CashFlowClient() {
           <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-start justify-between mb-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">{t.trendTitle}</h3>
-                <p className="text-sm text-gray-500 mt-1">{t.trendSubtitle}</p>
+                <h3 className="text-xl font-bold text-gray-900">{dt.trendTitle}</h3>
+                <p className="text-sm text-gray-500 mt-1">{dt.trendSubtitle}</p>
               </div>
             </div>
             <div className="h-96 min-h-[380px]">
@@ -1355,15 +1164,15 @@ export default function CashFlowClient() {
                       formatter={(value: any, name: any) => [formatCurrency(value), name]}
                     />
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Line type="monotone" dataKey="income" stroke="#10B981" strokeWidth={3} name="Income" dot={{ fill: '#10B981', r: 5 }} />
-                    <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} name="Expenses" dot={{ fill: '#EF4444', r: 5 }} />
-                    <Line type="monotone" dataKey="net" stroke="#3B82F6" strokeWidth={3} name="Net Cash Flow" dot={{ fill: '#3B82F6', r: 5 }} strokeDasharray="5 5" />
+                    <Line type="monotone" dataKey="income" stroke="#10B981" strokeWidth={3} name={dt.income} dot={{ fill: '#10B981', r: 5 }} />
+                    <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} name={dt.expenses} dot={{ fill: '#EF4444', r: 5 }} />
+                    <Line type="monotone" dataKey="net" stroke="#3B82F6" strokeWidth={3} name={dt.netCashFlow} dot={{ fill: '#3B82F6', r: 5 }} strokeDasharray="5 5" />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full w-full rounded-lg border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500 bg-gray-50/50">
                   <Calendar className="w-12 h-12 text-gray-400 mb-3" />
-                  <p className="text-sm font-medium">{t.trendEmpty}</p>
+                  <p className="text-sm font-medium">{dt.trendEmpty}</p>
                 </div>
               )}
             </div>
@@ -1371,7 +1180,7 @@ export default function CashFlowClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">{t.incomeBreakdown}</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">{dt.incomeBreakdown}</h3>
               <div className="space-y-4">
                 {Object.entries(stats.categoryBreakdown)
                   .filter(([category]) => ['sales', 'investment', 'other_income', 'order'].includes(category))
@@ -1402,7 +1211,7 @@ export default function CashFlowClient() {
             </div>
 
             <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">{t.expenseBreakdown}</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">{dt.expenseBreakdown}</h3>
               <div className="space-y-4">
                 {Object.entries(stats.categoryBreakdown)
                   .filter(([category]) => ['operational', 'stock_purchase', 'salary', 'capital'].includes(category))
@@ -1443,7 +1252,7 @@ export default function CashFlowClient() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
-                    placeholder={t.searchTransactions}
+                    placeholder={dt.searchTransactions}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
@@ -1455,7 +1264,7 @@ export default function CashFlowClient() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
               >
-                <option value="all">{t.allCategories}</option>
+                <option value="all">{dt.allCategories}</option>
                 {Object.entries(categoryLabels).map(([key, label]) => (
                   <option key={key} value={key}>{label}</option>
                 ))}
@@ -1467,12 +1276,12 @@ export default function CashFlowClient() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.date}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.type}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.category}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.description}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.amount}</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{cashFlowTranslations.table.actions}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{dt.date}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{dt.transactionType}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{dt.category}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{dt.description}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{dt.amount}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{dt.actions || 'Actions'}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -1481,8 +1290,8 @@ export default function CashFlowClient() {
                     <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center">
                         <DollarSign className="w-12 h-12 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">{t.noTransactionsTitle}</h3>
-                        <p className="text-gray-500 mb-4">{t.noTransactionsDesc}</p>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">{dt.noTransactionsTitle}</h3>
+                        <p className="text-gray-500 mb-4">{dt.noTransactionsDesc}</p>
                       </div>
                     </td>
                   </tr>
@@ -1498,7 +1307,7 @@ export default function CashFlowClient() {
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             transaction.transaction_type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
-                            {transaction.transaction_type}
+                            {transaction.transaction_type === 'income' ? dt.income : dt.expenses}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1546,7 +1355,7 @@ export default function CashFlowClient() {
         {/* Debts List */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900">{t.debtsTab}</h3>
+            <h3 className="text-lg font-bold text-gray-900">{dt.debtsTab}</h3>
           </div>
           <div className="divide-y divide-gray-200">
             {filteredDebts.map((debt) => {
@@ -1595,16 +1404,16 @@ export default function CashFlowClient() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
           <div className="bg-white rounded-3xl p-7 w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
             <div className="flex items-start justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">{editingTransaction ? t.editCashFlow : t.addCashFlow}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">{editingTransaction ? dt.editCashFlow : dt.addCashFlow}</h3>
               <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-700">✕</button>
             </div>
             <form onSubmit={handleSubmitTransaction} className="space-y-6">
               <div className="grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setFormData({ ...formData, transaction_type: 'income' })} className={`p-3 rounded-xl border-2 ${formData.transaction_type === 'income' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>Income</button>
-                <button type="button" onClick={() => setFormData({ ...formData, transaction_type: 'expense' })} className={`p-3 rounded-xl border-2 ${formData.transaction_type === 'expense' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}>Expense</button>
+                <button type="button" onClick={() => setFormData({ ...formData, transaction_type: 'income' })} className={`p-3 rounded-xl border-2 ${formData.transaction_type === 'income' ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}>{dt.income}</button>
+                <button type="button" onClick={() => setFormData({ ...formData, transaction_type: 'expense' })} className={`p-3 rounded-xl border-2 ${formData.transaction_type === 'expense' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}>{dt.expenses}</button>
               </div>
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-900">Category</label>
+                <label className="block text-sm font-semibold text-gray-900">{dt.category}</label>
                 <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value as TransactionCategory })} className="w-full p-3 border border-gray-300 rounded-xl">
                   {(formData.transaction_type === 'income' ? ['sales', 'investment', 'other_income', 'order'] : ['operational', 'stock_purchase', 'salary', 'capital']).map(cat => (
                     <option key={cat} value={cat}>{categoryLabels[cat as TransactionCategory] || cat}</option>
@@ -1613,21 +1422,21 @@ export default function CashFlowClient() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <label className="block text-sm font-semibold text-gray-900">Amount</label>
+                  <label className="block text-sm font-semibold text-gray-900">{dt.amount}</label>
                   <input type="text" value={formatAmountInput(formData.amount)} onChange={(e) => setFormData({ ...formData, amount: parseAmountInput(e.target.value) })} className="w-full p-3 border border-gray-300 rounded-xl" required />
                 </div>
                 <div className="space-y-3">
-                  <label className="block text-sm font-semibold text-gray-900">Date</label>
+                  <label className="block text-sm font-semibold text-gray-900">{dt.date}</label>
                   <input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" required />
                 </div>
               </div>
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-gray-900">Description</label>
+                <label className="block text-sm font-semibold text-gray-900">{dt.description}</label>
                 <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" rows={3} required />
               </div>
               <div className="flex gap-3">
-                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 p-3 border border-gray-200 rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 p-3 bg-[var(--color-accent)] text-white rounded-xl">Save</button>
+                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 p-3 border border-gray-200 rounded-xl">{dt.cancel}</button>
+                <button type="submit" className="flex-1 p-3 bg-[var(--color-accent)] text-white rounded-xl">{dt.save}</button>
               </div>
             </form>
           </div>
@@ -1638,15 +1447,15 @@ export default function CashFlowClient() {
       {showDebtModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
           <div className="bg-white rounded-3xl p-7 w-full max-w-md shadow-2xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">{editingDebt ? 'Edit Debt' : 'Record Debt'}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">{editingDebt ? dt.debtTitleEdit : dt.debtTitleNew}</h3>
             <form onSubmit={handleSubmitDebt} className="space-y-4">
-              <input type="text" placeholder="Creditor Name" value={debtFormData.creditor_name} onChange={(e) => setDebtFormData({ ...debtFormData, creditor_name: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" required />
-              <input type="text" placeholder="Amount" value={formatAmountInput(debtFormData.amount)} onChange={(e) => setDebtFormData({ ...debtFormData, amount: parseAmountInput(e.target.value) })} className="w-full p-3 border border-gray-300 rounded-xl" required />
-              <textarea placeholder="Description" value={debtFormData.description} onChange={(e) => setDebtFormData({ ...debtFormData, description: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" rows={3} />
+              <input type="text" placeholder={dt.creditor} value={debtFormData.creditor_name} onChange={(e) => setDebtFormData({ ...debtFormData, creditor_name: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" required />
+              <input type="text" placeholder={dt.amount} value={formatAmountInput(debtFormData.amount)} onChange={(e) => setDebtFormData({ ...debtFormData, amount: parseAmountInput(e.target.value) })} className="w-full p-3 border border-gray-300 rounded-xl" required />
+              <textarea placeholder={dt.description} value={debtFormData.description} onChange={(e) => setDebtFormData({ ...debtFormData, description: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" rows={3} />
               <input type="date" value={debtFormData.due_date} onChange={(e) => setDebtFormData({ ...debtFormData, due_date: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" />
               <div className="flex gap-3">
-                <button type="button" onClick={() => setShowDebtModal(false)} className="flex-1 p-3 border border-gray-200 rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 p-3 bg-red-600 text-white rounded-xl">Save</button>
+                <button type="button" onClick={() => setShowDebtModal(false)} className="flex-1 p-3 border border-gray-200 rounded-xl">{dt.cancel}</button>
+                <button type="submit" className="flex-1 p-3 bg-red-600 text-white rounded-xl">{dt.save}</button>
               </div>
             </form>
           </div>
@@ -1657,14 +1466,14 @@ export default function CashFlowClient() {
       {showPaymentModal && selectedDebtForPayment && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
           <div className="bg-white rounded-3xl p-7 w-full max-w-md shadow-2xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Pay Debt</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">{dt.recordDebt}</h3>
             <form onSubmit={handlePayDebt} className="space-y-4">
               <input type="text" value={formatAmountInput(paymentFormData.amount)} onChange={(e) => setPaymentFormData({ ...paymentFormData, amount: parseAmountInput(e.target.value) })} className="w-full p-3 border border-gray-300 rounded-xl" required />
               <input type="date" value={paymentFormData.payment_date} onChange={(e) => setPaymentFormData({ ...paymentFormData, payment_date: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" required />
-              <textarea placeholder="Notes" value={paymentFormData.notes} onChange={(e) => setPaymentFormData({ ...paymentFormData, notes: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" rows={3} />
+              <textarea placeholder={dt.description} value={paymentFormData.notes} onChange={(e) => setPaymentFormData({ ...paymentFormData, notes: e.target.value })} className="w-full p-3 border border-gray-300 rounded-xl" rows={3} />
               <div className="flex gap-3">
-                <button type="button" onClick={() => setShowPaymentModal(false)} className="flex-1 p-3 border border-gray-200 rounded-xl">Cancel</button>
-                <button type="submit" className="flex-1 p-3 bg-green-600 text-white rounded-xl">Pay Now</button>
+                <button type="button" onClick={() => setShowPaymentModal(false)} className="flex-1 p-3 border border-gray-200 rounded-xl">{dt.cancel}</button>
+                <button type="submit" className="flex-1 p-3 bg-green-600 text-white rounded-xl">{dt.save}</button>
               </div>
             </form>
           </div>

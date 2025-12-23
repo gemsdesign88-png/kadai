@@ -8,46 +8,36 @@ interface BusinessTypeSelectorProps {
   selected: 'toko' | 'resto' | null;
 }
 
-const businessTypes = [
-  {
-    id: 'toko' as const,
-    name: 'Lite',
-    icon: '🏪',
-    tagline: 'Simple & Fast',
-    description: 'Perfect for small businesses that need basic POS',
-    features: [
-      'Simple order & payment',
-      'Basic inventory tracking',
-      'Quick checkout',
-      'Cash register mode',
-    ],
-    idealFor: 'Warung, Kios, Retail, Salon',
-    price: 'Rp49K/bulan',
-    gradient: 'from-green-500 to-emerald-600',
-    bgGradient: 'from-green-50 to-emerald-50',
-  },
-  {
-    id: 'resto' as const,
-    name: 'Resto',
-    icon: '🍽️',
-    tagline: 'Complete Restaurant System',
-    description: 'Full-featured system for restaurants and cafés',
-    features: [
-      'Kitchen display system',
-      'Table management',
-      'Advanced inventory',
-      'Staff roles & analytics',
-    ],
-    idealFor: 'Café, Restaurant, Food Court',
-    price: 'From Rp149K/bulan',
-    gradient: 'from-[#FF5A5F] to-[#8B5CF6]',
-    bgGradient: 'from-red-50 to-purple-50',
-  },
-];
-
 export default function BusinessTypeSelector({ businessName, onSelect, selected }: BusinessTypeSelectorProps) {
   const { language, t } = useLanguage();
   
+  const businessTypes = [
+    {
+      id: 'toko' as const,
+      name: t.register.businessType.types.toko.name,
+      icon: '🏪',
+      tagline: t.register.businessType.types.toko.tagline,
+      description: t.register.businessType.types.toko.description,
+      features: t.register.businessType.types.toko.features,
+      idealFor: t.register.businessType.types.toko.idealFor,
+      price: t.register.businessType.types.toko.price,
+      gradient: 'from-green-500 to-emerald-600',
+      bgGradient: 'from-green-50 to-emerald-50',
+    },
+    {
+      id: 'resto' as const,
+      name: t.register.businessType.types.resto.name,
+      icon: '🍽️',
+      tagline: t.register.businessType.types.resto.tagline,
+      description: t.register.businessType.types.resto.description,
+      features: t.register.businessType.types.resto.features,
+      idealFor: t.register.businessType.types.resto.idealFor,
+      price: t.register.businessType.types.resto.price,
+      gradient: 'from-[#FF5A5F] to-[#8B5CF6]',
+      bgGradient: 'from-red-50 to-purple-50',
+    },
+  ];
+
   return (
     <div className="p-8 sm:p-12">
       <div className="max-w-6xl mx-auto">
@@ -59,7 +49,7 @@ export default function BusinessTypeSelector({ businessName, onSelect, selected 
                 🏢
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Business Name</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t.register.businessType.businessName}</p>
                 <p className="text-base font-bold text-gray-900 truncate">{businessName}</p>
               </div>
             </div>
@@ -130,7 +120,7 @@ export default function BusinessTypeSelector({ businessName, onSelect, selected 
                 <div className="pt-6 border-t border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Ideal For</p>
+                      <p className="text-xs text-gray-500 mb-1">{t.register.businessType.idealFor}</p>
                       <p className="text-sm font-medium text-gray-700">{type.idealFor}</p>
                     </div>
                     <div className="text-right">

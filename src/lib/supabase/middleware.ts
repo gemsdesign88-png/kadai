@@ -49,7 +49,13 @@ export async function updateSession(request: NextRequest) {
     '/contact',
     '/demo',
     '/login',
+    '/register',
     '/auth',
+    '/privacy',
+    '/terms',
+    '/cookies',
+    '/benefits',
+    '/business',
   ];
 
   const isPublicRoute = publicRoutes.some(route => 

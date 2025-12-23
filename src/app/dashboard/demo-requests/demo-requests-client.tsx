@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 
 interface DemoRequest {
   id: string;
@@ -14,6 +16,8 @@ interface DemoRequest {
 export default function DemoRequestsClient() {
   const router = useRouter()
   const supabase = createClient()
+  const { language } = useLanguage()
+  const { t: dt, locale } = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [requests, setRequests] = useState<DemoRequest[]>([])
 
@@ -45,7 +49,7 @@ export default function DemoRequestsClient() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('id-ID', {
+    return new Intl.DateTimeFormat(locale, {
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(date);
@@ -74,29 +78,29 @@ export default function DemoRequestsClient() {
           {/* Header */}
           <div className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] px-6 py-8">
             <h1 className="text-3xl font-bold text-white mb-2">
-              Demo Requests
+              {dt('demoRequests')}
             </h1>
             <p className="text-white/80">
-              WhatsApp numbers from users interested in the demo
+              {dt('demoRequestsDesc')}
             </p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-gray-50 border-b border-gray-200">
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="text-sm text-gray-600 mb-1">Total Requests</div>
+              <div className="text-sm text-gray-600 mb-1">{dt('totalRequests')}</div>
               <div className="text-3xl font-bold text-gray-900">
                 {requests.length}
               </div>
             </div>
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="text-sm text-gray-600 mb-1">Notified</div>
+              <div className="text-sm text-gray-600 mb-1">{dt('notified')}</div>
               <div className="text-3xl font-bold text-green-600">
                 {requests.filter((r) => r.notified).length}
               </div>
             </div>
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="text-sm text-gray-600 mb-1">Pending</div>
+              <div className="text-sm text-gray-600 mb-1">{dt('pending')}</div>
               <div className="text-3xl font-bold text-orange-600">
                 {requests.filter((r) => !r.notified).length}
               </div>
@@ -107,7 +111,7 @@ export default function DemoRequestsClient() {
           <div className="overflow-x-auto">
             {requests.length === 0 ? (
               <div className="p-12 text-center text-gray-500">
-                <p className="text-lg">No demo requests yet</p>
+                <p className="text-lg">{dt('noDemoRequests')}</p>
               </div>
             ) : (
               <table className="w-full">
@@ -117,16 +121,16 @@ export default function DemoRequestsClient() {
                       #
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      WhatsApp Number
+                      {dt('whatsappNumber')}
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Submitted At
+                      {dt('submittedAt')}
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Status
+                      {dt('statusLabel')}
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      Actions
+                      {dt('actions')}
                     </th>
                   </tr>
                 </thead>
@@ -167,11 +171,11 @@ export default function DemoRequestsClient() {
                       <td className="px-6 py-4">
                         {request.notified ? (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Notified
+                            {dt('notified')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            Pending
+                            {dt('pending')}
                           </span>
                         )}
                       </td>
@@ -182,7 +186,7 @@ export default function DemoRequestsClient() {
                             navigator.clipboard.writeText(request.whatsapp);
                           }}
                         >
-                          Copy Number
+                          {dt('copyNumber')}
                         </button>
                       </td>
                     </tr>
@@ -197,18 +201,20 @@ export default function DemoRequestsClient() {
             <div className="p-6 bg-gray-50 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600">
-                  Showing {requests.length} request
-                  {requests.length !== 1 ? 's' : ''}
+                  {requests.length === 1 
+                    ? dt('showingRequest').replace('{count}', requests.length.toString())
+                    : dt('showingRequests').replace('{count}', requests.length.toString())
+                  }
                 </p>
                 <button
                   onClick={() => {
                     const numbers = requests.map((r) => r.whatsapp).join('\n');
                     navigator.clipboard.writeText(numbers);
-                    alert('All numbers copied to clipboard!');
+                    alert(dt('allNumbersCopied'));
                   }}
                   className="px-4 py-2 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all"
                 >
-                  Copy All Numbers
+                  {dt('copyAllNumbers')}
                 </button>
               </div>
             </div>

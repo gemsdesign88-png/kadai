@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { TrendingUp, DollarSign, ShoppingBag, Clock, Calendar, Users, ArrowUp, ArrowDown, Star, PieChart as PieChartIcon, BarChart3 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/context"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 
 interface OrderStats {
   today: {
@@ -49,10 +50,19 @@ interface OrderStats {
 export default function OrdersPage() {
   const router = useRouter()
   const supabase = createClient()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
+  const { t: dt, locale, dayLabel } = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<OrderStats | null>(null)
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month'>('today')
+
+  const formatText = (key: string, replacements: Record<string, any>) => {
+    let text = dt[key] || key
+    Object.entries(replacements).forEach(([k, v]) => {
+      text = text.replace(`{${k}}`, v)
+    })
+    return text
+  }
 
   useEffect(() => {
     loadOrderStats()
@@ -179,13 +189,11 @@ export default function OrdersPage() {
       } else if (timeRange === 'week') {
         // For 7 days: show daily breakdown
         const dailyData: { [key: string]: { orders: number; revenue: number } } = {}
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-        const daysId = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
         
         relevantOrders.forEach(order => {
           const date = new Date(order.created_at)
           const dayIndex = date.getDay()
-          const dayName = language === 'en' ? days[dayIndex] : daysId[dayIndex]
+          const dayName = dayLabel(dayIndex)
           
           if (!dailyData[dayName]) {
             dailyData[dayName] = { orders: 0, revenue: 0 }
@@ -194,15 +202,17 @@ export default function OrdersPage() {
           dailyData[dayName].revenue += order.total || 0
         })
 
-        // Sort by day of week
-        const sortedDays = language === 'en' ? days : daysId
-        sortedDays.forEach(day => {
+        // Sort by day of week (starting from today - 6 days)
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date()
+          d.setDate(d.getDate() - i)
+          const dayName = dayLabel(d.getDay())
           hourlySalesChart.push({
-            hour: day,
-            orders: dailyData[day]?.orders || 0,
-            revenue: dailyData[day]?.revenue || 0
+            hour: dayName,
+            orders: dailyData[dayName]?.orders || 0,
+            revenue: dailyData[dayName]?.revenue || 0
           })
-        })
+        }
       } else {
         // For 30 days: show weekly breakdown
         const now = new Date()
@@ -220,7 +230,7 @@ export default function OrdersPage() {
           const weekRevenue = weekOrders.reduce((sum, o) => sum + (o.total || 0), 0)
           
           hourlySalesChart.push({
-            hour: `Week ${4 - i}`,
+            hour: `${dt.week} ${4 - i}`,
             orders: weekOrders.length,
             revenue: weekRevenue
           })
@@ -265,11 +275,18 @@ export default function OrdersPage() {
       })
 
       const channelSalesChart = Object.entries(channelData)
-        .map(([name, data]) => ({
-          name,
-          value: data.revenue,
-          orders: data.orders
-        }))
+        .map(([name, data]) => {
+          let translatedName = name
+          if (name === 'Dine-in') translatedName = dt.dineIn
+          else if (name === 'Takeaway') translatedName = dt.takeaway
+          else if (name === 'Delivery') translatedName = dt.delivery
+
+          return {
+            name: translatedName,
+            value: data.revenue,
+            orders: data.orders
+          }
+        })
         .filter(item => item.orders > 0) // Only show channels with orders
 
       setStats({
@@ -303,9 +320,9 @@ export default function OrdersPage() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: locale === 'id-ID' ? 'IDR' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
@@ -337,10 +354,10 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          {language === 'en' ? 'Orders Analytics' : 'Analitik Pesanan'}
+          {t.dashboard.ordersAnalytics}
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
-          {language === 'en' ? 'Monitor your orders performance and trends' : 'Pantau performa dan tren pesanan Anda'}
+          {t.dashboard.monitorOrders}
         </p>
       </div>
 
@@ -354,7 +371,7 @@ export default function OrdersPage() {
               : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
           }`}
         >
-          {language === 'en' ? 'Today' : 'Hari Ini'}
+          {t.dashboard.today}
         </button>
         <button
           onClick={() => setTimeRange('week')}
@@ -364,7 +381,7 @@ export default function OrdersPage() {
               : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
           }`}
         >
-          {language === 'en' ? '7 Days' : '7 Hari'}
+          {t.dashboard.sevenDays}
         </button>
         <button
           onClick={() => setTimeRange('month')}
@@ -374,7 +391,7 @@ export default function OrdersPage() {
               : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-gray-300'
           }`}
         >
-          {language === 'en' ? '30 Days' : '30 Hari'}
+          {t.dashboard.thirtyDays}
         </button>
       </div>
 
@@ -396,12 +413,12 @@ export default function OrdersPage() {
             )}
           </div>
           <h3 className="text-sm font-medium text-gray-600 mb-1">
-            {language === 'en' ? 'Total Revenue' : 'Total Pendapatan'}
+            {t.dashboard.totalRevenue}
           </h3>
           <p className="text-2xl font-bold text-gray-900">{formatCurrency(currentStats?.revenue || 0)}</p>
           {timeRange === 'today' && (
             <p className="text-xs text-gray-500 mt-2">
-              {language === 'en' ? 'vs yesterday' : 'vs kemarin'}
+              {t.dashboard.vsYesterday}
             </p>
           )}
         </div>
@@ -414,11 +431,11 @@ export default function OrdersPage() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-gray-600 mb-1">
-            {language === 'en' ? 'Total Orders' : 'Total Pesanan'}
+            {t.dashboard.totalOrders}
           </h3>
           <p className="text-2xl font-bold text-gray-900">{currentStats?.orders || 0}</p>
           <p className="text-xs text-gray-500 mt-2">
-            {language === 'en' ? 'completed orders' : 'pesanan selesai'}
+            {t.dashboard.completedOrders}
           </p>
         </div>
 
@@ -430,11 +447,11 @@ export default function OrdersPage() {
             </div>
           </div>
           <h3 className="text-sm font-medium text-gray-600 mb-1">
-            {language === 'en' ? 'Avg Order Value' : 'Rata-rata Nilai Pesanan'}
+            {t.dashboard.avgOrderValue}
           </h3>
           <p className="text-2xl font-bold text-gray-900">{formatCurrency(currentStats?.avgOrderValue || 0)}</p>
           <p className="text-xs text-gray-500 mt-2">
-            {language === 'en' ? 'per transaction' : 'per transaksi'}
+            {t.dashboard.perTransaction}
           </p>
         </div>
       </div>
@@ -447,7 +464,7 @@ export default function OrdersPage() {
               <Star className="w-5 h-5 text-white" />
             </div>
             <h3 className="text-lg font-bold text-gray-900">
-              {language === 'en' ? 'Top Selling Items' : 'Item Terlaris'}
+              {dt.topSellers}
             </h3>
           </div>
           <div className="space-y-4">
@@ -460,7 +477,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="font-semibold text-gray-900">{item.name}</p>
                     <p className="text-sm text-gray-600">
-                      {item.quantity} {language === 'en' ? 'sold' : 'terjual'}
+                      {item.quantity} {dt.sold}
                     </p>
                   </div>
                 </div>
@@ -469,7 +486,7 @@ export default function OrdersPage() {
             ))}
             {(!stats?.topItems || stats.topItems.length === 0) && (
               <p className="text-gray-500 text-center py-8">
-                {language === 'en' ? 'No sales data yet' : 'Belum ada data penjualan'}
+                {t.dashboard.noSalesData}
               </p>
             )}
           </div>
@@ -482,7 +499,7 @@ export default function OrdersPage() {
               <Clock className="w-5 h-5 text-white" />
             </div>
             <h3 className="text-lg font-bold text-gray-900">
-              {language === 'en' ? 'Peak Hours Today' : 'Jam Sibuk Hari Ini'}
+              {t.dashboard.peakHours}
             </h3>
           </div>
           <div className="space-y-4">
@@ -493,7 +510,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="font-semibold text-gray-900">{formatTime(peak.hour)}</p>
                     <p className="text-sm text-gray-600">
-                      {peak.orders} {language === 'en' ? 'orders' : 'pesanan'}
+                      {peak.orders} {t.dashboard.orders}
                     </p>
                   </div>
                 </div>
@@ -507,7 +524,7 @@ export default function OrdersPage() {
             ))}
             {(!stats?.peakHours || stats.peakHours.length === 0) && (
               <p className="text-gray-500 text-center py-8">
-                {language === 'en' ? 'No orders today yet' : 'Belum ada pesanan hari ini'}
+                {t.dashboard.noOrdersToday}
               </p>
             )}
           </div>
@@ -517,10 +534,10 @@ export default function OrdersPage() {
       {/* Charts Section Header */}
       <div className="mt-8 mb-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          📊 {language === 'en' ? 'Sales Analytics Charts' : 'Grafik Analitik Penjualan'}
+          📊 {t.dashboard.salesCharts}
         </h2>
         <p className="text-gray-600">
-          {language === 'en' ? 'Visual breakdown of your sales performance' : 'Visualisasi performa penjualan Anda'}
+          {t.dashboard.visualBreakdown}
         </p>
       </div>
 
@@ -534,30 +551,18 @@ export default function OrdersPage() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
-                {language === 'en' 
-                  ? timeRange === 'today' 
-                    ? 'Sales by Hour' 
-                    : timeRange === 'week' 
-                      ? 'Sales by Day (7 Days)' 
-                      : 'Sales by Week (4 Weeks)'
-                  : timeRange === 'today'
-                    ? 'Penjualan per Jam'
-                    : timeRange === 'week'
-                      ? 'Penjualan per Hari (7 Hari)'
-                      : 'Penjualan per Minggu (4 Minggu)'}
+                {timeRange === 'today' 
+                  ? t.dashboard.salesByHour 
+                  : timeRange === 'week' 
+                    ? t.dashboard.salesByDay 
+                    : t.dashboard.salesByWeek}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' 
-                  ? timeRange === 'today'
-                    ? 'Hourly revenue distribution'
-                    : timeRange === 'week'
-                      ? 'Daily revenue distribution'
-                      : 'Weekly revenue distribution'
-                  : timeRange === 'today'
-                    ? 'Distribusi pendapatan per jam'
-                    : timeRange === 'week'
-                      ? 'Distribusi pendapatan per hari'
-                      : 'Distribusi pendapatan per minggu'}
+                {timeRange === 'today'
+                  ? t.dashboard.hourlyRevenueDist
+                  : timeRange === 'week'
+                    ? t.dashboard.dailyRevenueDist
+                    : t.dashboard.weeklyRevenueDist}
               </p>
             </div>
           </div>
@@ -565,8 +570,8 @@ export default function OrdersPage() {
             {(!stats?.hourlySales || stats.hourlySales.length === 0 || stats.hourlySales.every(d => d.revenue === 0)) ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <BarChart3 className="w-16 h-16 mb-3 opacity-50" />
-                <p className="text-sm font-medium">{language === 'en' ? 'No sales data yet' : 'Belum ada data penjualan'}</p>
-                <p className="text-xs">{language === 'en' ? 'Create some orders to see this chart' : 'Buat pesanan untuk melihat grafik ini'}</p>
+                <p className="text-sm font-medium">{t.dashboard.noSalesData}</p>
+                <p className="text-xs">{t.dashboard.createOrders}</p>
               </div>
             ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -594,8 +599,8 @@ export default function OrdersPage() {
                     fontSize: '12px'
                   }}
                   formatter={(value: any, name: string) => {
-                    if (name === 'revenue') return [formatCurrency(Number(value)), language === 'en' ? 'Revenue' : 'Pendapatan']
-                    return [value, language === 'en' ? 'Orders' : 'Pesanan']
+                    if (name === 'revenue') return [formatCurrency(Number(value)), t.dashboard.revenue]
+                    return [value, t.dashboard.orders]
                   }}
                 />
                 <Bar 
@@ -615,17 +620,11 @@ export default function OrdersPage() {
             )}
           </div>
           <div className="mt-4 text-xs text-gray-600">
-            <p>💡 {language === 'en' 
-              ? timeRange === 'today'
-                ? 'Identify peak hours to optimize staffing and inventory'
+            <p>💡 {timeRange === 'today'
+                ? t.dashboard.tipPeakHours
                 : timeRange === 'week'
-                  ? 'Identify busiest days to plan promotions and resources'
-                  : 'Track weekly trends to forecast monthly performance'
-              : timeRange === 'today'
-                ? 'Identifikasi jam sibuk untuk mengoptimalkan staff dan stok'
-                : timeRange === 'week'
-                  ? 'Identifikasi hari tersibuk untuk rencanakan promo dan sumber daya'
-                  : 'Lacak tren mingguan untuk perkirakan performa bulanan'}</p>
+                  ? t.dashboard.tipBusiestDays
+                  : t.dashboard.tipWeeklyTrends}</p>
           </div>
         </div>
 
@@ -637,10 +636,10 @@ export default function OrdersPage() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
-                {language === 'en' ? 'Sales by Channel' : 'Penjualan per Saluran'}
+                {dt.salesByChannel}
               </h3>
               <p className="text-xs text-gray-600">
-                {language === 'en' ? 'Breakdown by order type' : 'Breakdown berdasarkan tipe pesanan'}
+                {dt.breakdownByOrderType}
               </p>
             </div>
           </div>
@@ -648,8 +647,8 @@ export default function OrdersPage() {
             {(!stats?.channelSales || stats.channelSales.length === 0 || stats.channelSales.every(d => d.value === 0)) ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <PieChartIcon className="w-16 h-16 mb-3 opacity-50" />
-                <p className="text-sm font-medium">{language === 'en' ? 'No channel data yet' : 'Belum ada data saluran'}</p>
-                <p className="text-xs">{language === 'en' ? 'Create some orders to see this chart' : 'Buat pesanan untuk melihat grafik ini'}</p>
+                <p className="text-sm font-medium">{dt.noChannelData}</p>
+                <p className="text-xs">{dt.createOrdersToSeeChart}</p>
               </div>
             ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -677,7 +676,7 @@ export default function OrdersPage() {
                     borderRadius: '8px' 
                   }}
                   formatter={(value: any, name: string, props: any) => {
-                    if (name === 'value') return [formatCurrency(Number(value)), language === 'en' ? 'Revenue' : 'Pendapatan']
+                    if (name === 'value') return [formatCurrency(Number(value)), t.dashboard.revenue]
                     return [value, name]
                   }}
                 />
@@ -686,7 +685,7 @@ export default function OrdersPage() {
                   height={36}
                   formatter={(value, entry: any) => {
                     const channel = stats?.channelSales.find(c => c.name === value)
-                    return `${value} (${channel?.orders || 0} ${language === 'en' ? 'orders' : 'pesanan'})`
+                    return `${value} (${channel?.orders || 0} ${t.dashboard.orders})`
                   }}
                 />
               </PieChart>
@@ -700,7 +699,7 @@ export default function OrdersPage() {
                 <div key={idx} className={`p-3 rounded-lg ${colors[idx]}`}>
                   <p className="text-xs font-medium">{channel.name}</p>
                   <p className="text-lg font-bold">{formatCurrency(channel.value)}</p>
-                  <p className="text-xs">{channel.orders} {language === 'en' ? 'orders' : 'pesanan'}</p>
+                  <p className="text-xs">{channel.orders} {t.dashboard.orders}</p>
                 </div>
               )
             })}
@@ -716,19 +715,17 @@ export default function OrdersPage() {
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-900 mb-3">
-              {language === 'en' ? '💡 Smart Suggestions' : '💡 Saran Cerdas'}
+              💡 {dt.smartSuggestions}
             </h3>
             <div className="space-y-3">
               {/* Revenue Growth Suggestion */}
               {stats?.today.growth !== undefined && stats.today.growth < -10 && (
                 <div className="bg-white rounded-lg p-4 border border-blue-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '📉 Revenue Down vs Yesterday' : '📉 Pendapatan Turun vs Kemarin'}
+                    📉 {dt.revenueDown}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? 'Consider running promotions or creating limited-time offers to boost sales. Review your menu pricing and customer feedback.'
-                      : 'Pertimbangkan untuk menjalankan promo atau membuat penawaran terbatas untuk meningkatkan penjualan. Tinjau harga menu dan feedback pelanggan.'}
+                    {dt.revenueDownDesc}
                   </p>
                 </div>
               )}
@@ -736,12 +733,10 @@ export default function OrdersPage() {
               {stats?.today.growth !== undefined && stats.today.growth > 20 && (
                 <div className="bg-white rounded-lg p-4 border border-green-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '🚀 Great Performance Today!' : '🚀 Performa Hari Ini Luar Biasa!'}
+                    🚀 {dt.greatPerformance}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? 'Revenue is up significantly! Ensure you have enough inventory for top sellers. Consider extending successful promotions.'
-                      : 'Pendapatan naik signifikan! Pastikan Anda punya stok cukup untuk item terlaris. Pertimbangkan perpanjang promo yang berhasil.'}
+                    {dt.greatPerformanceDesc}
                   </p>
                 </div>
               )}
@@ -750,12 +745,13 @@ export default function OrdersPage() {
               {stats?.peakHours && stats.peakHours.length > 0 && (
                 <div className="bg-white rounded-lg p-4 border border-blue-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '⏰ Optimize Staff Schedule' : '⏰ Optimalkan Jadwal Staff'}
+                    ⏰ {dt.optimizeStaff}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? `Your busiest hour today was ${formatTime(stats.peakHours[0].hour)}. Schedule more staff during peak hours to improve service speed and customer satisfaction.`
-                      : `Jam tersibuk hari ini adalah ${formatTime(stats.peakHours[0].hour)}. Jadwalkan lebih banyak staff saat jam sibuk untuk meningkatkan kecepatan layanan dan kepuasan pelanggan.`}
+                    {formatText('busiestHourMsg', { 
+                      time: formatTime(stats.peakHours[0].hour),
+                      desc: dt.optimizeStaffDesc
+                    })}
                   </p>
                 </div>
               )}
@@ -764,12 +760,13 @@ export default function OrdersPage() {
               {stats?.topItems && stats.topItems.length > 0 && (
                 <div className="bg-white rounded-lg p-4 border border-blue-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '⭐ Focus on Bestsellers' : '⭐ Fokus pada Bestseller'}
+                    ⭐ {dt.focusBestsellers}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? `"${stats.topItems[0].name}" is your top seller! Consider: 1) Creating combo deals with it, 2) Ensuring consistent quality, 3) Training staff to upsell it, 4) Promoting it on social media.`
-                      : `"${stats.topItems[0].name}" adalah item terlaris Anda! Pertimbangkan: 1) Buat paket combo dengannya, 2) Jaga konsistensi kualitas, 3) Latih staff untuk upsell, 4) Promosikan di media sosial.`}
+                    {formatText('bestsellerMsg', {
+                      name: stats.topItems[0].name,
+                      desc: dt.focusBestsellersDesc
+                    })}
                   </p>
                 </div>
               )}
@@ -778,12 +775,10 @@ export default function OrdersPage() {
               {currentStats && currentStats.orders < 5 && timeRange === 'today' && (
                 <div className="bg-white rounded-lg p-4 border border-amber-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '📢 Low Order Volume Today' : '📢 Volume Pesanan Rendah Hari Ini'}
+                    📢 {dt.lowOrderVolume}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? 'Drive more traffic with: 1) Flash sales during slow hours, 2) Social media posts with attractive food photos, 3) Loyalty rewards for repeat customers, 4) Partner with delivery apps.'
-                      : 'Tingkatkan traffic dengan: 1) Flash sale saat jam sepi, 2) Posting media sosial dengan foto makanan menarik, 3) Reward loyalitas untuk pelanggan repeat, 4) Bermitra dengan aplikasi delivery.'}
+                    {dt.lowOrderVolumeDesc}
                   </p>
                 </div>
               )}
@@ -792,12 +787,10 @@ export default function OrdersPage() {
               {currentStats && currentStats.avgOrderValue > 100000 && (
                 <div className="bg-white rounded-lg p-4 border border-green-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '💰 High Average Order Value' : '💰 Nilai Pesanan Rata-rata Tinggi'}
+                    💰 {dt.highAov}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? 'Customers are spending well! Maintain this by: 1) Creating premium menu items, 2) Offering exclusive experiences, 3) Implementing a VIP program, 4) Upselling desserts and beverages.'
-                      : 'Pelanggan spending dengan baik! Pertahankan dengan: 1) Buat menu item premium, 2) Tawarkan pengalaman eksklusif, 3) Implementasi program VIP, 4) Upsell dessert dan minuman.'}
+                    {dt.highAovDesc}
                   </p>
                 </div>
               )}
@@ -806,12 +799,10 @@ export default function OrdersPage() {
               {(!stats?.today.orders || stats.today.orders === 0) && timeRange === 'today' && (
                 <div className="bg-white rounded-lg p-4 border border-blue-200">
                   <p className="text-sm font-semibold text-gray-900 mb-1">
-                    {language === 'en' ? '🎯 Get Started Today' : '🎯 Mulai Hari Ini'}
+                    🎯 {dt.getStartedToday}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {language === 'en' 
-                      ? 'No orders yet today. Boost visibility by: 1) Posting breakfast/lunch specials on social media, 2) Sending push notifications to app users, 3) Offering early bird discounts, 4) Updating your business hours online.'
-                      : 'Belum ada pesanan hari ini. Tingkatkan visibilitas dengan: 1) Post spesial sarapan/makan siang di media sosial, 2) Kirim notifikasi push ke user app, 3) Tawarkan diskon early bird, 4) Update jam operasional online.'}
+                    {dt.getStartedTodayDesc}
                   </p>
                 </div>
               )}

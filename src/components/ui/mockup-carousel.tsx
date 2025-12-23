@@ -3,14 +3,17 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useLanguage } from "@/lib/i18n/context"
 
 interface MockupCarouselProps {
-  mockups: React.ComponentType<{ color: string; language: string }>[]
+  mockups: React.ComponentType<any>[]
   color: string
-  language: string
+  language?: string
 }
 
 export function MockupCarousel({ mockups, color, language }: MockupCarouselProps) {
+  const { language: ctxLanguage } = useLanguage()
+  const resolvedLanguage = language ?? ctxLanguage
   const [currentIndex, setCurrentIndex] = React.useState(0)
 
   const next = () => {
@@ -33,7 +36,7 @@ export function MockupCarousel({ mockups, color, language }: MockupCarouselProps
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
         >
-          <CurrentMockup color={color} language={language} />
+          <CurrentMockup color={color} language={resolvedLanguage} />
         </motion.div>
       </AnimatePresence>
 

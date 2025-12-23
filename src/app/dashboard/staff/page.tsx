@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 import { Plus, Edit2, Trash2, Search, User, Phone, Briefcase, BarChart3, TrendingUp } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
@@ -13,6 +14,7 @@ export default function StaffPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
+  const { t: dt, locale } = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [staff, setStaff] = useState<any[]>([])
   const [filteredStaff, setFilteredStaff] = useState<any[]>([])
@@ -255,7 +257,7 @@ export default function StaffPage() {
   }
 
   async function deleteStaff(id: string) {
-    if (!confirm('Hapus staff ini?')) return
+    if (!confirm(dt.deleteStaffConfirm)) return
 
     try {
       await supabase
@@ -270,7 +272,7 @@ export default function StaffPage() {
   }
 
   const getRoleLabel = (role: string) => {
-    return role || 'Tidak ada peran'
+    return role || dt.noRole
   }
 
   const getRoleColor = (role: string) => {
@@ -292,15 +294,15 @@ export default function StaffPage() {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Manage Staff' : 'Kelola Staff'}</h1>
-            <p className="text-sm sm:text-base text-gray-600">{language === 'en' ? 'Manage staff accounts and roles' : 'Kelola akun dan peran staff'}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{dt.manageStaff}</h1>
+            <p className="text-sm sm:text-base text-gray-600">{dt.manageStaffDesc}</p>
           </div>
           <button
             onClick={() => openModal()}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors w-full sm:w-auto"
           >
             <Plus className="w-5 h-5" />
-            {language === 'en' ? 'Add Staff' : 'Tambah Staff'}
+            {dt.addStaff}
           </button>
         </div>
       </div>
@@ -313,8 +315,8 @@ export default function StaffPage() {
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-gray-900">{language === 'en' ? 'Staff Performance' : 'Performa Staff'}</h3>
-              <p className="text-xs text-gray-600">{language === 'en' ? 'Revenue and order count per staff' : 'Revenue dan jumlah pesanan per staff'}</p>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">{dt.staffPerformance}</h3>
+              <p className="text-xs text-gray-600">{dt.revenueAndOrderCount}</p>
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -326,7 +328,7 @@ export default function StaffPage() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {language === 'en' ? '7 Days' : '7 Hari'}
+              {dt.sevenDays}
             </button>
             <button
               onClick={() => setPerformancePeriod('month')}
@@ -336,7 +338,7 @@ export default function StaffPage() {
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {language === 'en' ? '30 Days' : '30 Hari'}
+              {dt.thirtyDays}
             </button>
           </div>
         </div>
@@ -345,8 +347,8 @@ export default function StaffPage() {
           {staffPerformance.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">
               <TrendingUp className="w-16 h-16 mb-3 opacity-50" />
-              <p className="text-sm font-medium">Belum ada data performa</p>
-              <p className="text-xs">Pesanan dengan staff_id akan muncul di sini</p>
+              <p className="text-sm font-medium">{dt.noPerformanceData}</p>
+              <p className="text-xs">{dt.ordersWithStaffId}</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -369,14 +371,14 @@ export default function StaffPage() {
                     borderRadius: '8px' 
                   }}
                   formatter={(value: any, name: string) => {
-                    if (name === 'revenue') return [`Rp ${Number(value).toLocaleString('id-ID')}`, 'Revenue']
-                    if (name === 'orders') return [value, 'Pesanan']
+                    if (name === 'revenue') return [`Rp ${Number(value).toLocaleString(locale)}`, dt.revenue]
+                    if (name === 'orders') return [value, dt.orders]
                     return [value, name]
                   }}
                 />
                 <Legend />
-                <Bar dataKey="revenue" fill="#3b82f6" name="Revenue (Rp)" radius={[0, 4, 4, 0]} />
-                <Bar dataKey="orders" fill="#10b981" name="Jumlah Pesanan" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="revenue" fill="#3b82f6" name={dt.revenue} radius={[0, 4, 4, 0]} />
+                <Bar dataKey="orders" fill="#10b981" name={dt.totalOrders} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -385,24 +387,24 @@ export default function StaffPage() {
         {staffPerformance.length > 0 && (
           <div className="mt-4 grid grid-cols-3 gap-4">
             <div className="p-3 rounded-lg bg-blue-50">
-              <p className="text-xs text-blue-600 font-medium">Total Revenue</p>
+              <p className="text-xs text-blue-600 font-medium">{dt.totalRevenue}</p>
               <p className="text-lg font-bold text-blue-900">
-                Rp {staffPerformance.reduce((sum, s) => sum + s.revenue, 0).toLocaleString('id-ID')}
+                Rp {staffPerformance.reduce((sum, s) => sum + s.revenue, 0).toLocaleString(locale)}
               </p>
             </div>
             <div className="p-3 rounded-lg bg-green-50">
-              <p className="text-xs text-green-600 font-medium">Total Pesanan</p>
+              <p className="text-xs text-green-600 font-medium">{dt.totalOrders}</p>
               <p className="text-lg font-bold text-green-900">
                 {staffPerformance.reduce((sum, s) => sum + s.orders, 0)}
               </p>
             </div>
             <div className="p-3 rounded-lg bg-purple-50">
-              <p className="text-xs text-purple-600 font-medium">Avg per Pesanan</p>
+              <p className="text-xs text-purple-600 font-medium">{dt.avgPerOrder}</p>
               <p className="text-lg font-bold text-purple-900">
                 Rp {Math.round(
                   staffPerformance.reduce((sum, s) => sum + s.revenue, 0) / 
                   staffPerformance.reduce((sum, s) => sum + s.orders, 0)
-                ).toLocaleString('id-ID')}
+                ).toLocaleString(locale)}
               </p>
             </div>
           </div>
@@ -417,7 +419,7 @@ export default function StaffPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Cari staff..."
+                placeholder={dt.searchStaff}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
@@ -428,7 +430,7 @@ export default function StaffPage() {
               onChange={(e) => setSelectedRole(e.target.value)}
               className="px-4 py-2.5 border-2 border-gray-200 rounded-xl font-medium focus:outline-none focus:border-gray-400 hover:border-gray-300 transition-all cursor-pointer"
             >
-              <option value="all">Semua Peran</option>
+              <option value="all">{dt.allRoles}</option>
               {availableRoles.map(role => (
                 <option key={role.value} value={role.value}>{role.label}</option>
               ))}
@@ -442,12 +444,12 @@ export default function StaffPage() {
             <div className="col-span-full bg-white rounded-2xl p-12 text-center border border-gray-100">
               <User className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {staff.length === 0 ? 'Belum Ada Staff' : 'Tidak ada staff ditemukan'}
+                {staff.length === 0 ? dt.noStaffYet : dt.noStaffFound}
               </h3>
               <p className="text-gray-500 mb-6">
                 {staff.length === 0 
-                  ? 'Tambahkan staff pertama untuk mulai mengelola tim Anda'
-                  : 'Coba ubah filter atau kata kunci pencarian'}
+                  ? dt.addFirstStaffDesc
+                  : dt.changeFilterOrSearch}
               </p>
               {staff.length === 0 && (
                 <button
@@ -455,7 +457,7 @@ export default function StaffPage() {
                   className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
                 >
                   <Plus className="w-5 h-5" />
-                  Tambah Staff Pertama
+                  {dt.addFirstStaff}
                 </button>
               )}
             </div>
@@ -487,7 +489,7 @@ export default function StaffPage() {
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
-                    Edit
+                    {dt.edit}
                   </button>
                   <button
                     onClick={() => deleteStaff(member.id)}
@@ -507,12 +509,12 @@ export default function StaffPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-6">
-              {editingStaff ? 'Edit Staff' : 'Tambah Staff'}
+              {editingStaff ? dt.editStaff : dt.addStaff}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Lengkap
+                  {dt.fullName}
                 </label>
                 <input
                   type="text"
@@ -524,7 +526,7 @@ export default function StaffPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Telepon
+                  {dt.phone}
                 </label>
                 <input
                   type="tel"
@@ -535,7 +537,7 @@ export default function StaffPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Peran
+                  {dt.role}
                 </label>
                 <input
                   type="text"
@@ -543,7 +545,7 @@ export default function StaffPage() {
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
                   list="role-suggestions"
-                  placeholder="Contoh: manager, kang kopi, pembuat snack"
+                  placeholder={dt.rolePlaceholder}
                   className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl font-medium focus:outline-none focus:border-gray-400 hover:border-gray-300 transition-all"
                 />
                 <datalist id="role-suggestions">
@@ -553,19 +555,19 @@ export default function StaffPage() {
                 </datalist>
                 {availableRoles.length > 0 && (
                   <p className="mt-2 text-xs text-gray-500">
-                    Peran yang sudah ada: {availableRoles.map(r => r.label).join(', ')}
+                    {dt.existingRoles}: {availableRoles.map(r => r.label).join(', ')}
                   </p>
                 )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  PIN (4 digit)
+                  {dt.pin}
                 </label>
                 <input
                   type="password"
                   maxLength={4}
                   pattern="[0-9]{4}"
-                  placeholder={editingStaff ? 'Kosongkan jika tidak diubah' : ''}
+                  placeholder={editingStaff ? dt.pinPlaceholder : ''}
                   required={!editingStaff}
                   value={formData.pin}
                   onChange={(e) => setFormData({...formData, pin: e.target.value})}
@@ -578,13 +580,13 @@ export default function StaffPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                 >
-                  Batal
+                  {dt.cancel}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
                 >
-                  {editingStaff ? 'Simpan' : 'Tambah'}
+                  {editingStaff ? dt.save : dt.add}
                 </button>
               </div>
             </form>

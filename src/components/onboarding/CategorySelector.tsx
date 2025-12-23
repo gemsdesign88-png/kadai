@@ -45,7 +45,7 @@ export default function CategorySelector({ businessType, businessName, onSelect,
                 🏢
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Business Name</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t.register.category.businessName}</p>
                 <p className="text-base font-bold text-gray-900 truncate">{businessName}</p>
               </div>
             </div>
@@ -62,8 +62,10 @@ export default function CategorySelector({ businessType, businessName, onSelect,
                 {businessType === 'toko' ? '🏪' : '🍽️'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Business Type</p>
-                <p className="text-base font-bold text-gray-900 capitalize">{businessType}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t.register.category.businessType}</p>
+                <p className="text-base font-bold text-gray-900 capitalize">
+                  {businessType === 'toko' ? t.register.businessType.types.toko.name : t.register.businessType.types.resto.name}
+                </p>
               </div>
             </div>
           </div>

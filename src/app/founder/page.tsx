@@ -1,8 +1,6 @@
-export const runtime = 'edge';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import FounderDashboard from '@/components/founder/founder-dashboard';
-
 
 // Founder email - only this email can access
 const FOUNDER_EMAIL = 'gemmyadyendra@gmail.com';

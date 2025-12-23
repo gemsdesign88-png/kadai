@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/context"
+import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
 import { Package, AlertTriangle, TrendingDown, Plus, Minus, DollarSign, ShoppingCart, Search, PieChart as PieChartIcon } from "lucide-react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
@@ -29,6 +30,7 @@ export default function InventoryPage() {
   const router = useRouter()
   const supabase = createClient()
   const { language } = useLanguage()
+  const dt = createDashboardTranslator(language)
   const [loading, setLoading] = useState(true)
   const [stockItems, setStockItems] = useState<StockItem[]>([])
   const [showModal, setShowModal] = useState(false)
@@ -181,12 +183,12 @@ export default function InventoryPage() {
     const reorderLevel = item.ingredient.reorder_level || 20
     const percentage = (qty / parLevel) * 100
 
-    if (qty === 0) return { label: language === 'en' ? 'Out of Stock' : 'Habis', color: 'bg-red-600 text-white', percentage: 0 }
-    if (qty <= reorderLevel) return { label: language === 'en' ? 'Very Low' : 'Sangat Rendah', color: 'bg-red-500 text-white', percentage }
-    if (percentage < 50) return { label: language === 'en' ? 'Low' : 'Rendah', color: 'bg-orange-500 text-white', percentage }
-    if (percentage < 80) return { label: language === 'en' ? 'Medium' : 'Sedang', color: 'bg-yellow-500 text-white', percentage }
-    if (percentage <= 120) return { label: language === 'en' ? 'Good' : 'Baik', color: 'bg-green-500 text-white', percentage }
-    return { label: language === 'en' ? 'Overstocked' : 'Berlebih', color: 'bg-blue-500 text-white', percentage }
+    if (qty === 0) return { label: dt.outOfStockLabel, color: 'bg-red-600 text-white', percentage: 0 }
+    if (qty <= reorderLevel) return { label: dt.veryLow, color: 'bg-red-500 text-white', percentage }
+    if (percentage < 50) return { label: dt.lowStockLabel, color: 'bg-orange-500 text-white', percentage }
+    if (percentage < 80) return { label: dt.medium, color: 'bg-yellow-500 text-white', percentage }
+    if (percentage <= 120) return { label: dt.good, color: 'bg-green-500 text-white', percentage }
+    return { label: dt.overstockStatus, color: 'bg-blue-500 text-white', percentage }
   }
 
   const formatCurrency = (value: number) => {
@@ -214,8 +216,8 @@ export default function InventoryPage() {
     <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Manage Stock' : 'Kelola Stok'}</h1>
-        <p className="text-sm sm:text-base text-gray-600">{language === 'en' ? 'Monitor and adjust inventory' : 'Pantau dan sesuaikan inventory'}</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{dt.manageStock}</h1>
+        <p className="text-sm sm:text-base text-gray-600">{dt.monitorInventory}</p>
       </div>
 
       <div>
@@ -228,7 +230,7 @@ export default function InventoryPage() {
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-gray-900">{formatCurrency(stockStats.totalValue)}</h3>
-                <p className="text-sm text-gray-600">{language === 'en' ? 'Total Stock Value' : 'Total Nilai Stok'}</p>
+                <p className="text-sm text-gray-600">{dt.totalStockValueLabel}</p>
               </div>
             </div>
           </div>
@@ -240,7 +242,7 @@ export default function InventoryPage() {
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-gray-900">{stockStats.totalItems}</h3>
-                <p className="text-sm text-gray-600">{language === 'en' ? 'Total Items' : 'Total Item'}</p>
+                <p className="text-sm text-gray-600">{dt.totalItemsLabel}</p>
               </div>
             </div>
           </div>
@@ -252,7 +254,7 @@ export default function InventoryPage() {
               </div>
               <div>
                 <h3 className="text-3xl font-bold text-gray-900">{stockStats.outOfStock}</h3>
-                <p className="text-sm text-gray-600">{language === 'en' ? 'Out of Stock' : 'Item Habis'}</p>
+                <p className="text-sm text-gray-600">{dt.outOfStockLabel}</p>
               </div>
             </div>
           </div>
@@ -264,7 +266,7 @@ export default function InventoryPage() {
               </div>
               <div>
                 <h3 className="text-3xl font-bold text-gray-900">{stockStats.lowStock}</h3>
-                <p className="text-sm text-gray-600">{language === 'en' ? 'Low Stock' : 'Stok Rendah'}</p>
+                <p className="text-sm text-gray-600">{dt.lowStockLabel}</p>
               </div>
             </div>
           </div>
@@ -277,8 +279,8 @@ export default function InventoryPage() {
               <PieChartIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Stock Status Distribution' : 'Distribusi Status Stok'}</h3>
-              <p className="text-xs text-gray-600">{language === 'en' ? 'Breakdown of inventory item status' : 'Breakdown status inventory items'}</p>
+              <h3 className="text-lg font-bold text-gray-900">{dt.stockStatusDistribution}</h3>
+              <p className="text-xs text-gray-600">{dt.stockStatusDesc}</p>
             </div>
           </div>
           
@@ -286,8 +288,8 @@ export default function InventoryPage() {
             {stockDistribution.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <Package className="w-16 h-16 mb-3 opacity-50" />
-                <p className="text-sm font-medium">Belum ada data stok</p>
-                <p className="text-xs">Tambahkan ingredients untuk melihat distribusi</p>
+                <p className="text-sm font-medium">{dt.noStockData}</p>
+                <p className="text-xs">{dt.addIngredientsHint}</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -312,7 +314,7 @@ export default function InventoryPage() {
                       border: '1px solid #e5e7eb', 
                       borderRadius: '8px' 
                     }}
-                    formatter={(value: any) => [`${value} ${language === 'en' ? 'items' : 'item'}`, language === 'en' ? 'Quantity' : 'Jumlah']}
+                    formatter={(value: any) => [`${value} ${dt.totalItemsLabel}`, dt.quantityLabel]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -325,7 +327,7 @@ export default function InventoryPage() {
                 <div key={idx} className="p-4 rounded-xl border-2" style={{ borderColor: dist.color, backgroundColor: `${dist.color}10` }}>
                   <p className="text-xs sm:text-sm font-medium mb-2" style={{ color: dist.color }}>{dist.name}</p>
                   <p className="text-xl sm:text-2xl font-bold mb-1" style={{ color: dist.color }}>{dist.value}</p>
-                  <p className="text-xs" style={{ color: dist.color }}>{language === 'en' ? 'items' : 'item'}</p>
+                  <p className="text-xs" style={{ color: dist.color }}>{dt.totalItemsLabel}</p>
                 </div>
               ))}
             </div>
@@ -340,7 +342,7 @@ export default function InventoryPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={language === 'en' ? 'Search ingredients...' : 'Cari ingredient...'}
+              placeholder={dt.searchIngredients}
               className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] transition-all"
             />
           </div>
@@ -352,20 +354,20 @@ export default function InventoryPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">{language === 'en' ? 'Ingredient' : 'Bahan'}</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">{language === 'en' ? 'Category' : 'Kategori'}</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{language === 'en' ? 'Current Stock' : 'Stok Saat Ini'}</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{language === 'en' ? 'Reorder Level' : 'Reorder Level'}</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{language === 'en' ? 'Par Level' : 'Par Level'}</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{language === 'en' ? 'Status' : 'Status'}</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{language === 'en' ? 'Value' : 'Nilai'}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">{dt.ingredientLabel}</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">{dt.categoryLabel}</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{dt.currentStock}</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{dt.reorderLevel}</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{dt.parLevel}</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">{dt.statusLabel}</th>
+                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{dt.valueLabel}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredItems.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                      {searchQuery ? (language === 'en' ? 'No items match your search' : 'Tidak ada item yang cocok dengan pencarian') : (language === 'en' ? 'No items in inventory' : 'Tidak ada item dalam inventory')}
+                      {searchQuery ? dt.noItemsMatch : dt.noInventoryItems}
                     </td>
                   </tr>
                 ) : (
@@ -428,16 +430,16 @@ export default function InventoryPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-6">
-              {adjustmentType === 'add' ? 'Tambah Stok' : 'Kurangi Stok'}
+              {adjustmentType === 'add' ? dt.addStock : dt.subtractStock}
             </h2>
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
               <p className="font-medium text-gray-900">{selectedItem.ingredient.name}</p>
-              <p className="text-sm text-gray-600">Stok saat ini: <span className="font-bold">{selectedItem.quantity_on_hand} {selectedItem.ingredient.unit}</span></p>
+              <p className="text-sm text-gray-600">{dt.currentStockLabel}: <span className="font-bold">{selectedItem.quantity_on_hand} {selectedItem.ingredient.unit}</span></p>
             </div>
             <form onSubmit={handleAdjustment} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Jumlah ({selectedItem.ingredient.unit})
+                  {dt.amountLabel} ({selectedItem.ingredient.unit})
                 </label>
                 <input
                   type="number"
@@ -447,25 +449,25 @@ export default function InventoryPage() {
                   value={adjustmentAmount}
                   onChange={(e) => setAdjustmentAmount(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  placeholder="Masukkan jumlah"
+                  placeholder={dt.enterAmount}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Catatan (opsional)
+                  {dt.noteLabel}
                 </label>
                 <textarea
                   value={adjustmentNote}
                   onChange={(e) => setAdjustmentNote(e.target.value)}
                   rows={3}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                  placeholder="Alasan penyesuaian stok"
+                  placeholder={dt.adjustmentReason}
                 />
               </div>
               {adjustmentAmount && (
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-gray-700">
-                    Stok baru: <span className="font-bold text-blue-700">
+                    {dt.newStockLabel}: <span className="font-bold text-blue-700">
                       {adjustmentType === 'add' 
                         ? selectedItem.quantity_on_hand + parseFloat(adjustmentAmount)
                         : selectedItem.quantity_on_hand - parseFloat(adjustmentAmount)
@@ -480,7 +482,7 @@ export default function InventoryPage() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                 >
-                  Batal
+                  {dt.cancel}
                 </button>
                 <button
                   type="submit"
@@ -490,7 +492,7 @@ export default function InventoryPage() {
                       : 'bg-red-500 hover:bg-red-600'
                   }`}
                 >
-                  {adjustmentType === 'add' ? 'Tambah' : 'Kurangi'}
+                  {adjustmentType === 'add' ? dt.add : dt.subtract}
                 </button>
               </div>
             </form>

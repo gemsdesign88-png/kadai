@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { LayoutWrapper } from "@/components/layout/layout-wrapper";
 import { LanguageProvider } from "@/lib/i18n/context";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { LayoutContent } from "./layout-content";
-
-export const dynamic = 'force-dynamic';
+import { CurrencyProvider } from "@/lib/i18n/currency-context";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -13,15 +13,63 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "KadaiPOS - Modern POS System for All Businesses",
-  description: "Streamline your business operations with KadaiPOS. Modern, intuitive point of sale system designed for restaurants, cafes, retail stores, and all types of businesses.",
+  metadataBase: new URL('https://kadaipos.id'),
+  title: {
+    default: "KadaiPOS - Modern POS System for Restaurants, Cafes & Retail Stores",
+    template: "%s | KadaiPOS"
+  },
+  description: "Streamline your business operations with KadaiPOS. Modern, intuitive point of sale system designed for restaurants, cafes, and retail stores. Manage inventory, sales, and staff efficiently.",
+  keywords: ["POS system", "Point of Sale", "Restaurant POS", "Retail POS", "Cafe POS", "Inventory Management", "Sales Tracking", "KadaiPOS", "Indonesia POS"],
+  authors: [{ name: "KadaiPOS Team" }],
+  creator: "KadaiPOS",
+  publisher: "KadaiPOS",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://kadaipos.id",
+    siteName: "KadaiPOS",
+    title: "KadaiPOS - Modern POS System for Your Business",
+    description: "The most intuitive and powerful POS system for modern businesses. Manage everything from one place.",
+    images: [
+      {
+        url: "/Logo.svg",
+        width: 800,
+        height: 600,
+        alt: "KadaiPOS Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KadaiPOS - Modern POS System",
+    description: "Streamline your business operations with KadaiPOS. Modern, intuitive point of sale system.",
+    images: ["/Logo.svg"],
+  },
   icons: {
     icon: [
-      { url: "/Favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" }
+      { url: '/Favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
     ],
-    shortcut: "/Favicon.svg",
-    apple: "/Favicon.svg",
+    apple: '/Favicon.svg',
+  },
+  alternates: {
+    canonical: 'https://kadaipos.id',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -34,14 +82,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${plusJakartaSans.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
-        suppressHydrationWarning
       >
-        <ThemeProvider>
-          <LanguageProvider>
-            <LayoutContent>{children}</LayoutContent>
-          </LanguageProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <CurrencyProvider>
+            <ThemeProvider>
+              <ScrollProgress />
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </ThemeProvider>
+          </CurrencyProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

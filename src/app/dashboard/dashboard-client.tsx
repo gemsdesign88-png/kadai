@@ -6,6 +6,7 @@ import { DollarSign, ShoppingCart, Clock, Package, ChevronRight, Bell, AlertTria
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/i18n/context';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar, Legend } from 'recharts';
+import { createDashboardTranslator } from '@/lib/i18n/dashboard-translator';
 
 interface DashboardClientProps {
   restaurants: any[];
@@ -27,10 +28,35 @@ interface StaffPerformance {
 export default function DashboardClient({ restaurants }: DashboardClientProps) {
   const router = useRouter();
   const supabase = createClient();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
+  const { t: dt, locale } = createDashboardTranslator(language);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const dayLabel = (dayIndex: number) => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return dt.dayLabel(days[dayIndex]);
+  };
+
+  const formatText = (key: string, replacements?: Record<string, string | number>) => {
+    let text = dt(key);
+    if (replacements) {
+      Object.entries(replacements).forEach(([token, value]) => {
+        text = text.replace(`{${token}}`, String(value));
+      });
+    }
+    return text;
+  };
+
   const [loading, setLoading] = useState(false);
   const [activeRestaurant, setActiveRestaurant] = useState<any>(null);
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+
+  if (!mounted) return null;
+
   const [stats, setStats] = useState({
     todayRevenue: 0,
     todayOrders: 0,
@@ -134,7 +160,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
       for (let i = 29; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(today.getDate() - i);
-        const dateKey = date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' });
+        const dateKey = date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
         const nextDate = new Date(date);
         nextDate.setDate(nextDate.getDate() + 1);
         
@@ -160,7 +186,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
         });
         
         const weekRevenue = weekOrdersCalc.reduce((sum, o) => sum + (o.total || 0), 0);
-        const label = `${weekStartCalc.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}`;
+        const label = `${weekStartCalc.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`;
         revenueTrend.push({ date: label, revenue: Math.round(weekRevenue) });
       }
     } else {
@@ -177,7 +203,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
         });
         
         const monthRevenue = monthOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-        const label = monthDate.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+        const label = monthDate.toLocaleDateString(locale, { month: 'short', year: 'numeric' });
         revenueTrend.push({ date: label, revenue: Math.round(monthRevenue) });
       }
     }
@@ -189,35 +215,29 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
     
     if (ordersAOVPeriod === 'daily') {
       const dayOfWeekData: { [key: string]: { orders: number; revenue: number } } = {
-        'Monday': { orders: 0, revenue: 0 },
-        'Tuesday': { orders: 0, revenue: 0 },
-        'Wednesday': { orders: 0, revenue: 0 },
-        'Thursday': { orders: 0, revenue: 0 },
-        'Friday': { orders: 0, revenue: 0 },
-        'Saturday': { orders: 0, revenue: 0 },
-        'Sunday': { orders: 0, revenue: 0 }
+        '0': { orders: 0, revenue: 0 },
+        '1': { orders: 0, revenue: 0 },
+        '2': { orders: 0, revenue: 0 },
+        '3': { orders: 0, revenue: 0 },
+        '4': { orders: 0, revenue: 0 },
+        '5': { orders: 0, revenue: 0 },
+        '6': { orders: 0, revenue: 0 }
       };
-
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       
       weekOrders.forEach(order => {
         const orderDate = new Date(order.paid_at);
-        const dayName = dayNames[orderDate.getDay()];
-        dayOfWeekData[dayName].orders += 1;
-        dayOfWeekData[dayName].revenue += order.total || 0;
+        const dayIndex = orderDate.getDay().toString();
+        dayOfWeekData[dayIndex].orders += 1;
+        dayOfWeekData[dayIndex].revenue += order.total || 0;
       });
 
-      customerRevenueChartData = Object.entries(dayOfWeekData).map(([day, data]) => ({
-        day: language === 'en' ? day : 
-          day === 'Monday' ? 'Senin' :
-          day === 'Tuesday' ? 'Selasa' :
-          day === 'Wednesday' ? 'Rabu' :
-          day === 'Thursday' ? 'Kamis' :
-          day === 'Friday' ? 'Jumat' :
-          day === 'Saturday' ? 'Sabtu' : 'Minggu',
-        orders: data.orders,
-        avgOrderValue: data.orders > 0 ? Math.round(data.revenue / data.orders) : 0
-      }));
+      customerRevenueChartData = Object.entries(dayOfWeekData).map(([dayIndex, data]) => {
+        return {
+          day: dayLabel(parseInt(dayIndex)),
+          orders: data.orders,
+          avgOrderValue: data.orders > 0 ? Math.round(data.revenue / data.orders) : 0
+        };
+      });
     } else if (ordersAOVPeriod === 'weekly') {
       for (let i = 7; i >= 0; i--) {
         const weekEnd = new Date(today);
@@ -231,7 +251,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
         });
         
         const weekRevenue = weekOrdersCalc.reduce((sum, o) => sum + (o.total || 0), 0);
-        const label = `W${8-i}`;
+        const label = `${dt('weekShort')}${8-i}`;
         customerRevenueChartData.push({
           day: label,
           orders: weekOrdersCalc.length,
@@ -252,7 +272,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
         });
         
         const monthRevenue = monthOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-        const label = monthDate.toLocaleDateString('id-ID', { month: 'short' });
+        const label = monthDate.toLocaleDateString(locale, { month: 'short' });
         customerRevenueChartData.push({
           day: label,
           orders: monthOrders.length,
@@ -450,8 +470,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             id: 'growth',
             type: 'positive',
             icon: TrendingUp,
-            title: language === 'en' ? 'Strong Growth' : 'Pertumbuhan Kuat',
-            message: `${weekGrowth.toFixed(1)}% pertumbuhan pendapatan minggu ini`,
+            title: dt('growthHeadline'),
+            message: formatText('growthInsightMsg', { percent: weekGrowth.toFixed(1) }),
             color: 'green',
             link: '/dashboard/analytics'
           });
@@ -462,8 +482,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             id: 'top-item',
             type: 'info',
             icon: UtensilsCrossed,
-            title: language === 'en' ? 'Top Seller' : 'Penjual Terbaik',
-            message: `${topItems[0].name} adalah menu terlaris dengan ${topItems[0].count} penjualan`,
+            title: dt('topSellerHeadline'),
+            message: formatText('topSellerInsightMsg', { name: topItems[0].name, count: topItems[0].count }),
             color: 'blue',
             link: '/dashboard/menu'
           });
@@ -474,8 +494,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             id: 'top-table',
             type: 'info',
             icon: Building2,
-            title: language === 'en' ? 'Popular Table' : 'Meja Populer',
-            message: `Meja ${topTablesList[0].tableNumber} adalah yang paling ramai minggu ini`,
+            title: dt('topTableHeadline'),
+            message: formatText('topTableInsightMsg', { name: topTablesList[0].tableNumber }),
             color: 'purple',
             link: '/dashboard/tables'
           });
@@ -486,8 +506,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             id: 'top-staff',
             type: 'info',
             icon: Users,
-            title: language === 'en' ? 'Top Staff' : 'Staf Terbaik',
-            message: `${topStaffList[0].name} mencatat ${formatCurrency(topStaffList[0].revenue)} penjualan`,
+            title: dt('topStaffHeadline'),
+            message: formatText('topStaffInsightMsg2', { name: topStaffList[0].name, revenue: formatCurrency(topStaffList[0].revenue) }),
             color: 'indigo',
             link: '/dashboard/staff'
           });
@@ -499,8 +519,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             id: 'stock-alert',
             type: 'warning',
             icon: Package,
-            title: language === 'en' ? 'Stock Alert' : 'Peringatan Stok',
-            message: `${outOfStockCount} item habis & ${lowStockCount} item stok rendah. Segera lakukan restocking`,
+            title: dt('stockAlert'),
+            message: formatText('stockAlertMsg', { out: outOfStockCount, low: lowStockCount }),
             color: 'orange',
             link: '/dashboard/inventory'
           });
@@ -512,10 +532,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             id: 'customer-activity',
             type: 'info',
             icon: Users,
-            title: language === 'en' ? 'Customer Activity' : 'Aktivitas Pelanggan',
-            message: language === 'en' 
-              ? `${uniqueCustomers} customers this week. Keep them engaged with promotions!`
-              : `${uniqueCustomers} pelanggan minggu ini. Pertahankan dengan promosi menarik!`,
+            title: dt('customerActivity'),
+            message: formatText('customerActivityMsg2', { count: uniqueCustomers }),
             color: 'pink',
             link: '/dashboard/customers'
           });
@@ -549,8 +567,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
           newAlerts.push({
             id: 'stock-out',
             type: 'error',
-            message: `${outOfStockCount} item ${language === 'en' ? 'out of stock' : 'habis stok'}`,
-            action: language === 'en' ? 'Check Inventory' : 'Cek Stok',
+            message: formatText('outOfStockMsg', { count: outOfStockCount }),
+            action: dt('checkInventory'),
             link: '/dashboard/inventory'
           });
         }
@@ -558,8 +576,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
           newAlerts.push({
             id: 'stock-low',
             type: 'warning',
-            message: `${lowStockCount} item ${language === 'en' ? 'low stock' : 'stok menipis'}`,
-            action: language === 'en' ? 'Check Inventory' : 'Cek Stok',
+            message: formatText('lowStockMsg', { count: lowStockCount }),
+            action: dt('checkInventory'),
             link: '/dashboard/inventory'
           });
         }
@@ -568,8 +586,8 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
           newAlerts.push({
             id: 'orders-pending',
             type: 'info',
-            message: `${activeOrdersData.length} ${language === 'en' ? 'orders in progress' : 'pesanan sedang diproses'}`,
-            action: language === 'en' ? 'View Orders' : 'Lihat Pesanan',
+            message: formatText('ordersInProgressMsg', { count: activeOrdersData.length }),
+            action: dt('viewOrders'),
             link: '/dashboard/orders'
           });
         }
@@ -584,14 +602,14 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             if (item.quantity_on_hand === 0 && item.ingredient) {
               newTodos.push({
                 id: `restock-${item.id}`,
-                text: `Restock ${item.ingredient.name}`,
+                text: formatText('restockMsg', { name: item.ingredient.name }),
                 priority: 'high',
                 link: '/dashboard/inventory'
               });
             } else if (item.ingredient && item.quantity_on_hand <= item.ingredient.reorder_level) {
               newTodos.push({
                 id: `order-${item.id}`,
-                text: `Pesan ${item.ingredient.name} (stok: ${item.quantity_on_hand} ${item.ingredient.unit})`,
+                text: formatText('orderMsg', { name: item.ingredient.name, stock: item.quantity_on_hand, unit: item.ingredient.unit }),
                 priority: 'medium',
                 link: '/dashboard/inventory'
               });
@@ -616,16 +634,16 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: locale === 'id-ID' ? 'IDR' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('id-ID', {
+    return new Date(dateString).toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -647,15 +665,15 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
       <div className="min-h-screen bg-gradient-to-br from-[#FF5A5F]/5 via-white to-[#8B5CF6]/5 flex items-center justify-center">
         <div className="text-center max-w-md p-8">
           <Package className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Belum Ada Bisnis</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">{dt('noBusiness')}</h2>
           <p className="text-gray-600 mb-8">
-            Tambahkan bisnis pertama Anda untuk mulai menggunakan KadaiPOS
+            {dt('addFirstBusiness')}
           </p>
           <button 
             className="px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
             onClick={() => router.push('/dashboard/setup')}
           >
-            Tambah Bisnis
+            {dt('addBusiness')}
           </button>
         </div>
       </div>
@@ -670,10 +688,10 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <div>
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
-                {language === 'en' ? 'Welcome Back' : 'Selamat Datang'}
+                {dt('welcomeBack')}
               </h2>
               <p className="text-xs sm:text-sm text-gray-600">
-                {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'id-ID', { 
+                {new Date().toLocaleDateString(locale, { 
                   weekday: 'long', 
                   day: 'numeric',
                   month: 'long',
@@ -683,7 +701,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
             </div>
             <div className="text-left sm:text-right">
               <p className="text-xs sm:text-sm font-semibold text-gray-600 truncate max-w-[200px] sm:max-w-none">{activeRestaurant?.name}</p>
-              <p className="text-xs text-gray-500">{language === 'en' ? 'Current Restaurant' : 'Restoran Aktif'}</p>
+              <p className="text-xs text-gray-500">{dt('currentRestaurant')}</p>
             </div>
           </div>
         </div>
@@ -707,7 +725,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                   </div>
                   {stats.growthPercent > 0 && <span className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-semibold">+{stats.growthPercent}%</span>}
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'This Week' : 'Minggu Ini'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt('thisWeek')}</p>
                 <h3 className="text-lg font-bold text-gray-900 leading-tight">{formatCurrency(stats.weekRevenue)}</h3>
               </div>
 
@@ -718,7 +736,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                     <ShoppingCart className="w-5 h-5 text-white" />
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Total Orders' : 'Total Pesanan'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt('totalOrders')}</p>
                 <h3 className="text-lg font-bold text-gray-900 leading-tight">{stats.weekOrders}</h3>
               </div>
 
@@ -729,7 +747,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                     <TrendingUp className="w-5 h-5 text-white" />
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Avg Order' : 'Rata Pesanan'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt('avgOrder')}</p>
                 <h3 className="text-lg font-bold text-gray-900 leading-tight">{formatCurrency(stats.avgOrderValue)}</h3>
               </div>
 
@@ -740,7 +758,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                     <Users className="w-5 h-5 text-white" />
                   </div>
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'Customers' : 'Pelanggan'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt('customers')}</p>
                 <h3 className="text-lg font-bold text-gray-900 leading-tight">{stats.totalCustomers}</h3>
               </div>
 
@@ -758,9 +776,9 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                   }`}>
                     <Clock className="w-5 h-5 text-white" />
                   </div>
-                  {stats.activeOrders > 0 && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-semibold">{language === 'en' ? 'Active' : 'Aktif'}</span>}
+                  {stats.activeOrders > 0 && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-semibold">{dt('active')}</span>}
                 </div>
-                <p className="text-xs text-gray-600 mb-1">{language === 'en' ? 'In Progress' : 'Sedang Diproses'}</p>
+                <p className="text-xs text-gray-600 mb-1">{dt('inProgress')}</p>
                 <h3 className={`text-lg font-bold leading-tight ${stats.activeOrders > 0 ? 'text-gray-900' : 'text-gray-900'}`}>{stats.activeOrders}</h3>
               </div>
             </div>
@@ -775,10 +793,10 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                       <div className="flex items-center gap-2">
                         <BarChart3 className="w-5 h-5 text-[var(--color-accent)]" />
                         <h3 className="text-base sm:text-lg font-bold text-gray-900">
-                          {language === 'en' ? 'Revenue Trend' : 'Tren Pendapatan'}
-                          {revenueTrendPeriod === 'daily' && ` (${language === 'en' ? '30 Days' : '30 Hari'})`}
-                          {revenueTrendPeriod === 'weekly' && ` (${language === 'en' ? '12 Weeks' : '12 Minggu'})`}
-                          {revenueTrendPeriod === 'monthly' && ` (${language === 'en' ? '12 Months' : '12 Bulan'})`}
+                          {dt('revenueTrend')}
+                          {revenueTrendPeriod === 'daily' && ` (${dt('days30')})`}
+                          {revenueTrendPeriod === 'weekly' && ` (${dt('weeks12')})`}
+                          {revenueTrendPeriod === 'monthly' && ` (${dt('months12')})`}
                         </h3>
                       </div>
                       <div className="flex gap-1 overflow-x-auto pb-1">
@@ -790,7 +808,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {language === 'en' ? 'Daily' : 'Harian'}
+                          {dt('daily')}
                         </button>
                         <button
                           onClick={() => setRevenueTrendPeriod('weekly')}
@@ -800,7 +818,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {language === 'en' ? 'Weekly' : 'Mingguan'}
+                          {dt('weekly')}
                         </button>
                         <button
                           onClick={() => setRevenueTrendPeriod('monthly')}
@@ -810,7 +828,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {language === 'en' ? 'Monthly' : 'Bulanan'}
+                          {dt('monthly')}
                         </button>
                       </div>
                     </div>
@@ -826,7 +844,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                           <YAxis 
                             stroke="#6b7280"
                             style={{ fontSize: '10px' }}
-                            tickFormatter={(value) => `Rp ${(value / 1000000).toFixed(0)}M`}
+                            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}${dt('millionShort')}`}
                           />
                           <Tooltip 
                             formatter={(value: any) => formatCurrency(Number(value))}
@@ -854,10 +872,10 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                       <div className="flex items-center gap-2">
                         <ShoppingCart className="w-5 h-5 text-[var(--color-accent)]" />
                         <h3 className="text-base sm:text-lg font-bold text-gray-900">
-                          {language === 'en' ? 'Orders vs AOV' : 'Pesanan vs AOV'}
-                          {ordersAOVPeriod === 'daily' && ` (${language === 'en' ? 'by Day' : 'per Hari'})`}
-                          {ordersAOVPeriod === 'weekly' && ` (${language === 'en' ? '8 Weeks' : '8 Minggu'})`}
-                          {ordersAOVPeriod === 'monthly' && ` (${language === 'en' ? '12 Months' : '12 Bulan'})`}
+                          {dt('ordersVsAov')}
+                          {ordersAOVPeriod === 'daily' && ` (${dt('byDay')})`}
+                          {ordersAOVPeriod === 'weekly' && ` (${dt('weeks8')})`}
+                          {ordersAOVPeriod === 'monthly' && ` (${dt('months12')})`}
                         </h3>
                       </div>
                       <div className="flex gap-1 overflow-x-auto pb-1">
@@ -869,7 +887,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {language === 'en' ? 'Daily' : 'Harian'}
+                          {dt('daily')}
                         </button>
                         <button
                           onClick={() => setOrdersAOVPeriod('weekly')}
@@ -879,7 +897,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {language === 'en' ? 'Weekly' : 'Mingguan'}
+                          {dt('weekly')}
                         </button>
                         <button
                           onClick={() => setOrdersAOVPeriod('monthly')}
@@ -889,7 +907,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
-                          {language === 'en' ? 'Monthly' : 'Bulanan'}
+                          {dt('monthly')}
                         </button>
                       </div>
                     </div>
@@ -912,7 +930,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                             orientation="right"
                             stroke="#6b7280"
                             style={{ fontSize: '10px' }}
-                            tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+                            tickFormatter={(value) => `${(value / 1000).toFixed(0)}${dt('thousandShort')}`}
                           />
                           <Tooltip 
                             contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
@@ -928,7 +946,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                             yAxisId="left"
                             dataKey="orders" 
                             fill="#3b82f6" 
-                            name={language === 'en' ? 'Orders' : 'Pesanan'}
+                            name={dt('orders')}
                             radius={[8, 8, 0, 0]}
                           />
                           <Line 
@@ -937,7 +955,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                             dataKey="avgOrderValue" 
                             stroke="#10b981" 
                             strokeWidth={3}
-                            name={language === 'en' ? 'Avg Order Value' : 'Nilai Pesanan Rata'}
+                            name={dt('avgOrderValue')}
                             dot={{ fill: '#10b981', r: 4 }}
                             activeDot={{ r: 6 }}
                           />
@@ -947,11 +965,11 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                     <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-gray-600">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                        <span>{language === 'en' ? 'Blue bars: orders per day' : 'Bar biru: pesanan per hari'}</span>
+                        <span>{dt('ordersPerDayMsg')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-500 rounded"></div>
-                        <span>{language === 'en' ? 'Green line: average order value' : 'Garis hijau: nilai pesanan rata'}</span>
+                        <span>{dt('avgOrderMsg')}</span>
                       </div>
                     </div>
                   </div>
@@ -964,7 +982,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <Zap className="w-5 h-5 text-[var(--color-accent)]" />
-                  <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Business Insights' : 'Wawasan Bisnis'}</h3>
+                  <h3 className="text-lg font-bold text-gray-900">{dt('businessInsights')}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {insights.map((insight) => {
@@ -1045,7 +1063,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                               'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
                             }`}
                           >
-                            {language === 'en' ? 'Learn More →' : 'Pelajari Lebih →'}
+                            {dt('learnMore')}
                           </button>
                         </div>
                       </div>
@@ -1062,7 +1080,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-4">
                     <Bell className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Alerts' : 'Notifikasi'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt('alerts')}</h3>
                   </div>
                   <div className="space-y-3">
                     {alerts.slice(0, 3).map((alert) => (
@@ -1094,7 +1112,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-4">
                     <CheckCircle className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Action Items' : 'Hal yang Harus Dilakukan'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt('actionItems')}</h3>
                   </div>
                   <div className="space-y-2">
                     {todos.slice(0, 4).map((todo) => (
@@ -1126,14 +1144,14 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-5">
                     <UtensilsCrossed className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Sellers' : 'Menu Terlaris'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt('topSellers')}</h3>
                   </div>
                   <div className="space-y-3">
                     {topMenuItems.map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
-                          <p className="text-xs text-gray-600">{item.count} {language === 'en' ? 'sold' : 'terjual'}</p>
+                          <p className="text-xs text-gray-600">{item.count} {dt('sold')}</p>
                         </div>
                         <span className="text-sm font-bold text-[var(--color-accent)]">{formatCurrency(item.revenue)}</span>
                       </div>
@@ -1147,14 +1165,14 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-5">
                     <Building2 className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Tables' : 'Meja Populer'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt('topTables')}</h3>
                   </div>
                   <div className="space-y-3">
                     {topTables.map((table, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 text-sm">{language === 'en' ? 'Table' : 'Meja'} {table.tableNumber}</p>
-                          <p className="text-xs text-gray-600">{table.orders} {language === 'en' ? 'orders' : 'pesanan'}</p>
+                          <p className="font-semibold text-gray-900 text-sm">{dt('table')} {table.tableNumber}</p>
+                          <p className="text-xs text-gray-600">{table.orders} {dt('orders')}</p>
                         </div>
                         <span className="text-sm font-bold text-[var(--color-accent)]">{formatCurrency(table.revenue)}</span>
                       </div>
@@ -1168,14 +1186,14 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
                 <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-2 mb-5">
                     <Users className="w-5 h-5 text-[var(--color-accent)]" />
-                    <h3 className="text-lg font-bold text-gray-900">{language === 'en' ? 'Top Staff' : 'Staf Terbaik'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{dt('topStaff')}</h3>
                   </div>
                   <div className="space-y-3">
                     {topStaff.map((member, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
-                          <p className="text-xs text-gray-600">{member.orders} {language === 'en' ? 'orders' : 'pesanan'}</p>
+                          <p className="text-xs text-gray-600">{member.orders} {dt('orders')}</p>
                         </div>
                         <span className="text-sm font-bold text-[var(--color-accent)]">{formatCurrency(member.revenue)}</span>
                       </div>

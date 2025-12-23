@@ -12,7 +12,7 @@ import { MockupCarousel } from "@/components/ui/mockup-carousel"
 
 
 export default function QRMenuFeaturePage() {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
   const qrmenuMockups = [
     QRMenuDisplayMockup, QRMenuCustomerMockup, QROrderCartMockup, QRAnalyticsMockup
   ]
@@ -27,7 +27,7 @@ export default function QRMenuFeaturePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-[#FF5A5F] mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            {language === "en" ? "Back to Features" : "Kembali ke Fitur"}
+            {t.featurePages.backToFeatures}
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -38,22 +38,20 @@ export default function QRMenuFeaturePage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-100 rounded-full mb-6">
                 <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
-                <span className="text-sm font-bold text-cyan-700">QR Menu</span>
+                <span className="text-sm font-bold text-cyan-700">{t.featurePages.qrMenu.badge}</span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-                {language === "en" ? "Digital QR Menu" : "QR Menu Digital"}
+                {t.featurePages.qrMenu.title}
               </h1>
               
               <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                {language === "en"
-                  ? "Customers scan QR code at table to view menu and order directly without physical contact or waiting for staff."
-                  : "Pelanggan scan QR di meja untuk lihat menu dan order langsung tanpa kontak fisik atau menunggu staff."}
+                {t.featurePages.qrMenu.description}
               </p>
 
               <Link href="/demo">
                 <Button size="lg" className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] text-white rounded-full px-8 py-6 text-lg font-bold shadow-xl">
-                  {language === "en" ? "Try Demo" : "Coba Demo"}
+                  {t.featurePages.tryDemo}
                 </Button>
               </Link>
             </motion.div>
@@ -76,36 +74,11 @@ export default function QRMenuFeaturePage() {
       <section className="py-20">
         <Container>
           <h2 className="text-4xl font-black text-gray-900 mb-12 text-center">
-            {language === "en" ? "Key Features" : "Fitur Utama"}
+            {t.featurePages.keyFeatures}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: language === "en" ? "Contactless Ordering" : "Order Tanpa Kontak",
-                desc: language === "en" 
-                  ? "Customers order directly from their phones, no app download needed"
-                  : "Pelanggan order langsung dari HP, tanpa perlu download app"
-              },
-              {
-                title: language === "en" ? "Real-Time Menu" : "Menu Real-Time",
-                desc: language === "en"
-                  ? "Menu updates automatically when you make changes in the system"
-                  : "Menu update otomatis saat Anda ubah di sistem"
-              },
-              {
-                title: language === "en" ? "Multi-Language" : "Multi-Bahasa",
-                desc: language === "en"
-                  ? "Support multiple languages for international customers"
-                  : "Dukung berbagai bahasa untuk pelanggan internasional"
-              },
-              {
-                title: language === "en" ? "Image Gallery" : "Galeri Gambar",
-                desc: language === "en"
-                  ? "Showcase menu items with high-quality food photography"
-                  : "Tampilkan item menu dengan fotografi makanan berkualitas tinggi"
-              }
-            ].map((feature, i) => (
+            {t.featurePages.qrMenu.features.map((feature, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +90,7 @@ export default function QRMenuFeaturePage() {
                 <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}

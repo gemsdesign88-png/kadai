@@ -194,9 +194,9 @@ export default function OrdersClient() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: locale === 'id-ID' ? 'IDR' : locale === 'zh-CN' ? 'CNY' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)
@@ -319,7 +319,7 @@ export default function OrdersClient() {
                   axisLine={false} 
                   tickLine={false} 
                   tick={{ fill: '#9ca3af', fontSize: 12 }}
-                  tickFormatter={(value) => `Rp${value/1000}k`}
+                  tickFormatter={(value) => locale === 'id-ID' ? `Rp${value/1000}k` : locale === 'zh-CN' ? `¥${value/1000}k` : `$${value/1000}k`}
                 />
                 <Tooltip 
                   cursor={{ fill: '#f9fafb' }}
@@ -416,7 +416,7 @@ export default function OrdersClient() {
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900">#{order.id.slice(0, 8)}</td>
                     <td className="px-6 py-4 text-gray-500">
-                      {new Date(order.paid_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(order.paid_at).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="px-6 py-4 text-gray-500">{order.order_items?.length || 0} {dt("items")}</td>
                     <td className="px-6 py-4 font-semibold text-gray-900">{formatCurrency(order.total)}</td>

@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 const FOUNDER_EMAIL = 'gemmyadyendra@gmail.com';
 
 export async function POST(request: Request) {

@@ -1,10 +1,9 @@
 "use client"
 
-import * as React from "react"
-import { motion } from "framer-motion"
+import { getMockupTranslator } from "./mockup-i18n"
 
 export function PaymentCheckoutMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -16,16 +15,16 @@ export function PaymentCheckoutMockup({ color, language }: { color: string; lang
         }}
       >
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Payment' : 'Pembayaran'}</h3>
-          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'Table 5 - 3 items' : 'Meja 5 - 3 item'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Payment', 'Pembayaran', '支付')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('Table 5 - 3 items', 'Meja 5 - 3 item', '5号桌 - 3个项目')}</p>
         </div>
 
         <div className="bg-white rounded-2xl p-4 shadow-md border border-gray-100 mb-4">
           <div className="space-y-3">
             {[
-              { name: "Nasi Goreng Spesial", qty: 2, price: 50000 },
-              { name: "Es Teh Manis", qty: 2, price: 10000 },
-              { name: "Ayam Geprek", qty: 1, price: 20000 },
+              { name: t("Special Fried Rice", "Nasi Goreng Spesial", "特别炒饭"), qty: 2, price: 50000 },
+              { name: t("Sweet Iced Tea", "Es Teh Manis", "甜冰茶"), qty: 2, price: 10000 },
+              { name: t("Geprek Chicken", "Ayam Geprek", "碎鸡肉"), qty: 1, price: 20000 },
             ].map((item, i) => (
               <div key={i} className="flex justify-between text-sm">
                 <span className="text-gray-700">{item.qty}x {item.name}</span>
@@ -40,7 +39,7 @@ export function PaymentCheckoutMockup({ color, language }: { color: string; lang
               <span className="font-semibold text-gray-900">Rp 80.000</span>
             </div>
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-gray-600">{isEnglish ? 'Tax (10%)' : 'Pajak (10%)'}</span>
+              <span className="text-gray-600">{t('Tax (10%)', 'Pajak (10%)', '税 (10%)')}</span>
               <span className="font-semibold text-gray-900">Rp 8.000</span>
             </div>
             <div className="flex justify-between text-lg font-bold">
@@ -51,13 +50,13 @@ export function PaymentCheckoutMockup({ color, language }: { color: string; lang
         </div>
 
         <div className="mb-4">
-          <p className="text-sm font-bold text-gray-700 mb-3">{isEnglish ? 'Payment Method' : 'Metode Pembayaran'}</p>
+          <p className="text-sm font-bold text-gray-700 mb-3">{t('Payment Method', 'Metode Pembayaran', '支付方式')}</p>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { name: "Cash", icon: "💵", selected: true },
+              { name: t("Cash", "Tunai", "现金"), icon: "💵", selected: true },
               { name: "QRIS", icon: "📱", selected: false },
-              { name: "Debit", icon: "💳", selected: false },
-              { name: "Transfer", icon: "🏦", selected: false },
+              { name: t("Debit", "Debit", "借记卡"), icon: "💳", selected: false },
+              { name: t("Transfer", "Transfer", "转账"), icon: "🏦", selected: false },
             ].map((method, i) => (
               <div key={i} className={`p-3 rounded-xl border-2 cursor-pointer flex flex-col items-center gap-2 ${
                 method.selected ? 'bg-pink-50 border-pink-500' : 'bg-white border-gray-200'
@@ -70,7 +69,7 @@ export function PaymentCheckoutMockup({ color, language }: { color: string; lang
         </div>
 
         <button className="w-full py-4 bg-gradient-to-r from-pink-600 to-pink-700 text-white rounded-xl font-bold shadow-lg">
-          {isEnglish ? 'Process Payment' : 'Proses Pembayaran'}
+          {t('Process Payment', 'Proses Pembayaran', '处理支付')}
         </button>
       </div>
     </div>
@@ -78,7 +77,7 @@ export function PaymentCheckoutMockup({ color, language }: { color: string; lang
 }
 
 export function SplitBillMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -90,17 +89,17 @@ export function SplitBillMockup({ color, language }: { color: string; language: 
         }}
       >
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Split Bill' : 'Bagi Tagihan'}</h3>
-          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'Table 5' : 'Meja 5'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Split Bill', 'Bagi Tagihan', '分摊账单')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('Table 5', 'Meja 5', '5号桌')}</p>
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 mb-4 text-center">
-          <p className="text-sm text-gray-600 mb-1">{isEnglish ? 'Total Bill' : 'Total Tagihan'}</p>
+          <p className="text-sm text-gray-600 mb-1">{t('Total Bill', 'Total Tagihan', '总账单')}</p>
           <p className="text-3xl font-black text-gray-900">Rp 88.000</p>
         </div>
 
         <div className="mb-4">
-          <p className="text-sm font-bold text-gray-700 mb-3">{isEnglish ? 'Split Options' : 'Opsi Pembagian'}</p>
+          <p className="text-sm font-bold text-gray-700 mb-3">{t('Split Options', 'Opsi Pembagian', '分摊选项')}</p>
           <div className="grid grid-cols-4 gap-2">
             {[2, 3, 4, 5].map((num, i) => (
               <div key={i} className={`p-3 rounded-xl border-2 cursor-pointer text-center ${
@@ -108,7 +107,7 @@ export function SplitBillMockup({ color, language }: { color: string; language: 
               }`}>
                 <p className="text-2xl font-bold text-gray-900">{num}</p>
                 <p className={`text-xs mt-1 ${num === 3 ? 'text-pink-600 font-bold' : 'text-gray-600'}`}>
-                  {isEnglish ? 'people' : 'orang'}
+                  {t('people', 'orang', '人')}
                 </p>
               </div>
             ))}
@@ -117,17 +116,17 @@ export function SplitBillMockup({ color, language }: { color: string; language: 
 
         <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-xl p-4 border-2 border-pink-200 mb-4">
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-1">{isEnglish ? 'Per Person' : 'Per Orang'}</p>
+            <p className="text-sm text-gray-600 mb-1">{t('Per Person', 'Per Orang', '每人')}</p>
             <p className="text-3xl font-black text-pink-600">Rp 29.333</p>
           </div>
           <div className="mt-3 pt-3 border-t border-pink-200 flex items-center justify-between text-sm">
-            <span className="text-gray-600">{isEnglish ? 'Split into' : 'Dibagi menjadi'}</span>
-            <span className="font-bold text-gray-900">3 {isEnglish ? 'payments' : 'pembayaran'}</span>
+            <span className="text-gray-600">{t('Split into', 'Dibagi menjadi', '分为')}</span>
+            <span className="font-bold text-gray-900">3 {t('payments', 'pembayaran', '次支付')}</span>
           </div>
         </div>
 
         <button className="w-full py-4 bg-gradient-to-r from-pink-600 to-pink-700 text-white rounded-xl font-bold shadow-lg">
-          {isEnglish ? 'Proceed Split Payment' : 'Lanjut Bagi Pembayaran'}
+          {t('Proceed Split Payment', 'Lanjut Bagi Pembayaran', '继续分摊支付')}
         </button>
       </div>
     </div>
@@ -135,7 +134,7 @@ export function SplitBillMockup({ color, language }: { color: string; language: 
 }
 
 export function QRISPaymentMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -147,19 +146,19 @@ export function QRISPaymentMockup({ color, language }: { color: string; language
         }}
       >
         <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'QRIS Payment' : 'Pembayaran QRIS'}</h3>
-          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'Table 5' : 'Meja 5'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('QRIS Payment', 'Pembayaran QRIS', 'QRIS 支付')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('Table 5', 'Meja 5', '5号桌')}</p>
         </div>
 
         <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 mb-4 text-center">
-          <p className="text-sm text-gray-600 mb-2">{isEnglish ? 'Amount to Pay' : 'Jumlah Bayar'}</p>
+          <p className="text-sm text-gray-600 mb-2">{t('Amount to Pay', 'Jumlah Bayar', '支付金额')}</p>
           <p className="text-3xl font-black text-pink-600 mb-4">Rp 88.000</p>
           
           <div className="w-48 h-48 bg-gray-100 rounded-2xl mx-auto mb-4 flex items-center justify-center">
             <div className="text-6xl">📱</div>
           </div>
           
-          <p className="text-xs text-gray-600">{isEnglish ? 'Scan with any e-wallet app' : 'Scan dengan aplikasi e-wallet'}</p>
+          <p className="text-xs text-gray-600">{t('Scan with any e-wallet app', 'Scan dengan aplikasi e-wallet', '使用任何电子钱包应用扫描')}</p>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
@@ -168,14 +167,14 @@ export function QRISPaymentMockup({ color, language }: { color: string; language
               <span className="text-lg">⏱️</span>
             </div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-blue-900">{isEnglish ? 'Waiting for payment...' : 'Menunggu pembayaran...'}</p>
+              <p className="text-xs font-bold text-blue-900">{t('Waiting for payment...', 'Menunggu pembayaran...', '等待支付...')}</p>
               <p className="text-xs text-blue-700">03:45</p>
             </div>
           </div>
         </div>
 
         <button className="w-full py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold">
-          {isEnglish ? 'Cancel' : 'Batal'}
+          {t('Cancel', 'Batal', '取消')}
         </button>
       </div>
     </div>
@@ -183,7 +182,7 @@ export function QRISPaymentMockup({ color, language }: { color: string; language
 }
 
 export function ReceiptMockup({ color, language }: { color: string; language: string }) {
-  const isEnglish = language === 'en'
+  const t = getMockupTranslator(language)
   
   return (
     <div className="w-full max-w-md mx-auto">
@@ -198,22 +197,22 @@ export function ReceiptMockup({ color, language }: { color: string; language: st
           <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl">
             ✓
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">{isEnglish ? 'Payment Success!' : 'Pembayaran Berhasil!'}</h3>
-          <p className="text-sm text-gray-600 mt-1">{isEnglish ? 'December 3, 2025 14:30' : '3 Desember 2025 14:30'}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{t('Payment Success!', 'Pembayaran Berhasil!', '支付成功！')}</h3>
+          <p className="text-sm text-gray-600 mt-1">{t('December 3, 2025 14:30', '3 Desember 2025 14:30', '2025年12月3日 14:30')}</p>
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 mb-4">
           <div className="border-b border-dashed border-gray-300 pb-3 mb-3">
-            <p className="font-bold text-gray-900 mb-2">KadaiPOS Restaurant</p>
+            <p className="font-bold text-gray-900 mb-2">KadaiPOS Store</p>
             <p className="text-xs text-gray-600">Jl. Example No. 123</p>
             <p className="text-xs text-gray-600">Jakarta, Indonesia</p>
           </div>
 
           <div className="space-y-2 border-b border-dashed border-gray-300 pb-3 mb-3">
             {[
-              { name: "Nasi Goreng Spesial", qty: 2, price: 50000 },
-              { name: "Es Teh Manis", qty: 2, price: 10000 },
-              { name: "Ayam Geprek", qty: 1, price: 20000 },
+              { name: t("Special Fried Rice", "Nasi Goreng Spesial", "特别炒饭"), qty: 2, price: 50000 },
+              { name: t("Sweet Iced Tea", "Es Teh Manis", "甜冰茶"), qty: 2, price: 10000 },
+              { name: t("Geprek Chicken", "Ayam Geprek", "碎鸡肉"), qty: 1, price: 20000 },
             ].map((item, i) => (
               <div key={i} className="flex justify-between text-xs">
                 <span className="text-gray-700">{item.qty}x {item.name}</span>
@@ -228,7 +227,7 @@ export function ReceiptMockup({ color, language }: { color: string; language: st
               <span className="text-gray-900">80.000</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">{isEnglish ? 'Tax' : 'Pajak'} (10%)</span>
+              <span className="text-gray-600">{t('Tax', 'Pajak', '税')} (10%)</span>
               <span className="text-gray-900">8.000</span>
             </div>
           </div>
@@ -240,11 +239,11 @@ export function ReceiptMockup({ color, language }: { color: string; language: st
 
           <div className="mt-3 pt-3 border-t border-dashed border-gray-300 text-xs">
             <div className="flex justify-between mb-1">
-              <span className="text-gray-600">{isEnglish ? 'Payment' : 'Pembayaran'}</span>
-              <span className="text-gray-900">Cash</span>
+              <span className="text-gray-600">{t('Payment', 'Pembayaran', '支付')}</span>
+              <span className="text-gray-900">{t('Cash', 'Tunai', '现金')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">{isEnglish ? 'Table' : 'Meja'}</span>
+              <span className="text-gray-600">{t('Table', 'Meja', '桌号')}</span>
               <span className="text-gray-900">5</span>
             </div>
           </div>
@@ -252,10 +251,10 @@ export function ReceiptMockup({ color, language }: { color: string; language: st
 
         <div className="grid grid-cols-2 gap-3">
           <button className="py-3 bg-white border-2 border-pink-200 text-pink-700 rounded-xl font-bold text-sm">
-            {isEnglish ? 'Print' : 'Cetak'}
+            {t('Print', 'Cetak', '打印')}
           </button>
           <button className="py-3 bg-gradient-to-r from-pink-600 to-pink-700 text-white rounded-xl font-bold text-sm">
-            {isEnglish ? 'Send Email' : 'Kirim Email'}
+            {t('Send Email', 'Kirim Email', '发送邮件')}
           </button>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Palette, Check } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ThemeColorPickerProps {
   restaurantId: string;
@@ -26,6 +27,7 @@ const PRESET_COLORS = [
 ];
 
 export function ThemeColorPicker({ restaurantId, currentColor = '#FF5A5F', onColorChange }: ThemeColorPickerProps) {
+  const { setPrimaryColor } = useTheme();
   const [selectedColor, setSelectedColor] = useState(currentColor);
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
@@ -48,9 +50,9 @@ export function ThemeColorPicker({ restaurantId, currentColor = '#FF5A5F', onCol
         return;
       }
 
-      // Update CSS variables immediately
-      document.documentElement.style.setProperty('--color-accent', color);
-      
+      // Update theme context
+      await setPrimaryColor(color);
+
       // Notify parent component
       onColorChange?.(color);
 

@@ -130,7 +130,7 @@ export default function CustomersClient() {
       orders.forEach(order => {
         // Use customer_id as unique key, fallback to order.id if not available
         const customerId = order.customer_id || order.id
-        const customerName = order.customer_name?.trim() || `Customer ${customerId?.substring(0, 8)}`
+        const customerName = order.customer_name?.trim() || `${dt('customerPrefix')} ${customerId?.substring(0, 8)}`
         
         if (!customerData[customerId]) {
           customerData[customerId] = {
@@ -259,9 +259,9 @@ export default function CustomersClient() {
   }
 
   function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'IDR',
+      currency: locale === 'id-ID' ? 'IDR' : locale === 'zh-CN' ? 'CNY' : 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount)

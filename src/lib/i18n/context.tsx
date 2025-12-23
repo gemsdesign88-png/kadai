@@ -6,7 +6,7 @@ import { translations, Language } from "./translations"
 interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
-  t: typeof translations.en | typeof translations.id
+  t: typeof translations.en | typeof translations.id | typeof translations.zh
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
@@ -17,7 +17,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Load language from localStorage
     const savedLang = localStorage.getItem("language") as Language
-    if (savedLang && (savedLang === "en" || savedLang === "id")) {
+    if (savedLang && (savedLang === "en" || savedLang === "id" || savedLang === "zh")) {
       setLanguageState(savedLang)
     }
   }, [])

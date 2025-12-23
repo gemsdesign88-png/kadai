@@ -200,7 +200,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
                 🏢
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Business Name</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t.register.plan.businessName}</p>
                 <p className="text-base font-bold text-gray-900 truncate">{businessName}</p>
               </div>
             </div>
@@ -217,8 +217,10 @@ export default function PlanSelector({ businessType, category, businessName, onS
                 {businessType === 'toko' ? '🏪' : '🍽️'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Business Type</p>
-                <p className="text-base font-bold text-gray-900 capitalize">{businessType}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t.register.plan.businessType}</p>
+                <p className="text-base font-bold text-gray-900 capitalize">
+                  {businessType === 'toko' ? t.register.businessType.types.toko.name : t.register.businessType.types.resto.name}
+                </p>
               </div>
             </div>
           </div>
@@ -230,8 +232,10 @@ export default function PlanSelector({ businessType, category, businessName, onS
                 {getCategoryIcon(category)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Category</p>
-                <p className="text-base font-bold text-gray-900 truncate">{category || 'Not specified'}</p>
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t.register.plan.category}</p>
+                <p className="text-base font-bold text-gray-900 truncate">
+                  {category ? (t.register.category.categories[category as keyof typeof t.register.category.categories]?.name || category) : t.register.plan.notSpecified}
+                </p>
               </div>
             </div>
           </div>
@@ -295,7 +299,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
               }`}
             >
               {t.register.plan.yearly}
-              <span className="ml-1.5 text-xs font-semibold">{businessType === 'toko' ? t.register.plan.save : '~10% off'}</span>
+              <span className="ml-1.5 text-xs font-semibold">{businessType === 'toko' ? t.register.plan.save : `~10% ${t.register.plan.off}`}</span>
             </button>
           </div>
         </div>

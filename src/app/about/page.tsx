@@ -5,187 +5,95 @@ import { useLanguage } from "@/lib/i18n/context";
 import { Target, Users, Zap, Heart, Award, TrendingUp } from "lucide-react";
 
 export default function AboutPage() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   const values = [
     {
       icon: Users,
-      title: language === "en" ? "Customer First" : "Pelanggan Utama",
-      description: language === "en"
-        ? "Every decision we make starts with one question: How does this benefit our business partners? We build features that solve real problems faced by store owners daily."
-        : "Setiap keputusan yang kami buat dimulai dengan satu pertanyaan: Bagaimana ini menguntungkan mitra bisnis kami? Kami membangun fitur yang menyelesaikan masalah nyata yang dihadapi pemilik toko setiap hari.",
+      title: t.about.values.customerFirst.title,
+      description: t.about.values.customerFirst.description,
       color: "#FF5A5F",
-      principles: language === "en"
-        ? [
-            "Listen actively to customer feedback",
-            "Prioritize features that add real value",
-            "Provide responsive and helpful support",
-            "Build long-term partnerships, not transactions"
-          ]
-        : [
-            "Mendengarkan feedback pelanggan secara aktif",
-            "Prioritaskan fitur yang memberikan nilai nyata",
-            "Berikan dukungan yang responsif dan membantu",
-            "Bangun kemitraan jangka panjang, bukan transaksi"
-          ]
+      principles: t.about.values.customerFirst.principles
     },
     {
       icon: Zap,
-      title: language === "en" ? "Innovation & Simplicity" : "Inovasi & Kesederhanaan",
-      description: language === "en"
-        ? "Technology should empower, not complicate. We continuously innovate to bring the latest features while keeping the user experience simple and intuitive for everyone."
-        : "Teknologi seharusnya memberdayakan, bukan memperumit. Kami terus berinovasi untuk menghadirkan fitur terkini sambil menjaga pengalaman pengguna tetap sederhana dan intuitif untuk semua orang.",
+      title: t.about.values.innovationSimplicity.title,
+      description: t.about.values.innovationSimplicity.description,
       color: "#8B5CF6",
-      principles: language === "en"
-        ? [
-            "Embrace modern technology and best practices",
-            "Design for simplicity and ease of use",
-            "Stay ahead with continuous improvements",
-            "Make powerful features accessible to all"
-          ]
-        : [
-            "Adopsi teknologi modern dan praktik terbaik",
-            "Desain untuk kesederhanaan dan kemudahan penggunaan",
-            "Tetap unggul dengan perbaikan berkelanjutan",
-            "Buat fitur powerful dapat diakses semua orang"
-          ]
+      principles: t.about.values.innovationSimplicity.principles
     },
     {
       icon: Heart,
-      title: language === "en" ? "Built for Indonesia" : "Dibuat untuk Indonesia",
-      description: language === "en"
-        ? "We deeply understand Indonesian business culture, operations, and challenges. KadaiPOS is designed from the ground up to meet the unique needs of Indonesian businesses."
-        : "Kami sangat memahami budaya, operasi, dan tantangan bisnis Indonesia. KadaiPOS dirancang dari awal untuk memenuhi kebutuhan unik bisnis Indonesia.",
+      title: t.about.values.builtForIndonesia.title,
+      description: t.about.values.builtForIndonesia.description,
       color: "#3B82F6",
-      principles: language === "en"
-        ? [
-            "Support local payment methods (QRIS, e-wallets)",
-            "Accommodate Indonesian dining culture",
-            "Provide bilingual interface (EN/ID)",
-            "Understand local business practices"
-          ]
-        : [
-            "Dukung metode pembayaran lokal (QRIS, e-wallet)",
-            "Akomodasi budaya makan Indonesia",
-            "Sediakan interface bilingual (EN/ID)",
-            "Pahami praktik bisnis lokal"
-          ]
+      principles: t.about.values.builtForIndonesia.principles
     },
     {
       icon: Award,
-      title: language === "en" ? "Reliability & Security" : "Keandalan & Keamanan",
-      description: language === "en"
-        ? "Business operations never stop, and neither should your POS system. We prioritize uptime, data security, and automatic backups so you can run your business with peace of mind."
-        : "Operasi bisnis tidak pernah berhenti, begitu juga sistem POS Anda. Kami prioritaskan uptime, keamanan data, dan backup otomatis sehingga Anda dapat menjalankan bisnis dengan tenang.",
+      title: t.about.values.reliabilitySecurity.title,
+      description: t.about.values.reliabilitySecurity.description,
       color: "#10B981",
-      principles: language === "en"
-        ? [
-            "Cloud-based with automatic data backup",
-            "Secure payment processing",
-            "24/7 system availability",
-            "Regular security updates and monitoring"
-          ]
-        : [
-            "Berbasis cloud dengan backup data otomatis",
-            "Pemrosesan pembayaran yang aman",
-            "Ketersediaan sistem 24/7",
-            "Update keamanan dan monitoring rutin"
-          ]
+      principles: t.about.values.reliabilitySecurity.principles
     },
     {
       icon: TrendingUp,
-      title: language === "en" ? "Growth Partnership" : "Kemitraan Pertumbuhan",
-      description: language === "en"
-        ? "Your success is our success. We provide not just software, but insights and tools that help you understand your business better and make data-driven decisions for growth."
-        : "Kesuksesan Anda adalah kesuksesan kami. Kami menyediakan bukan hanya software, tetapi insight dan tools yang membantu Anda memahami bisnis lebih baik dan membuat keputusan berbasis data untuk pertumbuhan.",
+      title: t.about.values.growthPartnership.title,
+      description: t.about.values.growthPartnership.description,
       color: "#F59E0B",
-      principles: language === "en"
-        ? [
-            "Real-time analytics and actionable insights",
-            "Help identify opportunities for growth",
-            "Support business scaling and expansion",
-            "Provide resources for continuous learning"
-          ]
-        : [
-            "Analytics real-time dan insight yang actionable",
-            "Bantu identifikasi peluang untuk pertumbuhan",
-            "Dukung scaling dan ekspansi bisnis",
-            "Sediakan resources untuk pembelajaran berkelanjutan"
-          ]
+      principles: t.about.values.growthPartnership.principles
     },
     {
       icon: Target,
-      title: language === "en" ? "Transparency & Trust" : "Transparansi & Kepercayaan",
-      description: language === "en"
-        ? "We believe in honest communication and fair pricing. No hidden fees, no complicated contracts. What you see is what you get, with clear pricing per outlet."
-        : "Kami percaya pada komunikasi yang jujur dan harga yang adil. Tanpa biaya tersembunyi, tanpa kontrak rumit. Apa yang Anda lihat adalah apa yang Anda dapatkan, dengan harga yang jelas per outlet.",
+      title: t.about.values.transparencyTrust.title,
+      description: t.about.values.transparencyTrust.description,
       color: "#EF4444",
-      principles: language === "en"
-        ? [
-            "Simple, transparent pricing model",
-            "No hidden fees or surprise charges",
-            "Clear communication about updates and changes",
-            "Honest about capabilities and limitations"
-          ]
-        : [
-            "Model harga yang sederhana dan transparan",
-            "Tanpa biaya tersembunyi atau tagihan mengejutkan",
-            "Komunikasi jelas tentang update dan perubahan",
-            "Jujur tentang kemampuan dan keterbatasan"
-          ]
+      principles: t.about.values.transparencyTrust.principles
     }
   ];
 
   const stats = [
     {
       number: "2025",
-      label: language === "en" ? "Founded" : "Didirikan"
+      label: t.about.stats.founded
     },
     {
       number: "100%",
-      label: language === "en" ? "Cloud-Based" : "Berbasis Cloud"
+      label: t.about.stats.cloudBased
     },
     {
       number: "13+",
-      label: language === "en" ? "Core Features" : "Fitur Utama"
+      label: t.about.stats.coreFeatures
     },
     {
       number: "24/7",
-      label: language === "en" ? "Support Ready" : "Support Siap"
+      label: t.about.stats.supportReady
     }
   ];
 
   const team = [
     {
       name: "Gemmy Adyendra",
-      role: language === "en" ? "Founder & CEO" : "Founder & CEO",
-      description: language === "en"
-        ? "Passionate about helping businesses grow through technology"
-        : "Bersemangat membantu bisnis berkembang melalui teknologi"
+      role: t.about.team.founder.role,
+      description: t.about.team.founder.description
     }
   ];
 
   const whyChooseUs = [
     {
       icon: Award,
-      title: language === "en" ? "Modern Technology" : "Teknologi Modern",
-      description: language === "en"
-        ? "Built with latest technology stack for reliability and performance"
-        : "Dibangun dengan teknologi terkini untuk keandalan dan performa"
+      title: t.about.whyChooseUs.modernTechnology.title,
+      description: t.about.whyChooseUs.modernTechnology.description
     },
     {
       icon: TrendingUp,
-      title: language === "en" ? "Rapid Development" : "Pengembangan Cepat",
-      description: language === "en"
-        ? "Continuously adding new features and improvements every week"
-        : "Terus menambahkan fitur baru dan peningkatan setiap minggu"
+      title: t.about.whyChooseUs.rapidDevelopment.title,
+      description: t.about.whyChooseUs.rapidDevelopment.description
     },
     {
       icon: Heart,
-      title: language === "en" ? "Built for Indonesia" : "Dibuat untuk Indonesia",
-      description: language === "en"
-        ? "Designed specifically for Indonesian business operations and culture"
-        : "Dirancang khusus untuk operasi dan budaya bisnis Indonesia"
+      title: t.about.whyChooseUs.builtForIndonesia.title,
+      description: t.about.whyChooseUs.builtForIndonesia.description
     }
   ];
 
@@ -208,21 +116,19 @@ export default function AboutPage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 mb-6">
               <span className="text-sm font-medium text-gray-700">
-                {language === "en" ? "🏢 About KadaiPOS" : "🏢 Tentang KadaiPOS"}
+                {t.about.badge}
               </span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              {language === "en" ? "Revolutionizing" : "Merevolusi"}{" "}
+              {t.about.title}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "Business Management" : "Manajemen Bisnis"}
+                {t.about.titleHighlight}
               </span>
             </h1>
             
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              {language === "en"
-                ? "KadaiPOS is a new, modern point of sale system designed for all types of Indonesian businesses - from restaurants and cafes to retail stores. We're building a powerful yet intuitive platform to help business owners manage their operations efficiently and focus on what matters most - serving their customers."
-                : "KadaiPOS adalah sistem point of sale modern baru yang dirancang untuk semua jenis bisnis Indonesia - dari restoran dan kafe hingga toko retail. Kami membangun platform yang powerful namun intuitif untuk membantu pemilik bisnis mengelola operasi mereka secara efisien dan fokus pada yang paling penting - melayani pelanggan mereka."}
+              {t.about.subtitle}
             </p>
           </motion.div>
 
@@ -255,15 +161,13 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4">
-              {language === "en" ? "Our" : "Nilai-Nilai"}{" "}
+              {t.about.values.title}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "Values" : "Kami"}
+                {t.about.values.titleHighlight}
               </span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              {language === "en"
-                ? "The principles that guide everything we do"
-                : "Prinsip yang memandu semua yang kami lakukan"}
+              {t.about.values.subtitle}
             </p>
           </motion.div>
 
@@ -316,9 +220,9 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4">
-              {language === "en" ? "Why Choose" : "Mengapa Memilih"}{" "}
+              {t.about.whyChooseUs.title}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "KadaiPOS" : "KadaiPOS"}
+                {t.about.whyChooseUs.titleHighlight}
               </span>
             </h2>
           </motion.div>
@@ -354,15 +258,13 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4">
-              {language === "en" ? "Meet Our" : "Tim"}{" "}
+              {t.about.team.title}{" "}
               <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {language === "en" ? "Team" : "Kami"}
+                {t.about.team.titleHighlight}
               </span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              {language === "en"
-                ? "The people behind KadaiPOS"
-                : "Orang-orang di balik KadaiPOS"}
+              {t.about.team.subtitle}
             </p>
           </motion.div>
 
@@ -408,12 +310,10 @@ export default function AboutPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              {language === "en" ? "Be an Early Adopter" : "Jadilah Early Adopter"}
+              {t.about.cta.title}
             </h2>
             <p className="text-xl text-white/80 mb-8">
-              {language === "en"
-                ? "Join us in revolutionizing business management. Get special pricing and help shape the future of KadaiPOS."
-                : "Bergabunglah dengan kami dalam merevolusi manajemen bisnis. Dapatkan harga spesial dan bantu membentuk masa depan KadaiPOS."}
+              {t.about.cta.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
@@ -422,13 +322,13 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white rounded-full font-semibold hover:shadow-2xl hover:shadow-purple-500/50 transition-all"
               >
-                {language === "en" ? "Contact Us" : "Hubungi Kami"}
+                {t.about.cta.contactUs}
               </a>
               <a
                 href="/pricing"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold border border-white/20 hover:bg-white/20 transition-all"
               >
-                {language === "en" ? "View Pricing" : "Lihat Harga"}
+                {t.about.cta.viewPricing}
               </a>
             </div>
           </motion.div>

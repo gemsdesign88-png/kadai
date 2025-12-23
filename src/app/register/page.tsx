@@ -2,400 +2,238 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { useLanguage } from '@/lib/i18n/context';
 import { AuthHeader } from '@/components/auth-header';
-import BusinessTypeSelector from '@/components/onboarding/BusinessTypeSelector';
-import CategorySelector from '@/components/onboarding/CategorySelector';
-import PlanSelector from '@/components/onboarding/PlanSelector';
-
-export const dynamic = 'force-dynamic';
 import AccountCreation from '@/components/onboarding/AccountCreation';
-import { createRestaurantAction, createSubscriptionAction, createUserProfileAction, createUserAction } from '@/app/actions/register';
-
-type Step = 'account' | 'business-type' | 'category' | 'plan';
-
-interface RegistrationData {
-  email: string;
-  password: string;
-  fullName: string;
-  phoneNumber: string;
-  businessName: string;
-  businessType: 'toko' | 'resto' | null;
-  category: string | null;
-  planId: string | null;
-}
+import { createUserAction } from '@/app/actions/register';
+import { createClient } from '@/lib/supabase/client';
 
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
-  const { language, setLanguage, t } = useLanguage();
-  const [currentStep, setCurrentStep] = useState<Step>('account');
+  const { language, t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  const [registrationData, setRegistrationData] = useState<RegistrationData>({
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message);
+      setIsLoading(false);
+    }
+  };
+
+  const [registrationData, setRegistrationData] = useState({
     email: '',
     password: '',
     fullName: '',
     phoneNumber: '',
-    businessName: '',
-    businessType: null,
-    category: null,
-    planId: null,
   });
 
-  const updateData = (updates: Partial<RegistrationData>) => {
-    setRegistrationData(prev => ({ ...prev, ...updates }));
-  };
-
-  const handleAccountComplete = (data: { email: string; password: string; fullName: string; phoneNumber: string; businessName: string }) => {
-    updateData(data);
-    setCurrentStep('business-type');
-  };
-
-  const handleBusinessTypeSelect = (type: 'toko' | 'resto') => {
-    updateData({ businessType: type });
-  };
-
-  const handleCategorySelect = (category: string) => {
-    updateData({ category });
-  };
-
-  const handlePlanSelect = (planId: string) => {
-    updateData({ planId });
-  };
-
-  const handleNext = () => {
-    if (currentStep === 'business-type' && registrationData.businessType) {
-      setCurrentStep('category');
-    } else if (currentStep === 'category' && registrationData.category) {
-      setCurrentStep('plan');
-    } else if (currentStep === 'plan' && registrationData.planId) {
-      handleFinalSubmit();
-    }
-  };
-
-  const handleFinalSubmit = async () => {
-    if (!registrationData.planId) return;
-    
+  const handleAccountComplete = async (data: { email: string; password: string; fullName: string; phoneNumber: string }) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('Starting registration with data:', { 
-        email: registrationData.email, 
-        businessName: registrationData.businessName,
-        businessType: registrationData.businessType,
-        category: registrationData.category,
-        planId: registrationData.planId
+      console.log('Starting registration with data:', {
+        email: data.email,
+        fullName: data.fullName,
       });
 
-      // 1. Create user account using server action (bypasses email confirmation)
+      // Create user account using server action
       const userResult = await createUserAction({
-        email: registrationData.email,
-        password: registrationData.password,
-        fullName: registrationData.fullName,
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        phoneNumber: data.phoneNumber,
       });
 
-      console.log('User creation result:', userResult);
-
-      if (!userResult.success || !userResult.userId) {
-        throw new Error(userResult.error || 'Failed to create account');
+      if (!userResult.success) {
+        setError(userResult.error || 'Failed to create account');
+        setIsLoading(false);
+        return;
       }
 
-      const userId = userResult.userId;
-      console.log('User created with ID:', userId);
-
-      // Sign in the user after creation
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: registrationData.email,
-        password: registrationData.password,
-      });
-
-      if (signInError) {
-        console.error('Sign in after creation failed:', signInError);
-        // Continue anyway - user can sign in manually
-      }
-
-      // Small delay to ensure user is propagated to database
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 2. Create user profile
-      const profileResult = await createUserProfileAction({
-        userId: userId,
-        fullName: registrationData.fullName,
-        phoneNumber: registrationData.phoneNumber,
-        email: registrationData.email,
-      });
-
-      if (!profileResult.success) {
-        console.error('User profile creation failed:', profileResult.error);
-        // Continue anyway - profile can be created later
-      } else {
-        console.log('User profile created successfully');
-      }
-
-      // 3. Create restaurant using server action (bypasses RLS client-side issues)
-      const restaurantResult = await createRestaurantAction({
-        userId: userId,
-        businessName: registrationData.businessName,
-        businessType: registrationData.businessType || 'toko',
-        category: registrationData.category || 'general',
-        planId: registrationData.planId,
-      });
-
-      if (!restaurantResult.success || !restaurantResult.restaurant) {
-        throw new Error(`Failed to create restaurant: ${restaurantResult.error || 'Unknown error'}`);
-      }
-
-      console.log('Restaurant created successfully:', restaurantResult.restaurant);
-
-      // 4. Create initial subscription using server action
-      const subscriptionResult = await createSubscriptionAction({
-        restaurantId: restaurantResult.restaurant.id,
-        planId: registrationData.planId,
-      });
-
-      if (!subscriptionResult.success) {
-        console.error('Subscription creation failed:', subscriptionResult.error);
-        throw new Error(`Failed to create subscription: ${subscriptionResult.error || 'Unknown error'}`);
-      }
-
-      console.log('Subscription created successfully');
-
-      // Success! Show message and redirect
-      console.log('Registration successful, redirecting...');
-      const message = language === 'id' 
-        ? 'Selamat datang di KadaiPOS'
-        : language === 'zh'
-        ? '欢迎使用 KadaiPOS'
-        : 'Welcome to KadaiPOS';
+      console.log('User created successfully, showing verification message...');
       
-      setSuccessMessage(message);
+      // Show verification message
+      setRegisteredEmail(data.email);
+      setShowVerifyEmail(true);
       setIsLoading(false);
-      
-      // Wait 2 seconds to show success message
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      router.push('/dashboard?welcome=true');
     } catch (err: any) {
-      console.error('Registration error caught:', err);
-      console.error('Error message:', err?.message);
-      
-      // Enhanced error handling with specific messages
+      console.error('Registration error:', err);
       let errorMessage = 'Failed to complete registration';
-      
+
       if (err?.message) {
         errorMessage = err.message;
-      } else if (err?.error_description) {
-        errorMessage = err.error_description;
       } else if (typeof err === 'string') {
         errorMessage = err;
-      } else {
-        errorMessage = `Registration failed. Please check console for details.`;
       }
-      
+
       setError(errorMessage);
       setIsLoading(false);
     }
   };
 
-  const handleBack = () => {
-    const steps: Step[] = ['account', 'business-type', 'category', 'plan'];
-    const currentIndex = steps.indexOf(currentStep);
-    if (currentIndex > 0) {
-      setCurrentStep(steps[currentIndex - 1]);
+  const handleResendEmail = async () => {
+    if (!registeredEmail) return;
+    
+    setIsResending(true);
+    setResendMessage(null);
+    
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: registeredEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      
+      setResendMessage({
+        type: 'success',
+        text: language === 'id' ? 'Email verifikasi telah dikirim ulang!' : 'Verification email has been resent!'
+      });
+    } catch (err: any) {
+      console.error('Resend error:', err);
+      setResendMessage({
+        type: 'error',
+        text: err.message || (language === 'id' ? 'Gagal mengirim ulang email.' : 'Failed to resend email.')
+      });
+    } finally {
+      setIsResending(false);
     }
   };
-
-  const progress = {
-    account: 25,
-    'business-type': 50,
-    category: 75,
-    plan: 100,
-  }[currentStep];
 
   return (
     <>
       <AuthHeader />
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-16">
-        {/* Progress Bar */}
-        <div className="fixed top-16 left-0 right-0 h-1 bg-gray-200 z-50">
-          <div
-            className="h-full bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] transition-all duration-500 ease-out"
-            style={{width: `${progress}%`}}
-          ></div>
-        </div>
-
-        {/* Success Modal Overlay */}
-        {successMessage && (
+        {/* Verify Email Modal Overlay */}
+        {showVerifyEmail && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center animate-in fade-in zoom-in duration-300">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {language === 'id' ? 'Registrasi Berhasil!' : language === 'zh' ? '注册成功！' : 'Registration Successful!'}
+                {language === 'id' ? 'Cek Email Anda!' : language === 'zh' ? '检查您的电子邮件！' : 'Check Your Email!'}
               </h3>
-              <p className="text-gray-600 mb-4">{successMessage}</p>
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>{language === 'id' ? 'Mengarahkan ke dashboard...' : language === 'zh' ? '正在跳转到仪表板...' : 'Redirecting to dashboard...'}</span>
-              </div>
+              <p className="text-gray-600 mb-4">
+                {language === 'id' 
+                  ? `Kami telah mengirimkan link verifikasi ke ${registeredEmail}.`
+                  : language === 'zh'
+                  ? `我们已向 ${registeredEmail} 发送了验证链接。`
+                  : `We've sent a verification link to ${registeredEmail}.`
+                }
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                {language === 'id' 
+                  ? 'Silakan klik link di email tersebut untuk memverifikasi akun Anda sebelum login.'
+                  : language === 'zh'
+                  ? '请点击电子邮件中的链接以在登录前验证您的账户。'
+                  : 'Please click the link in that email to verify your account before logging in.'
+                }
+              </p>
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full py-3 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all mb-4"
+              >
+                {language === 'id' ? 'Ke Halaman Login' : language === 'zh' ? '前往登录页面' : 'Go to Login Page'}
+              </button>
+
+              {resendMessage && (
+                <div className={`mb-4 p-3 rounded-lg text-sm ${
+                  resendMessage.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                }`}>
+                  {resendMessage.text}
+                </div>
+              )}
+
+              <button
+                onClick={handleResendEmail}
+                disabled={isResending}
+                className="w-full py-2 text-gray-600 font-medium hover:text-gray-900 transition-colors disabled:opacity-50"
+              >
+                {isResending 
+                  ? (language === 'id' ? 'Mengirim...' : 'Sending...') 
+                  : (language === 'id' ? 'Kirim Ulang Email Verifikasi' : 'Resend Verification Email')
+                }
+              </button>
+
+              <p className="mt-4 text-xs text-gray-500">
+                {language === 'id' 
+                  ? 'Tidak menerima email? Periksa folder spam atau'
+                  : language === 'zh'
+                  ? '没有收到电子邮件？检查垃圾邮件文件夹或'
+                  : "Didn't receive the email? Check your spam folder or"
+                }{' '}
+                <button 
+                  onClick={() => {
+                    setShowVerifyEmail(false);
+                    setError(null);
+                    setResendMessage(null);
+                  }}
+                  className="text-[#FF5A5F] hover:underline font-medium"
+                >
+                  {language === 'id' ? 'coba lagi' : language === 'zh' ? '重试' : 'try again'}
+                </button>
+              </p>
             </div>
           </div>
         )}
 
-        {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
-        
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-            {error}
+        {/* Error Message */}
+        {error && !showVerifyEmail && (
+          <div className="max-w-md mx-auto mt-8 px-4">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+              <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
+              <button 
+                onClick={() => setError(null)}
+                className="text-red-600 hover:text-red-800"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          {currentStep === 'account' && (
+        {/* Account Creation Form */}
+        {!showVerifyEmail && (
+          <div className="container mx-auto max-w-2xl">
             <AccountCreation
               onComplete={handleAccountComplete}
-              initialData={{
-                email: registrationData.email,
-                password: registrationData.password,
-                fullName: registrationData.fullName,
-                phoneNumber: registrationData.phoneNumber,
-                businessName: registrationData.businessName,
-              }}
-            />
-          )}
-
-          {currentStep === 'business-type' && (
-            <BusinessTypeSelector
-              businessName={registrationData.businessName}
-              onSelect={handleBusinessTypeSelect}
-              selected={registrationData.businessType}
-            />
-          )}
-
-          {currentStep === 'category' && registrationData.businessType && (
-            <CategorySelector
-              businessType={registrationData.businessType}
-              businessName={registrationData.businessName}
-              onSelect={handleCategorySelect}
-              selected={registrationData.category}
-            />
-          )}
-
-          {currentStep === 'plan' && registrationData.businessType && (
-            <PlanSelector
-              businessType={registrationData.businessType}
-              category={registrationData.category}
-              businessName={registrationData.businessName}
-              onSelect={handlePlanSelect}
-              selected={registrationData.planId}
+              onGoogleLogin={handleGoogleLogin}
+              initialData={registrationData}
               isLoading={isLoading}
             />
-          )}
-        </div>
-      </main>
-
-      {/* Sticky Bottom Navigation - Only show after account step */}
-      {currentStep !== 'account' && (
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            {/* Back Button */}
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors border border-gray-300"
-              disabled={isLoading}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="text-sm font-medium">
-                {language === 'id' ? 'Kembali' : language === 'zh' ? '返回' : 'Back'}
-              </span>
-            </button>
-            
-            {/* Step Counter */}
-            <div className="text-sm text-gray-500 font-medium">
-              {t.register?.step || 'Step'} {['account', 'business-type', 'category', 'plan'].indexOf(currentStep) + 1} {t.register?.of || 'of'} 4
-            </div>
-
-            {/* Next Button */}
-            {currentStep !== 'plan' ? (
-              <button
-                onClick={() => {
-                  if (currentStep === 'business-type' && registrationData.businessType) {
-                    setCurrentStep('category');
-                  } else if (currentStep === 'category' && registrationData.category) {
-                    setCurrentStep('plan');
-                  }
-                }}
-                disabled={
-                  (currentStep === 'business-type' && !registrationData.businessType) ||
-                  (currentStep === 'category' && !registrationData.category)
-                }
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
-                  ((currentStep === 'business-type' && registrationData.businessType) ||
-                   (currentStep === 'category' && registrationData.category))
-                    ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white hover:shadow-lg hover:shadow-[#FF5A5F]/30'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                <span className="text-sm font-medium">
-                  {language === 'id' ? 'Lanjut' : language === 'zh' ? '继续' : 'Next'}
-                </span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            ) : (
-              <button
-                onClick={handleFinalSubmit}
-                disabled={!registrationData.planId || isLoading}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
-                  registrationData.planId && !isLoading
-                    ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white hover:shadow-lg hover:shadow-[#FF5A5F]/30'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span className="text-sm font-medium">
-                      {language === 'id' ? 'Memproses...' : language === 'zh' ? '处理中...' : 'Processing...'}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-sm font-medium">
-                      {language === 'id' ? 'Submit' : language === 'zh' ? '提交' : 'Submit'}
-                    </span>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </>
-                )}
-              </button>
-            )}
           </div>
-        </div>
+        )}
       </div>
-      )}
-    </div>
     </>
   );
 }

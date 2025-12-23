@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Building2, Calendar, CreditCard, MapPin, Phone, Mail, Edit, Plus, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/context';
+import { createDashboardTranslator } from '@/lib/i18n/dashboard-translator';
 
 interface Restaurant {
   id: string;
@@ -28,6 +29,7 @@ export default function OwnerPage() {
   const router = useRouter();
   const supabase = createClient();
   const { language } = useLanguage();
+  const { t: dt } = createDashboardTranslator(language);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,10 +89,10 @@ export default function OwnerPage() {
 
   const getPlanName = (plan: string) => {
     switch (plan) {
-      case 'monthly': return 'Bulanan';
-      case 'yearly': return 'Tahunan';
-      case 'lifetime': return 'Lifetime';
-      default: return 'Trial';
+      case 'monthly': return dt('monthly');
+      case 'yearly': return dt('yearly');
+      case 'lifetime': return dt('lifetime');
+      default: return dt('trial');
     }
   };
 
@@ -103,7 +105,7 @@ export default function OwnerPage() {
     const isExpired = daysLeft < 0;
 
     return {
-      date: new Date(expiryDate).toLocaleDateString('id-ID', { 
+      date: new Date(expiryDate).toLocaleDateString(dt.locale, { 
         day: 'numeric', 
         month: 'long', 
         year: 'numeric' 
@@ -136,10 +138,10 @@ export default function OwnerPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          {language === 'en' ? 'Owner Profile' : 'Profil Owner'}
+          {dt('ownerProfile')}
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
-          {language === 'en' ? 'Manage your account and restaurant information' : 'Kelola informasi akun dan restoran Anda'}
+          {dt('manageAccount')}
         </p>
       </div>
 
@@ -156,7 +158,7 @@ export default function OwnerPage() {
               className="mt-16 px-6 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <Edit className="w-4 h-4" />
-              {language === 'en' ? 'Edit Profile' : 'Edit Profil'}
+              {dt('editProfile')}
             </button>
           </div>
           
@@ -184,14 +186,14 @@ export default function OwnerPage() {
             </div>
             
             <div className="bg-gray-50 rounded-xl p-6">
-              <h3 className="font-bold text-gray-900 mb-4">{language === 'en' ? 'Account Summary' : 'Ringkasan Akun'}</h3>
+              <h3 className="font-bold text-gray-900 mb-4">{dt('accountSummary')}</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">{language === 'en' ? 'Total Restaurants' : 'Total Restoran'}</span>
+                  <span className="text-gray-600">{dt('totalRestaurants')}</span>
                   <span className="font-bold text-2xl text-[var(--color-accent)]">{restaurants.length}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">{language === 'en' ? 'Active' : 'Aktif'}</span>
+                  <span className="text-gray-600">{dt('active')}</span>
                   <span className="font-bold text-lg text-green-600">
                     {restaurants.filter(r => {
                       const status = getExpiryStatus(r);
@@ -200,7 +202,7 @@ export default function OwnerPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">{language === 'en' ? 'Needs Renewal' : 'Perlu Perpanjangan'}</span>
+                  <span className="text-gray-600">{dt('needsRenewal')}</span>
                   <span className="font-bold text-lg text-amber-600">
                     {restaurants.filter(r => {
                       const status = getExpiryStatus(r);
@@ -217,15 +219,15 @@ export default function OwnerPage() {
       {/* Restaurants Section */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{language === 'en' ? 'Your Restaurants' : 'Restoran Anda'}</h2>
-          <p className="text-gray-600">{language === 'en' ? 'Manage your restaurants and subscriptions' : 'Kelola restoran dan langganan Anda'}</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{dt('yourRestaurants')}</h2>
+          <p className="text-gray-600">{dt('manageRestaurantsDesc')}</p>
         </div>
         <button
           onClick={() => {/* TODO: Add restaurant */}}
           className="px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
-          {language === 'en' ? 'Add Restaurant' : 'Tambah Restoran'}
+          {dt('addRestaurant')}
         </button>
       </div>
 
@@ -257,7 +259,7 @@ export default function OwnerPage() {
                 )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-gray-900 mb-1 truncate">{restaurant.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">{restaurant.address || 'Alamat belum diisi'}</p>
+                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">{restaurant.address || dt('addressNotSet')}</p>
                   <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border ${getPlanBadgeColor(restaurant.subscription_plan)}`}>
                     <Calendar className="w-3 h-3" />
                     <span className="text-xs font-semibold">{getPlanName(restaurant.subscription_plan)}</span>
@@ -274,7 +276,7 @@ export default function OwnerPage() {
                 }`}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-gray-600">
-                      {expiryStatus.isExpired ? 'Berakhir pada:' : 'Aktif hingga:'}
+                      {expiryStatus.isExpired ? dt('expiredOn') : dt('activeUntil')}
                     </span>
                     <span className={`text-xs font-bold ${
                       expiryStatus.isExpired ? 'text-red-700' : 
@@ -286,12 +288,12 @@ export default function OwnerPage() {
                   </div>
                   {!expiryStatus.isExpired && (
                     <div className="text-xs text-gray-600">
-                      {expiryStatus.daysLeft} hari lagi
+                      {expiryStatus.daysLeft} {dt('daysLeft')}
                     </div>
                   )}
                   {expiryStatus.isExpired && (
                     <div className="text-xs font-semibold text-red-700 mt-1">
-                      ⚠️ Langganan telah berakhir
+                      ⚠️ {dt('subscriptionExpired')}
                     </div>
                   )}
                 </div>
@@ -309,7 +311,7 @@ export default function OwnerPage() {
                 }`}
               >
                 <CreditCard className="w-4 h-4" />
-                <span className="flex-1 text-center">{language === 'en' ? 'Manage Subscription' : 'Kelola Langganan'}</span>
+                <span className="flex-1 text-center">{dt('manageSubscription')}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -322,14 +324,14 @@ export default function OwnerPage() {
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Building2 className="w-10 h-10 text-gray-400" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">{language === 'en' ? 'No Restaurants Yet' : 'Belum Ada Restoran'}</h3>
-          <p className="text-gray-600 mb-6">{language === 'en' ? 'Start by adding your first restaurant' : 'Mulai dengan menambahkan restoran pertama Anda'}</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">{dt('noRestaurantsYet')}</h3>
+          <p className="text-gray-600 mb-6">{dt('startByAddingRestaurant')}</p>
           <button
             onClick={() => {/* TODO: Add restaurant */}}
             className="px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
-            {language === 'en' ? 'Add Restaurant' : 'Tambah Restoran'}
+            {dt('addRestaurant')}
           </button>
         </div>
       )}

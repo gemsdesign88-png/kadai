@@ -120,7 +120,7 @@ export default function TablesClient() {
       // Prepare performance data for chart (top 10 tables by revenue)
       const performanceData = Object.values(analytics)
         .map((a: any) => ({
-          table: `Table ${a.tableNumber}`,
+          table: `${dt("tableLabel")} ${a.tableNumber}`,
           revenue: a.totalRevenue,
           orders: a.totalOrders,
           avgOrder: a.totalOrders > 0 ? a.totalRevenue / a.totalOrders : 0
