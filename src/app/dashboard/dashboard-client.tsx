@@ -32,30 +32,9 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
   const { t: dt, locale } = createDashboardTranslator(language);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const dayLabel = (dayIndex: number) => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return dt.dayLabel(days[dayIndex]);
-  };
-
-  const formatText = (key: string, replacements?: Record<string, string | number>) => {
-    let text = dt(key);
-    if (replacements) {
-      Object.entries(replacements).forEach(([token, value]) => {
-        text = text.replace(`{${token}}`, String(value));
-      });
-    }
-    return text;
-  };
-
   const [loading, setLoading] = useState(false);
   const [activeRestaurant, setActiveRestaurant] = useState<any>(null);
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
-
-  if (!mounted) return null;
 
   const [stats, setStats] = useState({
     todayRevenue: 0,
@@ -84,6 +63,27 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
   const [revenueTrendPeriod, setRevenueTrendPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [ordersAOVPeriod, setOrdersAOVPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [allOrdersCache, setAllOrdersCache] = useState<any[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const dayLabel = (dayIndex: number) => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return dt.dayLabel(days[dayIndex]);
+  };
+
+  const formatText = (key: string, replacements?: Record<string, string | number>) => {
+    let text = dt(key);
+    if (replacements) {
+      Object.entries(replacements).forEach(([token, value]) => {
+        text = text.replace(`{${token}}`, String(value));
+      });
+    }
+    return text;
+  };
+
+  if (!mounted) return null;
 
   useEffect(() => {
     if (restaurants.length > 0) {

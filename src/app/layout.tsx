@@ -54,6 +54,7 @@ export const metadata: Metadata = {
     icon: { url: '/Favicon.svg', type: 'image/svg+xml' },
     apple: '/Favicon.svg',
   },
+  manifest: '/manifest.webmanifest',
   alternates: {
     canonical: 'https://kadaipos.id',
   },
