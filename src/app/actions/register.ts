@@ -176,12 +176,15 @@ export async function createRestaurantAction(input: CreateRestaurantInput) {
       .eq('id', input.planId)
       .single();
 
+    // Map 'lite' to 'toko' to satisfy the database constraint
+    const mappedPlanTier = plan?.plan_tier === 'lite' ? 'toko' : plan?.plan_tier;
+
     const restaurantData = {
       name: input.businessName,
       owner_id: input.userId,
       business_type: input.businessType,
       business_category: input.category,
-      plan_tier: plan?.plan_tier || (input.businessType === 'toko' ? 'toko' : 'starter'),
+      plan_tier: mappedPlanTier || (input.businessType === 'toko' ? 'toko' : 'starter'),
       onboarding_completed: true,
       is_trial: true,
       subscription_status: 'trial',
