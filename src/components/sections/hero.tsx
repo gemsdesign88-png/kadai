@@ -7,9 +7,14 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/context"
 import { ArrowRight, ShoppingCart, BarChart3, Users, CreditCard, Package, Receipt, TrendingUp, Clock, Zap, Shield, Smartphone } from "lucide-react"
 import Link from "next/link"
-import { InteractiveDashboardClient } from "./interactive-dashboard-client"
+import dynamic from "next/dynamic"
 
-const InteractiveDashboard = InteractiveDashboardClient
+const InteractiveDashboard = dynamic(() => import("./interactive-dashboard-client").then(mod => mod.InteractiveDashboardClient), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-[16/10] bg-white/5 rounded-3xl animate-pulse border border-white/10" />
+  )
+})
 
 export function Hero() {
   const { t, language } = useLanguage()
