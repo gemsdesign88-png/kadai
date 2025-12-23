@@ -174,16 +174,10 @@ const ZH_TODOS = [
 
 export function InteractiveDashboard() {
   const { language, t } = useLanguage()
-  const [mounted, setMounted] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState('dashboard')
   const [revenueTrendPeriod, setRevenueTrendPeriod] = React.useState<'daily' | 'weekly' | 'monthly'>('weekly')
   const [isFullscreen, setIsFullscreen] = React.useState(false)
   const [isMobile, setIsMobile] = React.useState(false)
-
-  // Mounted check for SSR
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Mobile detection
   React.useEffect(() => {
@@ -2096,15 +2090,8 @@ export function InteractiveDashboard() {
 
   return (
     <div className="relative">
-      {!mounted && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center rounded-3xl border border-gray-200 bg-white/90 text-sm font-medium text-gray-500">
-          Loading Dashboard...
-        </div>
-      )}
-
-      <div className={`transition-opacity duration-200 ${!mounted ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
-        {/* Fullscreen Modal for Mobile - Airbnb Style */}
-        {isMobile && isFullscreen && (
+      {/* Fullscreen Modal for Mobile - Airbnb Style */}
+      {isMobile && isFullscreen && (
           <>
             {/* Backdrop */}
             <div 
@@ -2288,7 +2275,6 @@ export function InteractiveDashboard() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   )
 }

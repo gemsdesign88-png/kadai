@@ -8,7 +8,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
 const InteractiveDashboard = dynamic(() => import('@/components/sections/interactive-dashboard').then(mod => mod.InteractiveDashboard), {
-  ssr: true,
+  ssr: false,
   loading: () => (
     <div className="w-full aspect-[16/10] bg-gray-100 rounded-3xl animate-pulse border border-gray-200 flex items-center justify-center">
       <div className="text-gray-400 font-medium">Loading Dashboard...</div>

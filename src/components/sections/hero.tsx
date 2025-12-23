@@ -10,7 +10,7 @@ import Link from "next/link"
 import dynamic from "next/dynamic"
 
 const InteractiveDashboard = dynamic(() => import("./interactive-dashboard").then(mod => mod.InteractiveDashboard), {
-  ssr: true,
+  ssr: false,
   loading: () => (
     <div className="w-full aspect-[16/10] bg-white/5 rounded-3xl animate-pulse border border-white/10" />
   )
