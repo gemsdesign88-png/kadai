@@ -11,17 +11,24 @@ interface CreateUserInput {
   phoneNumber?: string;
 }
 
+interface CreateUserInput {
+  email: string;
+  password: string;
+  fullName: string;
+  phoneNumber?: string;
+}
+
 export async function createUserAction(input: CreateUserInput) {
   try {
     const supabaseAdmin = createAdminClient();
 
-    console.log('[Server] Creating user with admin client:', input.email);
+    console.log('[Server] Creating user with admin client and email verification:', input.email);
 
-    // Use admin API to create user - auto-confirm email (temporary for testing)
+    // Use admin API to create user with email confirmation required
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: input.email,
       password: input.password,
-      email_confirm: true,
+      email_confirm: false, // Require email confirmation
       user_metadata: {
         full_name: input.fullName,
         phone: input.phoneNumber,
@@ -29,17 +36,17 @@ export async function createUserAction(input: CreateUserInput) {
     });
 
     if (error) {
-      console.error('[Server] Supabase signUp error:', {
+      console.error('[Server] Supabase admin createUser error:', {
         message: error.message,
         status: error.status,
         name: error.name
       });
-      
+
       // Check for duplicate email
       if (error.message?.includes('already') || error.message?.includes('exists')) {
         return { success: false, error: 'This email is already registered. Please sign in instead.', userId: null };
       }
-      
+
       return { success: false, error: error.message || 'Failed to create user', userId: null };
     }
 
@@ -48,7 +55,30 @@ export async function createUserAction(input: CreateUserInput) {
       return { success: false, error: 'User creation returned no data', userId: null };
     }
 
-    console.log('[Server] User registration initiated successfully:', data.user?.id);
+    console.log('[Server] User created successfully, now sending confirmation email...');
+
+    // Try to send confirmation email using Supabase's resend method
+    try {
+      const { error: resendError } = await supabaseAdmin.auth.resend({
+        type: 'signup',
+        email: input.email,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/onboarding`,
+        },
+      });
+
+      if (resendError) {
+        console.error('[Server] Failed to send confirmation email:', resendError);
+        // Don't fail the registration, just log the error
+      } else {
+        console.log('[Server] Confirmation email sent successfully');
+      }
+    } catch (resendErr) {
+      console.error('[Server] Error sending confirmation email:', resendErr);
+      // Don't fail the registration
+    }
+
+    console.log('[Server] User registration completed:', data.user?.id);
 
     return { success: true, userId: data.user?.id, error: null };
   } catch (err: any) {
