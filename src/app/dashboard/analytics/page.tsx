@@ -38,7 +38,6 @@ export default function AnalyticsPage() {
   const supabase = createClient()
   const { language, t } = useLanguage()
   const { t: dt } = createDashboardTranslator(language)
-  const [mounted, setMounted] = useState(false)
 
   const [loading, setLoading] = useState(true)
   const [restaurant, setRestaurant] = useState<any>(null)
@@ -67,12 +66,6 @@ export default function AnalyticsPage() {
   const [promoData, setPromoData] = useState<Array<{ name: string; revenue: number; discount: number; netRevenue: number }>>([])
   const [voidDiscountData, setVoidDiscountData] = useState<Array<{ type: string; count: number; amount: number }>>([])
   const [ratingData, setRatingData] = useState<Array<{ period: string; rating: number; reviews: number }>>([])
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
 
   // Initialize: Load user and restaurants
   useEffect(() => {

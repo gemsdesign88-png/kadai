@@ -30,7 +30,6 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
   const supabase = createClient();
   const { language, t } = useLanguage();
   const { t: dt, locale } = createDashboardTranslator(language);
-  const [mounted, setMounted] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [activeRestaurant, setActiveRestaurant] = useState<any>(null);
@@ -64,10 +63,6 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
   const [ordersAOVPeriod, setOrdersAOVPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [allOrdersCache, setAllOrdersCache] = useState<any[]>([]);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const dayLabel = (dayIndex: number) => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return dt.dayLabel(days[dayIndex]);
@@ -82,8 +77,6 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
     }
     return text;
   };
-
-  if (!mounted) return null;
 
   useEffect(() => {
     if (restaurants.length > 0) {

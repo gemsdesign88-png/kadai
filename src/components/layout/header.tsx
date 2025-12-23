@@ -43,12 +43,6 @@ const featuresMenu = [
 
 export function Header() {
   const pathname = usePathname()
-
-  // Hide header on in-app views (dashboard/order/register)
-  if (pathname?.startsWith('/order') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/register')) {
-    return null
-  }
-
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
   const [featuresOpen, setFeaturesOpen] = React.useState(false)
@@ -57,6 +51,11 @@ export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false)
   const featuresTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   const businessTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Hide header on in-app views (dashboard/order/register)
+  if (pathname?.startsWith('/order') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/register')) {
+    return null
+  }
   
   React.useEffect(() => {
     setMounted(true)
