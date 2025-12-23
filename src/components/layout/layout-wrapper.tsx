@@ -10,10 +10,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const isOrderPage = pathname.startsWith('/order');
   const isRegisterPage = pathname === '/register';
   const isLoginPage = pathname === '/login';
+  const isOnboardingPage = pathname === '/onboarding';
 
   return (
     <>
-      {!isOrderPage && !isLoginPage && <Header />}
+      {!isOrderPage && !isLoginPage && !isOnboardingPage && <Header />}
       <main className="min-h-screen">
         {children}
       </main>
