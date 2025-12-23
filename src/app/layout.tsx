@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import dynamic from "next/dynamic";
-
-const ClientLayout = dynamic(() => import("@/components/client-layout").then(mod => mod.ClientLayout), {
-  ssr: false,
-})
+import { LayoutWrapper } from "@/components/layout/layout-wrapper";
+import { LanguageProvider } from "@/lib/i18n/context";
+import { CurrencyProvider } from "@/lib/i18n/currency-context";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -80,10 +80,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${plusJakartaSans.variable} antialiased`}>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+      <body
+        className={`${plusJakartaSans.variable} antialiased`}
+      >
+        <LanguageProvider>
+          <CurrencyProvider>
+            <ThemeProvider>
+              <ScrollProgress />
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </ThemeProvider>
+          </CurrencyProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
