@@ -23,7 +23,12 @@ export async function middleware(request: NextRequest) {
          !pathname.startsWith('/_next'))) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
-    return await updateSession(request);
+    try {
+      return await updateSession(request);
+    } catch (error) {
+      console.error('Middleware updateSession error:', error);
+      return NextResponse.next();
+    }
   }
   
   // Public routes that don't require authentication
@@ -43,7 +48,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  return await updateSession(request);
+  try {
+    return await updateSession(request);
+  } catch (error) {
+    console.error('Middleware updateSession error:', error);
+    return NextResponse.next();
+  }
 }
 
 export const config = {
