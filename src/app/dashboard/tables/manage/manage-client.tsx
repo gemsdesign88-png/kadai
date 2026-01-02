@@ -355,7 +355,7 @@ export default function ManageTablesPage() {
             <div className="bg-gray-50 p-4 rounded-xl mb-6">
               <div className="bg-white p-4 rounded-lg shadow-sm mx-auto w-fit">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://order.kadaipos.id/order/${selectedQRTable.barcode || selectedQRTable.id}`)}&v=2`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://order.kadaipos.id/${restaurant?.name?.toLowerCase().replace(/\s+/g, '-')}/${selectedQRTable.barcode || selectedQRTable.id}`)}&v=2`}
                   alt="QR Code"
                   className="w-52 h-52"
                 />
@@ -363,7 +363,7 @@ export default function ManageTablesPage() {
               <div className="mt-4 text-center space-y-2">
                 <button
                   onClick={() => {
-                    const url = `https://order.kadaipos.id/order/${selectedQRTable.barcode || selectedQRTable.id}`
+                    const url = `https://order.kadaipos.id/${restaurant?.name?.toLowerCase().replace(/\s+/g, '-')}/${selectedQRTable.barcode || selectedQRTable.id}`
                     window.open(url, '_blank')
                   }}
                   className="text-[#FF5A5F] font-semibold text-sm hover:underline"
@@ -372,7 +372,7 @@ export default function ManageTablesPage() {
                 </button>
                 <button
                   onClick={() => {
-                    const url = `https://order.kadaipos.id/order/${selectedQRTable.barcode || selectedQRTable.id}`
+                    const url = `https://order.kadaipos.id/${restaurant?.name?.toLowerCase().replace(/\s+/g, '-')}/${selectedQRTable.barcode || selectedQRTable.id}`
                     navigator.clipboard.writeText(url)
                     alert((t.mockups.tables as any).linkCopied)
                   }}
@@ -396,7 +396,7 @@ export default function ManageTablesPage() {
               </button>
               <button
                 onClick={() => {
-                  const url = `https://order.kadaipos.id/order/${selectedQRTable.barcode || selectedQRTable.id}`
+                  const url = `https://order.kadaipos.id/${restaurant?.name?.toLowerCase().replace(/\s+/g, '-')}/${selectedQRTable.barcode || selectedQRTable.id}`
                   if (navigator.share) {
                     navigator.share({
                       title: `QR Code Meja ${selectedQRTable.number}`,
