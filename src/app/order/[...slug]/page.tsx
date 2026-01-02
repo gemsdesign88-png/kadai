@@ -185,37 +185,7 @@ export default function CustomerOrderPage() {
 
       setTable(tableData as Table);
 
-      // Check table status first
-      if (tableData.status !== 'occupied') {
-        setTableInactive(true);
-        setErrorMessage('Meja belum diaktifkan. Silakan panggil staff untuk mengaktifkan meja.');
-        // Still load restaurant for branding
-        const { data: restaurantData } = await supabase
-          .from('restaurants')
-          .select('id, name, logo_url, primary_color')
-          .eq('id', tableData.restaurant_id)
-          .single();
-        if (restaurantData) {
-          setRestaurant(restaurantData);
-        }
-        setLoading(false);
-        return;
-      }
-
-      // If no dynamic code in URL, generate one and redirect
-      if (!dynamicCodeFromUrl) {
-        await generateAndRedirect(tableData.id);
-        return;
-      }
-
-      // Validate dynamic code from URL
-      const isValid = await validateDynamicCode(tableData.id, dynamicCodeFromUrl);
-      if (!isValid) {
-        setLoading(false);
-        return;
-      }
-
-      // Load restaurant details
+      // Always load restaurant first for branding (logo, colors)
       const { data: restaurantData } = await supabase
         .from('restaurants')
         .select('id, name, logo_url, primary_color, owner_id')
@@ -224,11 +194,63 @@ export default function CustomerOrderPage() {
 
       if (restaurantData) {
         const primaryColor = restaurantData.primary_color;
-        console.log('✅ Restaurant loaded:', { id: restaurantData.id, primary_color: primaryColor });
+        console.log('✅ Restaurant loaded:', { 
+          id: restaurantData.id, 
+          name: restaurantData.name,
+          logo_url: restaurantData.logo_url,
+          primary_color: primaryColor 
+        });
         setRestaurant({
           ...restaurantData,
           primary_color: primaryColor || '#FF5A5F'
         });
+      }
+
+      // Check table status - but still allow viewing menu for occupied tables even without dynamic code
+      // Dynamic code validation (optional - only if table_sessions exists)
+      // For now, skip dynamic code system if table_sessions doesn't exist
+      let skipDynamicCode = false;
+      
+      if (!dynamicCodeFromUrl && tableData.status === 'occupied') {
+        // Try to generate dynamic code, but don't fail if table_sessions doesn't exist
+        try {
+          const response = await fetch(`/api/table-session?tableId=${tableData.id}`);
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            // Redirect to URL with dynamic code
+            const newUrl = `/order/${restaurantSlug}/${data.dynamicCode}/${tableBarcode}`;
+            router.replace(newUrl);
+            return;
+          } else {
+            // Dynamic code system not working, continue without it
+            console.warn('Dynamic code generation failed, continuing without it:', data);
+            skipDynamicCode = true;
+          }
+        } catch (codeError) {
+          console.warn('Dynamic code system not available, continuing without it:', codeError);
+          skipDynamicCode = true;
+        }
+      } else if (dynamicCodeFromUrl && tableData.status === 'occupied') {
+        // Validate dynamic code from URL if provided
+        try {
+          const isValid = await validateDynamicCode(tableData.id, dynamicCodeFromUrl);
+          if (!isValid) {
+            console.warn('Dynamic code validation failed, continuing anyway');
+            skipDynamicCode = true;
+          }
+        } catch (validationError) {
+          console.warn('Dynamic code validation error:', validationError);
+          skipDynamicCode = true;
+        }
+      }
+
+      // If table is not occupied, show error
+      if (tableData.status !== 'occupied') {
+        setTableInactive(true);
+        setErrorMessage('Meja belum diaktifkan. Silakan panggil staff untuk mengaktifkan meja.');
+        setLoading(false);
+        return;
       }
 
       // Load menu for this restaurant
