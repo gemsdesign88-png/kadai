@@ -4,7 +4,6 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import Head from 'next/head';
 
 export default function OrderLayout({
   children,
@@ -112,5 +111,21 @@ export default function OrderLayout({
     updateMetadata();
   }, [pathname]);
 
-  return <ThemeProvider>{children}</ThemeProvider>;
+  useEffect(() => {
+    // Ensure no header/footer elements leak into order page
+    // Hide any potential header/footer from root layout
+    document.body.classList.add('order-page-active');
+    
+    return () => {
+      document.body.classList.remove('order-page-active');
+    };
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <div className="order-page-wrapper" style={{ isolation: 'isolate' }}>
+        {children}
+      </div>
+    </ThemeProvider>
+  );
 }

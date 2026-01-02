@@ -342,3 +342,16 @@ body {
 body[data-dashboard-fullscreen="true"] header {
   display: none !important;
 }
+/* Ensure order page is completely isolated from main layout */
+body.order-page-active header,
+body.order-page-active footer,
+body.order-page-active nav[role="navigation"]:not(.order-page-wrapper nav) {
+  display: none !important;
+}
+
+.order-page-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
