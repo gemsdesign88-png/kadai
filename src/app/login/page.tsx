@@ -28,13 +28,42 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const hasAnyRestaurant = async (ownerId: string) => {
+    try {
+      const { count, error } = await supabase
+        .from('restaurants')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', ownerId);
+
+      if (error) {
+        console.error('Restaurant existence check error:', error);
+        // Fallback: limit(1) avoids maybeSingle/single multi-row errors
+        const { data: rows, error: fallbackError } = await supabase
+          .from('restaurants')
+          .select('id')
+          .eq('owner_id', ownerId)
+          .limit(1);
+        if (fallbackError) {
+          console.error('Restaurant existence fallback error:', fallbackError);
+          return false;
+        }
+        return (rows?.length || 0) > 0;
+      }
+
+      return (count ?? 0) > 0;
+    } catch (e) {
+      console.error('Restaurant existence check unexpected error:', e);
+      return false;
+    }
+  };
+
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       });
       if (error) throw error;
@@ -49,17 +78,8 @@ export default function LoginPage() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        const { data: restaurant } = await supabase
-          .from('restaurants')
-          .select('id, onboarding_completed')
-          .eq('owner_id', session.user.id)
-          .maybeSingle();
-          
-        if (!restaurant || !restaurant.onboarding_completed) {
-          router.push('/onboarding');
-        } else {
-          router.push('/dashboard');
-        }
+        const hasRestaurant = await hasAnyRestaurant(session.user.id);
+        router.replace(hasRestaurant ? '/dashboard' : '/onboarding');
       }
     };
     checkUser();
@@ -111,18 +131,9 @@ export default function LoginPage() {
       }
 
       if (data.session) {
-        // Check if user has completed onboarding
-        const { data: restaurant } = await supabase
-          .from('restaurants')
-          .select('id, onboarding_completed')
-          .eq('owner_id', data.user.id)
-          .maybeSingle();
-          
-        if (!restaurant || !restaurant.onboarding_completed) {
-          router.push('/onboarding');
-        } else {
-          router.push('/dashboard');
-        }
+        // Check if user has any restaurant (supports multiple outlets)
+        const hasRestaurant = await hasAnyRestaurant(data.user.id);
+        router.replace(hasRestaurant ? '/dashboard' : '/onboarding');
         router.refresh();
       }
     } catch (err: any) {

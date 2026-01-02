@@ -86,6 +86,12 @@ export default function PlanSelector({ businessType, category, businessName, onS
           };
 
           data.forEach((plan: any) => {
+            // Skip promo plans as requested
+            if (plan.id.includes('promo') || plan.name.toLowerCase().includes('promo')) {
+              console.log(`[PlanSelector] Skipping promo plan: ${plan.id}`);
+              return;
+            }
+
             // Determine billing cycle from period or duration_months field
             // Check for 'monthly', 'month', or duration_months === 1 for monthly plans
             const billing = 
@@ -98,7 +104,8 @@ export default function PlanSelector({ businessType, category, businessName, onS
             console.log(`[PlanSelector] Plan ${plan.id}: period="${plan.period}", duration_months="${plan.duration_months}", billing="${billing}"`);
             
             // Determine business type from plan_tier
-            const businessType = plan.plan_tier === 'lite' ? 'toko' : 'resto';
+            // Lite tier goes to toko, others go to resto
+            const planBusinessType = plan.plan_tier === 'lite' ? 'toko' : 'resto';
             
             // Build revenue guide text
             let revenueGuide = '';
@@ -126,7 +133,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
               revenueGuide: revenueGuide,
             };
 
-            if (businessType === 'toko') {
+            if (planBusinessType === 'toko') {
               // Add toko features
               transformedPlan.features = [
                 'Unlimited orders',
@@ -136,7 +143,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
                 'Basic reports',
               ];
               transformedPlans.toko.push(transformedPlan);
-            } else if (businessType === 'resto') {
+            } else if (planBusinessType === 'resto') {
               transformedPlans.resto.push(transformedPlan);
             }
           });
@@ -178,8 +185,8 @@ export default function PlanSelector({ businessType, category, businessName, onS
   ];
 
   return (
-    <div className="p-8 sm:p-12">
-      <div className="max-w-[1400px] mx-auto">
+    <div className="p-4 sm:p-6">
+      <div className="max-w-[1800px] mx-auto">
         {/* Loading State */}
         {isLoadingPlans ? (
           <div className="flex flex-col items-center justify-center py-20">
@@ -192,7 +199,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
         ) : (
         <>
         {/* Selected Info Summary - Enhanced Cards */}
-        <div className="mb-10 grid md:grid-cols-3 gap-4">
+        <div className="mb-10 grid md:grid-cols-3 gap-6">
           {/* Business Name Card */}
           <div className="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-2">
@@ -253,7 +260,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
 
         {/* Resto: Show Features First */}
         {businessType === 'resto' && (
-          <div className="mb-12 max-w-6xl mx-auto">
+          <div className="mb-12 w-full mx-auto">
             <div className="bg-white rounded-2xl p-8 border-2 border-gray-200 shadow-md">
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
                 {t.register.plan.allPlansIncludeTitle}
@@ -305,33 +312,24 @@ export default function PlanSelector({ businessType, category, businessName, onS
         </div>
 
         {/* Plans Grid */}
-        <div className={`grid gap-6 ${businessType === 'toko' ? 'md:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-3'}`}>
+        <div className={`grid gap-8 ${businessType === 'toko' ? 'md:grid-cols-2 max-w-6xl mx-auto' : 'md:grid-cols-3 w-full mx-auto'}`}>
           {availablePlans.map((plan) => (
             <button
               key={plan.id}
               onClick={() => onSelect(plan.id)}
-              className={`group relative p-8 rounded-2xl border-2 transition-all duration-300 text-left hover:shadow-xl hover:-translate-y-1 ${
+              className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 text-left hover:shadow-xl hover:-translate-y-1 ${
                 selected === plan.id
                   ? 'border-[#FF5A5F] bg-gradient-to-br from-red-50 to-purple-50 shadow-lg scale-105'
                   : 'border-gray-200 hover:border-gray-300 bg-white'
               }`}
             >
-              {/* Selected Indicator */}
-              {selected === plan.id && (
-                <div className="absolute top-8 right-8 w-8 h-8 rounded-full bg-gradient-to-br from-[#FF5A5F] to-[#8B5CF6] flex items-center justify-center shadow-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              )}
-
               <div className="relative">
                 {/* Plan Header */}
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   {plan.name}
                 </h3>
                 {plan.revenueGuide && (
-                  <p className="text-lg text-[#FF5A5F] font-semibold mb-4">
+                  <p className="text-base text-[#FF5A5F] font-semibold mb-4">
                     {plan.revenueGuide}
                   </p>
                 )}
@@ -339,7 +337,7 @@ export default function PlanSelector({ businessType, category, businessName, onS
                 {/* Pricing */}
                 <div className="mb-6">
                   <div className="flex items-baseline space-x-1">
-                    <span className="text-4xl font-bold bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
+                    <span className="text-3xl font-bold bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
                       {plan.priceDisplay}
                     </span>
                     <span className="text-gray-500 text-sm">{plan.period}</span>

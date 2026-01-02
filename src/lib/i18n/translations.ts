@@ -2819,7 +2819,7 @@ We will respond to your inquiry within 7 business days.`
       subtitle: "Kadai adalah solusi point of sale lengkap untuk restoran, kafe, dan toko retail. Tingkatkan efisiensi, puaskan pelanggan, dan kembangkan bisnis Anda.",
       getStarted: "Mulai Sekarang",
       watchDemo: "Lihat Demo",
-      badge: "Sistem POS Terbaik",
+      badge: "POS Terbaik di Indonesia",
       heading: "Keunggulan demi keunggulan.",
       tagline: "Sistem POS lengkap untuk restoran, kafe, dan toko retail. Sederhanakan operasi dan puaskan pelanggan dengan solusi modern kami.",
       learnMore: "Pelajari Lebih Lanjut",
@@ -2832,7 +2832,7 @@ We will respond to your inquiry within 7 business days.`
       scrollExplore: "Gulir untuk melihat",
     },
     realUiFeatures: {
-      badge: "Bekerja Dimana Saja, Kapan Saja",
+      badge: "Solusi POS Terbaik di Indonesia",
       title: "Satu Platform",
       titleHighlight: "Semua Perangkat",
       description: "Aplikasi mobile untuk staff yang bergerak. Tablet untuk display dapur. Web dashboard untuk owner. Semua sinkron real-time tanpa lag.",
@@ -3158,7 +3158,7 @@ We will respond to your inquiry within 7 business days.`
       badge: "🏢 Tentang Kadai",
       title: "Merevolusi",
       titleHighlight: "Manajemen Bisnis",
-      subtitle: "Kadai adalah sistem point of sale modern baru yang dirancang untuk semua jenis bisnis Indonesia - dari restoran dan kafe hingga toko retail. Kami membangun platform yang powerful namun intuitif untuk membantu pemilik bisnis mengelola operasi mereka secara efisien dan fokus pada yang paling penting - melayani pelanggan mereka.",
+      subtitle: "Kadai adalah sistem POS terbaik di Indonesia yang dirancang untuk semua jenis bisnis - dari restoran dan kafe hingga toko retail. Kami membangun platform yang powerful namun intuitif untuk membantu pemilik bisnis mengelola operasi mereka secara efisien dan fokus pada yang paling penting - melayani pelanggan mereka.",
       stats: {
         founded: "Didirikan",
         cloudBased: "Berbasis Cloud",
@@ -3831,7 +3831,7 @@ We will respond to your inquiry within 7 business days.`
       signIn: "Masuk"
     },
     footer: {
-      description: "Sistem point of sale modern untuk restoran, kafe, dan toko retail. Sederhanakan operasi Anda dan puaskan pelanggan Anda.",
+      description: "KadaiPOS adalah sistem POS terbaik di Indonesia untuk restoran, kafe, dan toko retail. Sederhanakan operasi Anda dan kembangkan bisnis Anda.",
       product: "Produk",
       company: "Perusahaan",
       legal: "Legal",

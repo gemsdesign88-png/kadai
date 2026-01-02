@@ -8,7 +8,6 @@ import AnalyticsClientSlim from '../analytics/analytics-client-slim'
 const CashFlow = dynamic(() => import('../cash-flow/cash-flow-client'), { ssr: false })
 const Customers = dynamic(() => import('../customers/customers-client'), { ssr: false })
 const DemoRequests = dynamic(() => import('../demo-requests/demo-requests-client'), { ssr: false })
-const Inventory = dynamic(() => import('../inventory/inventory-client'), { ssr: false })
 const Menu = dynamic(() => import('../menu/menu-client'), { ssr: false })
 const MenuManage = dynamic(() => import('../menu/manage/manage-client'), { ssr: false })
 const Orders = dynamic(() => import('../orders/orders-client'), { ssr: false })
@@ -26,7 +25,6 @@ export default function CatchAllClient({ slug }: { slug: string }) {
   if (slug === 'cash-flow') return <CashFlow />
   if (slug === 'customers') return <Customers />
   if (slug === 'demo-requests') return <DemoRequests />
-  if (slug === 'inventory') return <Inventory />
   if (slug === 'menu') return <Menu />
   if (slug === 'menu/manage') return <MenuManage />
   if (slug === 'orders') return <Orders />

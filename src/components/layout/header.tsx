@@ -150,7 +150,7 @@ export function Header() {
               <img 
                 ref={logoRef}
                 src={pathname === '/' && !shouldShowScrolled ? "/logo-white.svg" : "/logo-black.svg"} 
-                alt="Kadai" 
+                alt="KadaiPOS - Aplikasi Kasir Digital Terbaik" 
                 className="h-10 w-auto transition-all duration-300" 
               />
             </Link>
@@ -464,7 +464,7 @@ export function Header() {
                 className="flex items-center gap-3" 
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <img src="/logo-black.svg" alt="Radai" className="h-10 w-auto" />
+                <img src="/logo-black.svg" alt="KadaiPOS - Aplikasi Kasir Digital Terbaik" className="h-10 w-auto" />
               </Link>
               <button
                 type="button"

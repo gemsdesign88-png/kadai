@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KadaiPOS Feature Graphic 1024x500</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+        
+        .graphic {
+            width: 1024px;
+            height: 500px;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        /* Decorative elements */
+        .graphic::before {
+            content: '';
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            border-radius: 50%;
+        }
+        
+        .graphic::after {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            bottom: -150px;
+            left: -150px;
+            border-radius: 50%;
+        }
+        
+        /* Grid pattern overlay */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.5;
+        }
+        
+        /* Content container */
+        .content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 80px;
+        }
+        
+        /* Left side - Text */
+        .left-content {
+            flex: 1;
+            max-width: 500px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #e5e5e5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+        
+        .tagline {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #a3a3a3;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #d4d4d4;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+            color: #000000;
+        }
+        
+        /* Right side - Visual elements */
+        .right-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .device-mockup {
+            position: relative;
+            width: 280px;
+            height: 400px;
+        }
+        
+        .device {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #262626, #1a1a1a);
+            border-radius: 32px;
+            padding: 12px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.5),
+                inset 0 0 0 2px rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        .device-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Screen content */
+        .screen-header {
+            background: linear-gradient(135deg, #262626 0%, #1a1a1a 100%);
+            padding: 20px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .screen-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .screen-subtitle {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        .screen-body {
+            padding: 16px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #a3a3a3;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 6px;
+        }
+        
+        .menu-name {
+            font-size: 11px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        
+        .menu-price {
+            font-size: 11px;
+            color: #e5e5e5;
+            font-weight: 600;
+        }
+        
+        /* Floating elements */
+        .float-card {
+            position: absolute;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        
+        .float-card-1 {
+            top: 20px;
+            right: -80px;
+            width: 140px;
+        }
+        
+        .float-card-2 {
+            bottom: 60px;
+            right: -100px;
+            width: 140px;
+        }
+        
+        .float-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .float-text {
+            font-size: 11px;
+            color: #a3a3a3;
+            margin-bottom: 4px;
+        }
+        
+        .float-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="graphic">
+        <div class="grid-overlay"></div>
+        
+        <div class="content">
+            <!-- Left Content -->
+            <div class="left-content">
+                <div class="logo">KadaiPOS</div>
+                <div class="tagline">Modern POS System for Your Restaurant</div>
+                <div class="subtitle">Complete solution for managing orders, inventory, reports & staff</div>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Fast Cashier</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Real-time Reports</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Inventory Tracking</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Staff Management</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Multi-Restaurant</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Bluetooth Printer</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Content -->
+            <div class="right-content">
+                <div class="device-mockup">
+                    <div class="device">
+                        <div class="device-screen">
+                            <div class="screen-header">
+                                <div class="screen-title">Dashboard</div>
+                                <div class="screen-subtitle">Today's Performance</div>
+                            </div>
+                            <div class="screen-body">
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Sales Today</div>
+                                    <div class="stat-value">Rp 2,450,000</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Orders Completed</div>
+                                    <div class="stat-value">87 orders</div>
+                                </div>
+                                <div class="menu-item">
+                                    <div class="menu-name">Nasi Goreng Spesial</div>
+                                    <div class="menu-price">Rp 25,000</div>
+                                </div>
+                                <div class="menu-item">
+                                    <div class="menu-name">Es Teh Manis</div>
+                                    <div class="menu-price">Rp 5,000</div>
+                                </div>
+                                <div class="menu-item">
+                                    <div class="menu-name">Ayam Bakar</div>
+                                    <div class="menu-price">Rp 35,000</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating cards -->
+                    <div class="float-card float-card-1">
+                        <div class="float-icon">📊</div>
+                        <div class="float-text">Best Seller</div>
+                        <div class="float-value">Nasi Goreng</div>
+                    </div>
+                    
+                    <div class="float-card float-card-2">
+                        <div class="float-icon">👥</div>
+                        <div class="float-text">Active Staff</div>
+                        <div class="float-value">5 people</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

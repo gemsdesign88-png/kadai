@@ -76,7 +76,7 @@ export function Footer() {
                 href="/" 
                 className="inline-flex items-center gap-3"
               >
-                <img src="/logo-white.svg" alt="KadaiPOS" className="h-10 w-auto" />
+                <img src="/logo-white.svg" alt="KadaiPOS - Aplikasi Kasir Digital Terbaik" className="h-10 w-auto" />
               </Link>
               <p className="text-base leading-relaxed text-gray-400 max-w-xs font-medium">
                 {t.footer.description}

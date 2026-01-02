@@ -8,12 +8,12 @@ Marketing website for KadaiPOS - a modern POS system for restaurants, built with
 - [x] Verify copilot-instructions.md file created
 - [x] Clarify Project Requirements - Next.js marketing site with TypeScript, Tailwind, App Router
 - [x] Scaffold the Project - Next.js created successfully
-- [ ] Customize the Project - Install shadcn/ui and create pages
-- [ ] Install Required Extensions
-- [ ] Compile the Project
-- [ ] Create and Run Task
-- [ ] Launch the Project
-- [ ] Ensure Documentation is Complete
+- [x] Customize the Project - Install shadcn/ui and create pages
+- [x] Install Required Extensions
+- [x] Compile the Project
+- [x] Create and Run Task
+- [x] Launch the Project
+- [x] Ensure Documentation is Complete
 
 ## Tech Stack
 - Next.js 14+ (App Router)

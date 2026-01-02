@@ -87,14 +87,14 @@ export function Hero() {
             </motion.h1>
             
             {/* Tagline */}
-            <motion.p
+            <motion.h2
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
               className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 text-white"
             >
               {t.hero.heading}
-            </motion.p>
+            </motion.h2>
             
             {/* Subtitle */}
             <motion.p

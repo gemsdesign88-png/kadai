@@ -28,6 +28,34 @@ export default function OnboardingPage() {
     planId: null as string | null,
   });
 
+  const hasAnyRestaurant = async (ownerId: string) => {
+    try {
+      const { count, error } = await supabase
+        .from('restaurants')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', ownerId);
+
+      if (error) {
+        console.error('Restaurant existence check error:', error);
+        const { data: rows, error: fallbackError } = await supabase
+          .from('restaurants')
+          .select('id')
+          .eq('owner_id', ownerId)
+          .limit(1);
+        if (fallbackError) {
+          console.error('Restaurant existence fallback error:', fallbackError);
+          return false;
+        }
+        return (rows?.length || 0) > 0;
+      }
+
+      return (count ?? 0) > 0;
+    } catch (e) {
+      console.error('Restaurant existence check unexpected error:', e);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -37,15 +65,10 @@ export default function OnboardingPage() {
       }
       setUser(user);
 
-      // Check if restaurant already exists and onboarding is completed
-      const { data: restaurant } = await supabase
-        .from('restaurants')
-        .select('id, onboarding_completed')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (restaurant?.onboarding_completed) {
-        router.push('/dashboard');
+      // Check if restaurant already exists
+      const hasRestaurant = await hasAnyRestaurant(user.id);
+      if (hasRestaurant) {
+        router.replace('/dashboard');
       }
     };
     checkUser();

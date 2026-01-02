@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useLanguage } from "@/lib/i18n/context"
 import { createDashboardTranslator } from "@/lib/i18n/dashboard-translator"
-import { Package, AlertTriangle, TrendingDown, Plus, Minus, DollarSign, ShoppingCart, Search, PieChart as PieChartIcon } from "lucide-react"
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import { Package, AlertTriangle, TrendingDown, DollarSign, Search, PieChart as PieChartIcon } from "lucide-react"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 
 interface StockItem {
   id: string
@@ -45,10 +45,11 @@ export default function InventoryPage() {
     outOfStock: 0,
     totalItems: 0
   })
-  const [stockDistribution, setStockDistribution] = useState<any[]>([])
+  const [stockDistribution, setStockDistribution] = useState<Array<{ name: string; value: number; color: string }>>([])
 
   useEffect(() => {
     loadInventory()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function loadInventory() {
@@ -136,7 +137,7 @@ export default function InventoryPage() {
     }
   }
 
-  function openAdjustmentModal(item: any, type: 'add' | 'subtract') {
+  function openAdjustmentModal(item: StockItem, type: 'add' | 'subtract') {
     setSelectedItem(item)
     setAdjustmentType(type)
     setAdjustmentAmount('')
@@ -314,7 +315,7 @@ export default function InventoryPage() {
                       border: '1px solid #e5e7eb', 
                       borderRadius: '8px' 
                     }}
-                    formatter={(value: any) => [`${value} ${dt.totalItemsLabel}`, dt.quantityLabel]}
+                    formatter={(value: number) => [`${value} ${dt.totalItemsLabel}`, dt.quantityLabel]}
                   />
                 </PieChart>
               </ResponsiveContainer>

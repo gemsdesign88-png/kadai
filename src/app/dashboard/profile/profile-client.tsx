@@ -103,6 +103,11 @@ export default function ProfileClient() {
           </div>
         </div>
       </header>
+              <p className="text-sm text-gray-500 mt-1">{dt('manageAccountInfo')}</p>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">

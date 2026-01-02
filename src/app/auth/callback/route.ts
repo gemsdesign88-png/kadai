@@ -54,16 +54,16 @@ export async function GET(request: Request) {
       // Create restaurant if metadata exists and no restaurant yet
       if (metadata.restaurant_name) {
         console.log('Checking for existing restaurant...');
-        const { data: existingRestaurant, error: checkError } = await supabase
+        const { count, error: checkError } = await supabase
           .from('restaurants')
-          .select('id')
-          .eq('owner_id', userId)
-          .single();
+          .select('id', { count: 'exact', head: true })
+          .eq('owner_id', userId);
 
-        console.log('Existing restaurant check:', existingRestaurant);
+        console.log('Existing restaurant count:', count);
         console.log('Check error:', checkError);
 
-        if (!existingRestaurant) {
+        const hasRestaurant = !checkError && (count ?? 0) > 0;
+        if (!hasRestaurant) {
           console.log('Creating new restaurant with name:', metadata.restaurant_name);
           const { data: newRestaurant, error: restaurantError } = await supabase
             .from('restaurants')

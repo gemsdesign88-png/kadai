@@ -30,8 +30,8 @@ export default async function DashboardLayout({
     .select('*')
     .eq('owner_id', user.id);
 
-  // If no restaurants or onboarding not completed, redirect to onboarding
-  if (!restaurants || restaurants.length === 0 || !restaurants.some(r => r.onboarding_completed)) {
+  // If no restaurants, redirect to onboarding
+  if (!restaurants || restaurants.length === 0) {
     redirect('/onboarding');
   }
 

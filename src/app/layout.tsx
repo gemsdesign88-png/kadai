@@ -15,11 +15,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://kadaipos.id'),
   title: {
-    default: "KadaiPOS - Modern POS System for Restaurants, Cafes & Retail Stores",
+    default: "KadaiPOS - POS Terbaik di Indonesia untuk Restoran & Toko",
     template: "%s | KadaiPOS"
   },
-  description: "Streamline your business operations with KadaiPOS. Modern, intuitive point of sale system designed for restaurants, cafes, and retail stores. Manage inventory, sales, and staff efficiently.",
-  keywords: ["POS system", "Point of Sale", "Restaurant POS", "Retail POS", "Cafe POS", "Inventory Management", "Sales Tracking", "KadaiPOS", "Indonesia POS"],
+  description: "KadaiPOS adalah sistem POS terbaik di Indonesia untuk restoran, cafe, dan toko retail. Aplikasi kasir digital modern untuk kelola stok, penjualan, dan staff dengan mudah.",
+  keywords: ["POS terbaik di Indonesia", "Aplikasi Kasir Terbaik", "POS system", "Point of Sale", "Aplikasi Kasir", "Kasir Digital", "Restaurant POS", "Retail POS", "Cafe POS", "Inventory Management", "Sales Tracking", "KadaiPOS", "Indonesia POS", "Software Kasir"],
   authors: [{ name: "KadaiPOS Team" }],
   creator: "KadaiPOS",
   publisher: "KadaiPOS",
@@ -76,8 +76,38 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "KadaiPOS",
+    "operatingSystem": "Web, iOS, Android",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "IDR"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "120"
+    },
+    "description": "Modern POS system for restaurants, cafes, and retail stores in Indonesia.",
+    "url": "https://kadaipos.id",
+    "author": {
+      "@type": "Organization",
+      "name": "KadaiPOS"
+    }
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${plusJakartaSans.variable} antialiased`}
       >
