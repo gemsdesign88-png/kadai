@@ -146,7 +146,7 @@ NGINX
     fi
     
     echo "🔒 Setting up SSL (this requires DNS to be pointed to this server)..."
-    $SUDO certbot --nginx -d kadaipos.id -d www.kadaipos.id --non-interactive --agree-tos --email hello@kadaipos.id --redirect || echo "SSL setup failed - DNS might not be pointed yet"
+    $SUDO certbot --nginx -d kadaipos.id -d www.kadaipos.id --non-interactive --agree-tos --email mamak@kadaipos.id --redirect || echo "SSL setup failed - DNS might not be pointed yet"
 else
     echo "⚠️  Nginx not found. Please install Nginx and configure reverse proxy manually."
     echo "   Or ensure your firewall/hosting panel forwards port 80/443 to 3000"

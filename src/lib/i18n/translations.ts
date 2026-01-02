@@ -642,11 +642,11 @@ export const translations = {
         }
       },
       team: {
-        title: "Meet Our",
-        titleHighlight: "Team",
-        subtitle: "The people behind Kadai",
+        title: "Meet The",
+        titleHighlight: "Creator",
+        subtitle: "The person behind Kadai",
         founder: {
-          role: "Founder & CEO",
+          role: "Founder",
           description: "Passionate about helping businesses grow through technology"
         }
       },
@@ -1228,7 +1228,7 @@ export const translations = {
     footer: {
       description: "Modern point of sale system for restaurants, cafes, and retail stores. Simplify your operations and delight your customers.",
       product: "Product",
-      company: "Company",
+      company: "About",
       legal: "Legal",
       privacy: "Privacy",
       terms: "Terms",
@@ -3247,11 +3247,11 @@ We will respond to your inquiry within 7 business days.`
         }
       },
       team: {
-        title: "Tim",
-        titleHighlight: "Kami",
-        subtitle: "Orang-orang di balik Kadai",
+        title: "Tentang",
+        titleHighlight: "Kreator",
+        subtitle: "Sosok di balik Kadai",
         founder: {
-          role: "Founder & CEO",
+          role: "Founder",
           description: "Bersemangat membantu bisnis berkembang melalui teknologi"
         }
       },
@@ -3833,7 +3833,7 @@ We will respond to your inquiry within 7 business days.`
     footer: {
       description: "KadaiPOS adalah sistem POS terbaik di Indonesia untuk restoran, kafe, dan toko retail. Sederhanakan operasi Anda dan kembangkan bisnis Anda.",
       product: "Produk",
-      company: "Perusahaan",
+      company: "Tentang",
       legal: "Legal",
       privacy: "Privasi",
       terms: "Syarat",
@@ -5780,7 +5780,7 @@ Kami akan menanggapi pertanyaan Anda dalam 7 hari kerja.`
     footer: {
       description: "为餐厅、咖啡馆和零售店提供的现代销售点系统。简化您的运营并取悦您的客户。",
       product: "产品",
-      company: "公司",
+      company: "关于",
       legal: "法律",
       privacy: "隐私",
       terms: "条款",

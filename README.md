@@ -73,7 +73,7 @@ npm run dev
 ```
 src/
 ├── app/
-│   ├── about/              # About page with company values
+│   ├── about/              # About page with project values
 │   ├── auth/               # Auth callback & error pages
 │   ├── contact/            # Contact coming soon page
 │   ├── dashboard/          # Protected dashboard (requires login)
@@ -98,7 +98,7 @@ src/
 - `/features` - 13 POS features overview
 - `/features/[feature]` - Individual feature detail pages with UI mockups
 - `/pricing` - Pricing plans (Starter, Professional, Enterprise)
-- `/about` - Company story, values, team
+- `/about` - Project story, values, creator
 - `/contact` - Contact coming soon (WhatsApp collection)
 - `/demo` - Demo coming soon (WhatsApp collection)
 - `/login` - Authentication page (login/signup/forgot password)
