@@ -5,11 +5,13 @@ import { useEffect, useRef, memo } from 'react';
 interface CustomerInfoModalProps {
   isOpen: boolean;
   onConfirm: (name: string, phone: string) => void;
+  primaryColor?: string;
 }
 
 const CustomerInfoModal = memo(function CustomerInfoModal({
   isOpen,
   onConfirm,
+  primaryColor = '#FF5A5F',
 }: CustomerInfoModalProps) {
   const nameRef = useRef<HTMLInputElement>(null);
   const phoneRef = useRef<HTMLInputElement>(null);
@@ -57,7 +59,8 @@ const CustomerInfoModal = memo(function CustomerInfoModal({
           type="text"
           autoComplete="off"
           inputMode="text"
-          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4"
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:ring-2"
+          style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
           placeholder="Masukkan nama"
           defaultValue=""
         />
@@ -70,7 +73,8 @@ const CustomerInfoModal = memo(function CustomerInfoModal({
           type="tel"
           autoComplete="off"
           inputMode="tel"
-          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4"
+          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 focus:outline-none focus:ring-2"
+          style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
           placeholder="Masukkan nomor telepon"
           defaultValue=""
         />
@@ -78,7 +82,8 @@ const CustomerInfoModal = memo(function CustomerInfoModal({
         <button
           type="button"
           onClick={handleSubmit}
-          className="w-full bg-red-500 text-white py-3.5 rounded-xl font-bold"
+          className="w-full text-white py-3.5 rounded-xl font-bold transition-opacity hover:opacity-90"
+          style={{ backgroundColor: primaryColor }}
         >
           Lanjutkan
         </button>

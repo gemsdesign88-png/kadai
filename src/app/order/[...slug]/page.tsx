@@ -877,6 +877,7 @@ export default function CustomerOrderPage() {
       {/* Customer Info Modal - Initial */}
       <CustomerInfoModal
         isOpen={showCustomerInfo}
+        primaryColor={primaryColor}
         onConfirm={async (name, phone) => {
           setCustomerName(name);
           setCustomerPhone(phone);
