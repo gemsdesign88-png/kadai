@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Minus, Plus, ShoppingCart, X, User } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, X, User, AlertCircle, QrCode, RefreshCw } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import CustomerInfoModal from '../components/CustomerInfoModal';
 
@@ -30,6 +30,7 @@ interface Table {
   id: string;
   number: number;
   restaurant_id: string;
+  status: 'available' | 'occupied' | 'reserved';
 }
 
 interface Restaurant {
@@ -43,8 +44,13 @@ export default function CustomerOrderPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string[];
-  // Extract barcode from slug array: [restaurant-name, table-barcode]
+  
+  // Parse slug: can be [restaurant-name, table-barcode] or [restaurant-name, dynamic-code, table-barcode]
+  const hasDynamicCode = slug && slug.length >= 3;
   const tableBarcode = slug && slug.length >= 2 ? slug[slug.length - 1] : '';
+  const dynamicCodeFromUrl = hasDynamicCode ? slug[slug.length - 2] : null;
+  const restaurantSlug = slug && slug.length >= 1 ? slug[0] : '';
+  
   const { setPrimaryColor } = useTheme();
 
   const [table, setTable] = useState<Table | null>(null);
@@ -57,6 +63,15 @@ export default function CustomerOrderPage() {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
   const [sending, setSending] = useState(false);
+
+  // Table status and dynamic code
+  const [tableInactive, setTableInactive] = useState(false);
+  const [codeInvalid, setCodeInvalid] = useState(false);
+  const [codeExpired, setCodeExpired] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [dynamicCode, setDynamicCode] = useState<string | null>(dynamicCodeFromUrl);
+  const [codeExpiresAt, setCodeExpiresAt] = useState<Date | null>(null);
+  const [generatingCode, setGeneratingCode] = useState(false);
 
   // Customer info
   const [customerName, setCustomerName] = useState('');
@@ -157,10 +172,10 @@ export default function CustomerOrderPage() {
         throw new Error('Invalid table barcode');
       }
 
-      // Find table by barcode
+      // Find table by barcode - include status
       const { data: tableData, error: tableError } = await supabase
         .from('tables')
-        .select('id, number, restaurant_id')
+        .select('id, number, restaurant_id, status')
         .eq('barcode', tableBarcode)
         .single();
 
@@ -170,7 +185,37 @@ export default function CustomerOrderPage() {
 
       setTable(tableData as Table);
 
-      // Load restaurant details including owner info
+      // Check table status first
+      if (tableData.status !== 'occupied') {
+        setTableInactive(true);
+        setErrorMessage('Meja belum diaktifkan. Silakan panggil staff untuk mengaktifkan meja.');
+        // Still load restaurant for branding
+        const { data: restaurantData } = await supabase
+          .from('restaurants')
+          .select('id, name, logo_url, primary_color')
+          .eq('id', tableData.restaurant_id)
+          .single();
+        if (restaurantData) {
+          setRestaurant(restaurantData);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // If no dynamic code in URL, generate one and redirect
+      if (!dynamicCodeFromUrl) {
+        await generateAndRedirect(tableData.id);
+        return;
+      }
+
+      // Validate dynamic code from URL
+      const isValid = await validateDynamicCode(tableData.id, dynamicCodeFromUrl);
+      if (!isValid) {
+        setLoading(false);
+        return;
+      }
+
+      // Load restaurant details
       const { data: restaurantData } = await supabase
         .from('restaurants')
         .select('id, name, logo_url, primary_color, owner_id')
@@ -178,15 +223,15 @@ export default function CustomerOrderPage() {
         .single();
 
       if (restaurantData) {
-        // Use the restaurant's primary_color
         const primaryColor = restaurantData.primary_color;
-        
         console.log('✅ Restaurant loaded:', { id: restaurantData.id, primary_color: primaryColor });
         setRestaurant({
           ...restaurantData,
           primary_color: primaryColor || '#FF5A5F'
         });
-      }      // Load menu for this restaurant
+      }
+
+      // Load menu for this restaurant
       const { data: menuData, error: menuError } = await supabase
         .from('menu_items')
         .select(`
@@ -225,10 +270,86 @@ export default function CustomerOrderPage() {
       setCategories(Array.from(categorySet));
     } catch (err: any) {
       console.error('Error loading table/menu:', err);
-      alert(err.message || 'Failed to load table');
+      setErrorMessage(err.message || 'Gagal memuat data meja');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Generate dynamic code and redirect to new URL
+  const generateAndRedirect = async (tableId: string) => {
+    try {
+      setGeneratingCode(true);
+      
+      const response = await fetch(`/api/table-session?tableId=${tableId}`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        if (data.tableStatus === 'available') {
+          setTableInactive(true);
+          setErrorMessage(data.message || 'Meja belum diaktifkan.');
+        } else {
+          setErrorMessage(data.error || 'Gagal membuat kode.');
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to URL with dynamic code
+      const newUrl = `/order/${restaurantSlug}/${data.dynamicCode}/${tableBarcode}`;
+      router.replace(newUrl);
+    } catch (error) {
+      console.error('Error generating dynamic code:', error);
+      setErrorMessage('Gagal membuat kode. Silakan coba lagi.');
+      setLoading(false);
+    } finally {
+      setGeneratingCode(false);
+    }
+  };
+
+  // Validate dynamic code
+  const validateDynamicCode = async (tableId: string, code: string): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/table-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tableId,
+          dynamicCode: code,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.isValid) {
+        if (data.reason === 'table_not_active') {
+          setTableInactive(true);
+          setErrorMessage(data.message);
+        } else if (data.reason === 'code_expired') {
+          setCodeExpired(true);
+          setErrorMessage(data.message);
+        } else {
+          setCodeInvalid(true);
+          setErrorMessage(data.message);
+        }
+        return false;
+      }
+
+      setDynamicCode(code);
+      return true;
+    } catch (error) {
+      console.error('Error validating code:', error);
+      setErrorMessage('Gagal memvalidasi kode.');
+      return false;
+    }
+  };
+
+  // Handle rescan - redirect back to base URL to get new code
+  const handleRescan = () => {
+    const baseUrl = `/order/${restaurantSlug}/${tableBarcode}`;
+    router.replace(baseUrl);
+    // Force reload to re-run the flow
+    window.location.href = baseUrl;
   };
 
   const fetchExistingCustomer = async (phone: string | null) => {
@@ -383,8 +504,12 @@ export default function CustomerOrderPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-gray-800">Memuat Menu</h2>
-            <p className="text-gray-600">Sedang menyiapkan menu terbaik untuk Anda...</p>
+            <h2 className="text-xl font-bold text-gray-800">
+              {generatingCode ? 'Membuat Kode...' : 'Memuat Menu'}
+            </h2>
+            <p className="text-gray-600">
+              {generatingCode ? 'Sedang menyiapkan akses untuk Anda...' : 'Sedang menyiapkan menu terbaik untuk Anda...'}
+            </p>
           </div>
           <div className="mt-6 flex justify-center">
             <div className="flex space-x-2">
@@ -397,6 +522,85 @@ export default function CustomerOrderPage() {
       </div>
     );
   }
+
+  // Show error screen for inactive table, invalid code, or expired code
+  if (tableInactive || codeInvalid || codeExpired) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: `linear-gradient(to bottom right, ${primaryColor}10, ${primaryColor}20)` }}>
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
+          {/* Restaurant Logo */}
+          {restaurant?.logo_url && (
+            <div className="mb-6">
+              <img
+                src={getLogoUrl(restaurant.logo_url) || restaurant.logo_url}
+                alt={restaurant.name}
+                className="w-20 h-20 rounded-2xl mx-auto object-cover shadow-lg"
+              />
+            </div>
+          )}
+
+          {/* Icon */}
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" 
+               style={{ backgroundColor: tableInactive ? '#FEF3C7' : '#FEE2E2' }}>
+            {tableInactive ? (
+              <AlertCircle className="w-10 h-10 text-amber-500" />
+            ) : (
+              <QrCode className="w-10 h-10 text-red-500" />
+            )}
+          </div>
+
+          {/* Message */}
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            {tableInactive ? 'Meja Belum Aktif' : codeExpired ? 'Kode Kadaluarsa' : 'Kode Tidak Valid'}
+          </h2>
+          <p className="text-gray-600 mb-8">
+            {errorMessage}
+          </p>
+
+          {/* Action Button */}
+          {(codeExpired || codeInvalid) && (
+            <button
+              onClick={handleRescan}
+              className="w-full py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <RefreshCw className="w-5 h-5" />
+              Scan Ulang QR Code
+            </button>
+          )}
+
+          {tableInactive && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                Silakan duduk di meja dan panggil staff untuk mengaktifkan pesanan
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2 transition-all hover:opacity-90"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <RefreshCw className="w-5 h-5" />
+                Cek Ulang Status
+              </button>
+            </div>
+          )}
+
+          {/* Restaurant Name */}
+          <p className="mt-6 text-sm text-gray-400">
+            {restaurant?.name || 'Restaurant'} • Meja {table?.number}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Helper function for logo URL (needed in error screen)
+  const getLogoUrl = (logoPath?: string | null) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http')) return logoPath;
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    return `${base}/storage/v1/object/public/${logoPath.replace(/^\/+/, '')}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
