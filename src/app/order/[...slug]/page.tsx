@@ -211,42 +211,56 @@ export default function CustomerOrderPage() {
       // For now, skip dynamic code system if table_sessions doesn't exist
       let skipDynamicCode = false;
       
-      if (!dynamicCodeFromUrl && tableData.status === 'occupied') {
-        // Try to generate dynamic code, but don't fail if table_sessions doesn't exist
-        try {
-          const response = await fetch(`/api/table-session?tableId=${tableData.id}`);
-          const data = await response.json();
+      // Only try dynamic code system if table is occupied
+      if (tableData.status === 'occupied') {
+        if (!dynamicCodeFromUrl) {
+          // Try to generate dynamic code, but don't fail if table_sessions doesn't exist
+          try {
+            const response = await fetch(`/api/table-session?tableId=${tableData.id}`);
+            const data = await response.json();
 
-          if (response.ok && data.success) {
-            // Redirect to URL with dynamic code
-            const newUrl = `/order/${restaurantSlug}/${data.dynamicCode}/${tableBarcode}`;
-            router.replace(newUrl);
-            return;
-          } else {
-            // Dynamic code system not working, continue without it
-            console.warn('Dynamic code generation failed, continuing without it:', data);
+            if (response.ok && data.success) {
+              // Redirect to URL with dynamic code
+              const newUrl = `/order/${restaurantSlug}/${data.dynamicCode}/${tableBarcode}`;
+              router.replace(newUrl);
+              return;
+            } else {
+              // Dynamic code system not working, continue without it
+              console.warn('Dynamic code generation failed, continuing without it:', data);
+              skipDynamicCode = true;
+            }
+          } catch (codeError) {
+            console.warn('Dynamic code system not available, continuing without it:', codeError);
             skipDynamicCode = true;
           }
-        } catch (codeError) {
-          console.warn('Dynamic code system not available, continuing without it:', codeError);
-          skipDynamicCode = true;
-        }
-      } else if (dynamicCodeFromUrl && tableData.status === 'occupied') {
-        // Validate dynamic code from URL if provided
-        try {
-          const isValid = await validateDynamicCode(tableData.id, dynamicCodeFromUrl);
-          if (!isValid) {
-            console.warn('Dynamic code validation failed, continuing anyway');
+        } else {
+          // Have dynamic code in URL - try to validate, but don't fail if system unavailable
+          try {
+            const response = await fetch('/api/table-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                tableId: tableData.id,
+                dynamicCode: dynamicCodeFromUrl,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (data.isValid) {
+              setDynamicCode(dynamicCodeFromUrl);
+            } else {
+              // Code validation failed - but don't block, just log it
+              console.warn('Dynamic code validation failed:', data);
+              skipDynamicCode = true;
+            }
+          } catch (validationError) {
+            console.warn('Dynamic code validation error:', validationError);
             skipDynamicCode = true;
           }
-        } catch (validationError) {
-          console.warn('Dynamic code validation error:', validationError);
-          skipDynamicCode = true;
         }
-      }
-
-      // If table is not occupied, show error
-      if (tableData.status !== 'occupied') {
+      } else {
+        // Table is not occupied
         setTableInactive(true);
         setErrorMessage('Meja belum diaktifkan. Silakan panggil staff untuk mengaktifkan meja.');
         setLoading(false);
