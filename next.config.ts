@@ -18,8 +18,8 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         // Rewrite order.kadaipos.id subdomain paths to /order route
         {
-          source: '/:restaurantName/:tableBarcode',
-          destination: '/order/:restaurantName/:tableBarcode',
+          source: '/:path*',
+          destination: '/order/:path*',
           has: [
             {
               type: 'host',
