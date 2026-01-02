@@ -13,6 +13,23 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // Rewrite order.kadaipos.id subdomain paths to /order route
+        {
+          source: '/:restaurantName/:tableBarcode',
+          destination: '/order/:restaurantName/:tableBarcode',
+          has: [
+            {
+              type: 'host',
+              value: 'order.kadaipos.id',
+            },
+          ],
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
