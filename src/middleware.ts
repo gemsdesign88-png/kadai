@@ -44,6 +44,13 @@ export async function middleware(request: NextRequest) {
   // Check if the path starts with any public route
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   
+  // Rewrite order.kadaipos.id requests to /order path
+  if (host === 'order.kadaipos.id' && !pathname.startsWith('/order') && !pathname.startsWith('/_next')) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/order${pathname}`;
+    return NextResponse.rewrite(url);
+  }
+  
   if (host === 'order.kadaipos.id' || isPublicRoute) {
     return NextResponse.next();
   }
