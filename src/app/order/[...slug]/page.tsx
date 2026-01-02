@@ -594,14 +594,6 @@ export default function CustomerOrderPage() {
     );
   }
 
-  // Helper function for logo URL (needed in error screen)
-  const getLogoUrl = (logoPath?: string | null) => {
-    if (!logoPath) return null;
-    if (logoPath.startsWith('http')) return logoPath;
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    return `${base}/storage/v1/object/public/${logoPath.replace(/^\/+/, '')}`;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       {/* Enhanced Header */}
