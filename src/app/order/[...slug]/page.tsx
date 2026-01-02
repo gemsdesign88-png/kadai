@@ -42,7 +42,9 @@ interface Restaurant {
 export default function CustomerOrderPage() {
   const params = useParams();
   const router = useRouter();
-  const tableBarcode = params.tableBarcode as string;
+  const slug = params.slug as string[];
+  // Extract barcode from slug array: [restaurant-name, table-barcode]
+  const tableBarcode = slug && slug.length >= 2 ? slug[slug.length - 1] : '';
   const { setPrimaryColor } = useTheme();
 
   const [table, setTable] = useState<Table | null>(null);
