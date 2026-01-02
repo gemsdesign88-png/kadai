@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Minus, Plus, ShoppingCart, X, User } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
-import CustomerInfoModal from '../../components/CustomerInfoModal';
+import CustomerInfoModal from '../components/CustomerInfoModal';
 
 interface MenuItem {
   id: string;
