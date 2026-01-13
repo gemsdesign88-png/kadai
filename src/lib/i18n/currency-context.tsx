@@ -11,16 +11,18 @@ interface CurrencyContextType {
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined)
 
-export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrency] = useState<Currency>('IDR')
-
-  useEffect(() => {
-    // Load from localStorage on mount
+function getInitialCurrency(): Currency {
+  if (typeof window !== 'undefined') {
     const stored = localStorage.getItem('preferred-currency')
     if (stored && ['IDR', 'USD', 'CNY'].includes(stored)) {
-      setCurrency(stored as Currency)
+      return stored as Currency
     }
-  }, [])
+  }
+  return 'IDR'
+}
+
+export function CurrencyProvider({ children }: { children: React.ReactNode }) {
+  const [currency, setCurrency] = useState<Currency>(getInitialCurrency)
 
   const handleSetCurrency = (newCurrency: Currency) => {
     setCurrency(newCurrency)

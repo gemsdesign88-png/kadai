@@ -128,13 +128,16 @@ export function AISmartPasteDemo() {
     { key: "pro" as BusinessType, icon: Scissors, label: "Pro" }
   ];
 
+  const currentData = pasteData[activeType];
+  const textExample = currentData.example;
+
   useEffect(() => {
-    setTextInput(pasteData[activeType].example);
+    setTextInput(textExample);
     setShowResults(false);
-  }, [activeType, language]);
+  }, [activeType, textExample]);
 
   const handleCopyExample = () => {
-    navigator.clipboard.writeText(pasteData[activeType].example);
+    navigator.clipboard.writeText(currentData.example);
     setCopiedText(true);
     setTimeout(() => setCopiedText(false), 2000);
   };
@@ -149,7 +152,6 @@ export function AISmartPasteDemo() {
     }, 2500);
   };
 
-  const currentData = pasteData[activeType];
   const Icon = currentData.icon;
 
   // Count total items and categories

@@ -79,11 +79,10 @@ export function SimplePieChart({ data, size = 200 }: PieChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
   
-  let currentAngle = 0;
-  const segments = data.map((item, idx) => {
+  const segments = data.reduce<Array<{ path: string; color: string; name: string; value: number; endAngle: number }>>((acc, item, idx) => {
     const sliceAngle = (item.value / total) * 360;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + sliceAngle;
+    const startAngle = idx === 0 ? 0 : acc[idx - 1].endAngle;
+    const endAngle = startAngle + sliceAngle;
     
     const start = {
       x: Math.cos((startAngle - 90) * Math.PI / 180),
@@ -97,10 +96,9 @@ export function SimplePieChart({ data, size = 200 }: PieChartProps) {
     const largeArc = sliceAngle > 180 ? 1 : 0;
     const path = `M 0 0 L ${start.x} ${start.y} A 1 1 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
     
-    currentAngle = endAngle;
-    
-    return { path, color: colors[idx % colors.length], name: item.name, value: item.value };
-  });
+    acc.push({ path, color: colors[idx % colors.length], name: item.name, value: item.value, endAngle });
+    return acc;
+  }, []);
 
   return (
     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>

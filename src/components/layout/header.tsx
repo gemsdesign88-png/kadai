@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { useLanguage } from "@/lib/i18n/context"
 import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store, UtensilsCrossed, Scissors } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 const navigation = [
   { name: "features", href: "/features", hasDropdown: true },
@@ -52,11 +52,14 @@ export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false)
   const featuresTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   const businessTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
-
-  // Hide header on in-app views (dashboard/order/register)
-  if (pathname?.startsWith('/order') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/register')) {
-    return null
-  }
+  
+  // Refs for logo and Try Demo button, modal position and width state
+  const logoRef = React.useRef<HTMLImageElement>(null)
+  const tryDemoButtonRef = React.useRef<HTMLButtonElement>(null)
+  const businessButtonRef = React.useRef<HTMLButtonElement>(null)
+  const [modalLeft, setModalLeft] = React.useState<number | null>(null)
+  const [modalWidth, setModalWidth] = React.useState<number | null>(null)
+  const [businessModalLeft, setBusinessModalLeft] = React.useState<number | null>(null)
   
   React.useEffect(() => {
     setMounted(true)
@@ -104,14 +107,11 @@ export function Header() {
   
   // Only show glass effect when scrolling, not based on page
   const shouldShowScrolled = isScrolled
-
-  // Refs for logo and Try Demo button, modal position and width state
-  const logoRef = React.useRef<HTMLImageElement>(null);
-  const tryDemoButtonRef = React.useRef<HTMLButtonElement>(null);
-  const businessButtonRef = React.useRef<HTMLButtonElement>(null);
-  const [modalLeft, setModalLeft] = React.useState<number | null>(null);
-  const [modalWidth, setModalWidth] = React.useState<number | null>(null);
-  const [businessModalLeft, setBusinessModalLeft] = React.useState<number | null>(null);
+  
+  // Hide header on in-app views (dashboard/order/register)
+  if (pathname?.startsWith('/order') || pathname?.startsWith('/dashboard') || pathname?.startsWith('/register')) {
+    return null
+  }
 
   // When modal opens, calculate logo left and Try Demo button right, set modal left and width
   React.useEffect(() => {

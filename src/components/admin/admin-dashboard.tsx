@@ -870,7 +870,7 @@ export default function AdminDashboard({
                                 Subject: {lead.subject}
                               </p>
                               <div className="p-3 bg-slate-50 rounded text-sm text-slate-700 whitespace-pre-wrap italic">
-                                "{lead.message}"
+                                &quot;{lead.message}&quot;
                               </div>
                             </div>
                           </div>

@@ -13,6 +13,42 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const DEFAULT_PRIMARY_COLOR = '#FF5A5F';
 
+// Helper function to adjust color brightness
+function adjustColorBrightness(color: string, percent: number): string {
+  // Remove # if present
+  const hex = color.replace('#', '');
+  
+  // Convert to RGB
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+
+  // Adjust brightness
+  r = Math.min(255, Math.max(0, r + (r * percent) / 100));
+  g = Math.min(255, Math.max(0, g + (g * percent) / 100));
+  b = Math.min(255, Math.max(0, b + (b * percent) / 100));
+
+  // Convert back to hex
+  const rr = Math.round(r).toString(16).padStart(2, '0');
+  const gg = Math.round(g).toString(16).padStart(2, '0');
+  const bb = Math.round(b).toString(16).padStart(2, '0');
+
+  return `#${rr}${gg}${bb}`;
+}
+
+function updateCSSVariables(color: string) {
+  // Update CSS variables dynamically
+  document.documentElement.style.setProperty('--color-accent', color);
+  
+  // Generate hover color (slightly darker)
+  const hoverColor = adjustColorBrightness(color, -10);
+  document.documentElement.style.setProperty('--color-accent-hover', hoverColor);
+  
+  // Generate light color (very light version)
+  const lightColor = adjustColorBrightness(color, 40);
+  document.documentElement.style.setProperty('--color-accent-light', lightColor);
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [primaryColor, setPrimaryColorState] = useState<string>(DEFAULT_PRIMARY_COLOR);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,7 +96,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           setIsLoading(false);
           return;
         }
-      } catch (err) {
+      } catch {
         // Column might not exist, continue with default
         console.log('primary_color column not found in user_profiles, using default');
       }
@@ -98,19 +134,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('restaurantChanged', handleRestaurantChange);
     };
   }, []);
-
-  const updateCSSVariables = (color: string) => {
-    // Update CSS variables dynamically
-    document.documentElement.style.setProperty('--color-accent', color);
-    
-    // Generate hover color (slightly darker)
-    const hoverColor = adjustColorBrightness(color, -10);
-    document.documentElement.style.setProperty('--color-accent-hover', hoverColor);
-    
-    // Generate light color (very light version)
-    const lightColor = adjustColorBrightness(color, 40);
-    document.documentElement.style.setProperty('--color-accent-light', lightColor);
-  };
 
   const setPrimaryColor = async (color: string) => {
     try {
@@ -153,27 +176,4 @@ export function useTheme() {
     throw new Error('useTheme must be used within ThemeProvider');
   }
   return context;
-}
-
-// Helper function to adjust color brightness
-function adjustColorBrightness(color: string, percent: number): string {
-  // Remove # if present
-  let hex = color.replace('#', '');
-  
-  // Convert to RGB
-  let r = parseInt(hex.substring(0, 2), 16);
-  let g = parseInt(hex.substring(2, 4), 16);
-  let b = parseInt(hex.substring(4, 6), 16);
-
-  // Adjust brightness
-  r = Math.min(255, Math.max(0, r + (r * percent) / 100));
-  g = Math.min(255, Math.max(0, g + (g * percent) / 100));
-  b = Math.min(255, Math.max(0, b + (b * percent) / 100));
-
-  // Convert back to hex
-  const rr = Math.round(r).toString(16).padStart(2, '0');
-  const gg = Math.round(g).toString(16).padStart(2, '0');
-  const bb = Math.round(b).toString(16).padStart(2, '0');
-
-  return `#${rr}${gg}${bb}`;
 }
