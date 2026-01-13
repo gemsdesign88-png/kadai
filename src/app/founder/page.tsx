@@ -65,18 +65,20 @@ export default function FounderMessagePage() {
                 transition={{ delay: 0.2 }}
                 className="bg-white/5 border border-white/10 rounded-[32px] p-8 backdrop-blur-xl space-y-8"
               >
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#FF5A5F] to-purple-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-                  <div className="relative w-full aspect-square rounded-2xl bg-gray-800 border border-white/10 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="/founder.png" 
-                      alt={founder.name} 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 pointer-events-none"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent flex flex-col justify-end p-6">
-                      <h3 className="text-xl font-black tracking-tight">{founder.name}</h3>
-                      <p className="text-sm text-gray-400 font-bold">{founder.role}</p>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <div className="relative w-full aspect-square rounded-2xl bg-gray-800 border border-white/10 flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="/founder.png" 
+                        alt={founder.name} 
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
                     </div>
+                  </div>
+                  
+                  <div className="px-2">
+                    <h3 className="text-2xl font-black tracking-tight text-white mb-1">{founder.name}</h3>
+                    <p className="text-sm text-[#FF5A5F] font-black uppercase tracking-wider">{founder.role}</p>
                   </div>
                 </div>
 
@@ -92,13 +94,15 @@ export default function FounderMessagePage() {
                 </div>
 
                 <div className="pt-6 border-t border-white/10">
-                  <Link 
-                    href="/contact" 
+                  <a
+                    href="https://www.linkedin.com/in/gemmy-adyendra-agardi/"
+                    target="_blank"
+                    rel="noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-[#FF5A5F] text-white font-black uppercase tracking-widest text-[11px] hover:bg-[#E8484D] transition-all shadow-[0_0_20px_rgba(255,90,95,0.2)]"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    Connect via WhatsApp
-                  </Link>
+                    Connect on LinkedIn
+                  </a>
                 </div>
               </motion.div>
             </div>
