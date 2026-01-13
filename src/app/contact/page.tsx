@@ -1,40 +1,26 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/context';
-import { MessageCircle, Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { MessageCircle, Mail, MapPin, Send, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import ContactForm from '@/components/forms/ContactForm';
 
 export default function ContactPage() {
   const { t } = useLanguage();
-  const [whatsapp, setWhatsapp] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement WhatsApp number collection
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
-  };
 
   const contactMethods = [
     {
       icon: MessageCircle,
       title: t.contact.contactMethods.whatsapp.title,
       description: t.contact.contactMethods.whatsapp.description,
-      action: "https://wa.me/6281339765775"
+      action: "https://wa.me/628211031903"
     },
     {
       icon: Mail,
       title: t.contact.contactMethods.email.title,
       description: t.contact.contactMethods.email.description,
       action: "mailto:mamak@kadaipos.id"
-    },
-    {
-      icon: Phone,
-      title: t.contact.contactMethods.phone.title,
-      description: t.contact.contactMethods.phone.description,
-      action: "tel:+6281339765775"
     }
   ];
 
@@ -53,18 +39,18 @@ export default function ContactPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-4xl mx-auto"
+            className="text-center max-w-4xl mx-auto mb-20"
           >
-            {/* Coming Soon Badge */}
+            {/* Status Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF5A5F]/10 to-[#8B5CF6]/10 backdrop-blur-sm rounded-full border border-[#FF5A5F]/20 mb-8"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full border border-gray-100 mb-8 shadow-sm"
             >
-              <Send className="w-5 h-5 text-[#FF5A5F]" />
-              <span className="text-sm font-semibold bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {t.contact.badge}
+              <Sparkles className="w-5 h-5 text-[#FF5A5F]" />
+              <span className="text-sm font-bold uppercase tracking-widest text-gray-900">
+                {t.contact.titleHighlight}
               </span>
             </motion.div>
 
@@ -73,11 +59,11 @@ export default function ContactPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl md:text-7xl font-bold mb-6"
+              className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9]"
             >
               {t.contact.title}{" "}
-              <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                {t.contact.titleHighlight}
+              <span className="bg-gradient-to-r from-[#FF5A5F] to-purple-600 bg-clip-text text-transparent">
+                Expert Support
               </span>
             </motion.h1>
 
@@ -86,162 +72,144 @@ export default function ContactPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-xl text-gray-600 mb-12 leading-relaxed"
+              className="text-xl md:text-2xl text-gray-500 max-w-2xl mx-auto leading-relaxed font-medium"
             >
               {t.contact.subtitle}
             </motion.p>
-
-            {/* WhatsApp Quick Contact */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="max-w-md mx-auto mb-16"
-            >
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="tel"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder={t.contact.whatsappPlaceholder}
-                    required
-                    pattern="[0-9]{10,15}"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-[#FF5A5F] focus:outline-none transition-all"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitted}
-                  className="px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
-                >
-                  {isSubmitted ? (
-                    <>
-                      <MessageCircle className="w-5 h-5" />
-                      {t.contact.registered}
-                    </>
-                  ) : (
-                    <>
-                      {t.contact.contactMe}
-                      <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
-              </form>
-              {isSubmitted && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 text-green-600 font-medium"
-                >
-                  {t.contact.successMessage}
-                </motion.p>
-              )}
-            </motion.div>
           </motion.div>
 
-          {/* Contact Methods */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
-          >
-            {contactMethods.map((method, index) => (
-              <motion.a
-                key={index}
-                href={method.action}
-                target={method.action.startsWith('http') ? '_blank' : undefined}
-                rel={method.action.startsWith('http') ? 'noopener noreferrer' : undefined}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
-                className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-[#FF5A5F]/30 hover:shadow-xl transition-all group cursor-pointer"
+          {/* Contact Form Section */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-start">
+              {/* Left Side: Info & Methods */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+                className="space-y-12"
               >
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#FF5A5F]/10 to-[#8B5CF6]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <method.icon className="w-7 h-7 text-[#FF5A5F]" />
+                <div className="grid gap-6">
+                  {contactMethods.map((method, index) => (
+                    <motion.a
+                      key={index}
+                      href={method.action}
+                      target={method.action.startsWith('http') ? '_blank' : undefined}
+                      rel={method.action.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="group flex items-start gap-6 p-8 bg-white rounded-[32px] border border-gray-100 hover:border-[#FF5A5F]/30 hover:shadow-xl transition-all"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-all duration-500">
+                        <method.icon className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{method.title}</h3>
+                        <p className="text-gray-500 font-medium leading-relaxed">{method.description}</p>
+                      </div>
+                    </motion.a>
+                  ))}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  {method.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {method.description}
-                </p>
-              </motion.a>
-            ))}
-          </motion.div>
+
+                {/* Professional Support Badge */}
+                <div className="p-10 bg-gradient-to-br from-gray-900 to-black rounded-[40px] text-white relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Sparkles className="w-20 h-20 text-white" />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/10 mb-6">
+                      <CheckCircle2 className="w-4 h-4 text-[#FF5A5F]" />
+                      <span className="text-xs font-black uppercase tracking-widest">{t.contact.supportCard.badge}</span>
+                    </div>
+                    <h3 className="text-2xl font-black mb-4 leading-tight">{t.contact.supportCard.title}</h3>
+                    <p className="text-gray-400 font-medium leading-relaxed">
+                      {t.contact.supportCard.description}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Right Side: High Fidelity Form */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+                className="relative"
+              >
+                <ContactForm type="contact" />
+              </motion.div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Location/Info Section */}
-      <div className="py-20 bg-white/50">
+      <section className="py-24 border-y border-gray-100 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="max-w-3xl mx-auto text-center"
+            className="max-w-4xl mx-auto flex flex-col items-center text-center"
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#FF5A5F]/10 to-[#8B5CF6]/10 mb-6">
-              <MapPin className="w-8 h-8 text-[#FF5A5F]" />
+            <div className="w-16 h-16 bg-gray-900 text-white rounded-2xl flex items-center justify-center mb-10 rotate-3">
+              <MapPin className="w-8 h-8" />
             </div>
-            <h2 className="text-4xl font-bold mb-4">
+            
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">
               {t.contact.visitUs.title}
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-500 mb-12 font-medium max-w-2xl">
               {t.contact.visitUs.subtitle}
             </p>
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full text-gray-700 font-semibold">
-              <MapPin className="w-5 h-5" />
+            
+            <div className="inline-flex items-center gap-4 px-8 py-4 bg-gray-50 rounded-full border border-gray-100 text-gray-900 font-bold uppercase tracking-widest text-sm shadow-sm hover:shadow-md transition-shadow">
+              <span className="w-2 h-2 rounded-full bg-[#FF5A5F] animate-pulse" />
               {t.contact.visitUs.location}
             </div>
           </motion.div>
         </div>
-      </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#FF5A5F]/20 via-[#8B5CF6]/20 to-[#3B82F6]/20" />
-        </div>
-
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-[#FF5A5F]/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-[#8B5CF6]/30 rounded-full blur-3xl animate-pulse delay-1000" />
+      <section className="relative py-32 overflow-hidden bg-gray-900">
+        <div className="absolute inset-0 z-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#FF5A5F]/20 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto"
+            className="text-center max-w-4xl mx-auto"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-[0.9]">
               {t.contact.cta.title}
             </h2>
-            <p className="text-xl text-white/80 mb-8">
+            <p className="text-xl md:text-2xl text-gray-400 mb-12 font-medium max-w-2xl mx-auto">
               {t.contact.cta.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <a
-                href="https://wa.me/6281339765775"
+                href="https://wa.me/628211031903"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold rounded-xl hover:shadow-xl transition-all"
+                className="group relative px-10 py-5 bg-white text-gray-900 font-black rounded-2xl hover:bg-gray-50 transition-all flex items-center gap-3 w-full sm:w-auto justify-center overflow-hidden"
               >
-                <MessageCircle className="w-5 h-5" />
-                {t.contact.cta.chatOnWhatsApp}
+                <div className="absolute inset-x-0 h-1 bottom-0 bg-gradient-to-r from-[#FF5A5F] to-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                <MessageCircle className="w-5 h-5 text-[#FF5A5F]" />
+                <span className="uppercase tracking-widest text-xs">{t.contact.cta.chatOnWhatsApp}</span>
               </a>
-              <a
+              
+              <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
+                className="px-10 py-5 bg-white/5 backdrop-blur-md text-white border border-white/10 font-black rounded-2xl hover:bg-white/10 transition-all w-full sm:w-auto justify-center text-center uppercase tracking-widest text-xs"
               >
                 {t.contact.cta.viewPricing}
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

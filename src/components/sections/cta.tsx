@@ -150,15 +150,15 @@ export function CTA() {
                 </Button>
               </div>
               
-              {/* Trust indicators with playful cards */}
+              {/* System indicators with playful cards */}
               <div className="flex items-center justify-center gap-6 flex-wrap">
                 <motion.div 
                   whileHover={{ y: -5, rotate: -2 }}
                   className="flex flex-col items-center bg-white px-6 py-4 rounded-[16px] border-3 border-[#FFB4A2] shadow-[0_4px_12px_rgba(26,26,46,0.04)]"
                 >
-                  <div className="text-3xl font-black text-[#FF5A5F]">10,000+</div>
+                  <div className="text-3xl font-black text-[#FF5A5F]">2025</div>
                   <div className="mt-1 text-sm font-bold text-[#4B5563]">
-                    {language === "en" ? "Active users" : "Pengguna aktif"}
+                    {language === "en" ? "Modern Tech" : "Teknologi Modern"}
                   </div>
                 </motion.div>
                 

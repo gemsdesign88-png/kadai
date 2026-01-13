@@ -223,7 +223,7 @@ export default function OwnerPage() {
           <p className="text-gray-600">{dt('manageRestaurantsDesc')}</p>
         </div>
         <button
-          onClick={() => {/* TODO: Add restaurant */}}
+          onClick={() => router.push('/onboarding')}
           className="px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -327,7 +327,7 @@ export default function OwnerPage() {
           <h3 className="text-lg font-bold text-gray-900 mb-2">{dt('noRestaurantsYet')}</h3>
           <p className="text-gray-600 mb-6">{dt('startByAddingRestaurant')}</p>
           <button
-            onClick={() => {/* TODO: Add restaurant */}}
+            onClick={() => router.push('/onboarding')}
             className="px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl font-semibold hover:bg-[var(--color-accent-hover)] transition-colors inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />

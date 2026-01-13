@@ -531,7 +531,7 @@ Kami mendorong Anda untuk meninjau kebijakan ini secara berkala. Tanggal "Terakh
 
 Data Protection Officer:
 Email: mamak@kadaipos.id
-Phone: +6281339765775
+Phone: +628211031903
 
 Mailing Address:
 Business Hours:
@@ -544,7 +544,7 @@ We will respond to your inquiry within 7 business days.`
 
 Petugas Perlindungan Data:
 Email: mamak@kadaipos.id
-Telepon: +6281339765775
+Telepon: +628211031903
 
 Alamat Surat:
 Jam Operasional:

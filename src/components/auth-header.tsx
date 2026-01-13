@@ -12,7 +12,7 @@ export function AuthHeader() {
             <Link href="/">
               <img 
                 src="/logo-black.svg" 
-                alt="KadaiPOS Logo" 
+                alt="Kadai Logo" 
                 className="h-8 w-auto"
               />
             </Link>

@@ -275,7 +275,7 @@ export default function RestaurantSubscriptionPage() {
                   </div>
                   <button
                     onClick={() => {
-                      window.open(`https://wa.me/6281339765775?text=Halo, saya ingin ${expiryStatus?.isExpired ? 'mengaktifkan kembali' : 'upgrade ke'} Paket Bulanan untuk restoran ${restaurant.name}`, '_blank');
+                      window.open(`https://wa.me/628211031903?text=Halo, saya ingin ${expiryStatus?.isExpired ? 'mengaktifkan kembali' : 'upgrade ke'} Paket Bulanan untuk restoran ${restaurant.name}`, '_blank');
                     }}
                     className="w-full mt-4 py-3 rounded-xl font-bold bg-gradient-to-r from-[var(--color-accent)] to-[#8B5CF6] text-white hover:shadow-lg transition-all"
                   >
@@ -311,7 +311,7 @@ export default function RestaurantSubscriptionPage() {
                   </div>
                   <button
                     onClick={() => {
-                      window.open(`https://wa.me/6281339765775?text=Halo, saya ingin ${expiryStatus?.isExpired ? 'mengaktifkan kembali' : 'upgrade ke'} Paket Tahunan untuk restoran ${restaurant.name}`, '_blank');
+                      window.open(`https://wa.me/628211031903?text=Halo, saya ingin ${expiryStatus?.isExpired ? 'mengaktifkan kembali' : 'upgrade ke'} Paket Tahunan untuk restoran ${restaurant.name}`, '_blank');
                     }}
                     className="w-full mt-4 py-3 rounded-xl font-bold bg-gradient-to-r from-[#10B981] to-[#059669] text-white hover:shadow-lg transition-all"
                   >
@@ -334,7 +334,7 @@ export default function RestaurantSubscriptionPage() {
         <div className="mt-12 text-center">
           <p className="text-gray-600 mb-4">{language === 'en' ? 'Need help or have questions?' : 'Butuh bantuan atau punya pertanyaan?'}</p>
           <button
-            onClick={() => window.open('https://wa.me/6281339765775?text=Halo, saya butuh bantuan terkait langganan', '_blank')}
+            onClick={() => window.open('https://wa.me/628211031903?text=Halo, saya butuh bantuan terkait langganan', '_blank')}
             className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

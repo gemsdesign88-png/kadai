@@ -427,7 +427,7 @@ Email: mamak@kadaipos.id
 Subject: Cookie Policy Inquiry
 
 Data Protection Officer:
-Phone: +6281339765775
+Phone: +628211031903
 
 Mailing Address:
 
@@ -443,7 +443,7 @@ Email: mamak@kadaipos.id
 Subject: Pertanyaan Kebijakan Cookie
 
 Petugas Perlindungan Data:
-Telepon: +6281339765775
+Telepon: +628211031903
 
 Alamat Surat:
 

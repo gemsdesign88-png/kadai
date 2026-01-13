@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/context";
 import { Container } from "@/components/ui/container";
 import { 
-  ChefHat, 
   Check, 
   ArrowRight,
   Utensils,
@@ -12,7 +11,13 @@ import {
   Blocks,
   Cloud,
   Store,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Pizza,
+  IceCream,
+  Beer,
+  Cake,
+  CupSoda,
+  Soup
 } from "lucide-react";
 import Link from "next/link";
 
@@ -23,18 +28,25 @@ export default function RestoPage() {
   const useCaseIcons = {
     warung: Store,
     restaurant: Utensils,
+    cafe: Coffee,
+    fastfood: Pizza,
+    bakery: Cake,
+    icecream: IceCream,
+    bar: Beer,
     foodcourt: Blocks,
     catering: UtensilsCrossed,
     cloudkitchen: Cloud,
+    juicebar: CupSoda,
+    streetfood: Soup,
   };
 
   return (
     <main className="bg-white">
       {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-gradient-to-br from-purple-50 via-white to-pink-50 relative overflow-hidden">
+      <section className="pt-32 pb-20 bg-gradient-to-br from-orange-50 via-white to-red-50 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
         </div>
 
         <Container>
@@ -44,12 +56,12 @@ export default function RestoPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 text-white mb-6">
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium text-white mb-6" style={{backgroundColor: '#FF6B35'}}>
                 {resto.hero.badge}
               </span>
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
                 {resto.hero.title}{" "}
-                <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #FF6B35, #FF8C5A)'}}>
                   {resto.hero.titleHighlight}
                 </span>
               </h1>
@@ -57,12 +69,12 @@ export default function RestoPage() {
                 {resto.hero.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-                <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <span className="text-3xl font-bold" style={{color: '#FF6B35'}}>
                   {resto.hero.price}
                 </span>
               </div>
               <Link href="/pricing">
-                <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2 mx-auto group">
+                <button className="px-8 py-4 text-white rounded-xl font-semibold transition-all shadow-lg flex items-center gap-2 mx-auto group hover:opacity-90" style={{backgroundColor: '#FF6B35'}}>
                   {resto.hero.getStarted}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -73,11 +85,11 @@ export default function RestoPage() {
       </section>
 
       {/* Use Cases Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gradient-to-b from-gray-900 to-gray-800">
         <Container>
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">{resto.useCases.title}</h2>
-            <p className="text-xl text-gray-600">{resto.useCases.subtitle}</p>
+            <h2 className="text-4xl font-bold mb-4 text-white">{resto.useCases.title}</h2>
+            <p className="text-xl text-gray-300">{resto.useCases.subtitle}</p>
           </div>
 
           <div className="space-y-20">
@@ -85,6 +97,7 @@ export default function RestoPage() {
               if (key === 'title' || key === 'subtitle' || typeof useCase !== 'object') return null;
               
               const Icon = useCaseIcons[key as keyof typeof useCaseIcons];
+              if (!Icon) return null; // Skip if no icon is defined
               const isEven = idx % 2 === 0;
 
               return (
@@ -98,20 +111,20 @@ export default function RestoPage() {
                 >
                   <div className={isEven ? '' : 'md:col-start-2'}>
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="p-3 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl">
-                        <Icon className="w-8 h-8 text-purple-600" />
+                      <div className="p-3 rounded-2xl shadow-lg" style={{background: 'linear-gradient(to bottom right, #FF6B35, #FF8C5A)', boxShadow: '0 10px 15px -3px rgba(255, 107, 53, 0.3)'}}>
+                        <Icon className="w-8 h-8 text-white" />
                       </div>
-                      <h3 className="text-3xl font-bold">{useCase.name}</h3>
+                      <h3 className="text-3xl font-bold text-white">{useCase.name}</h3>
                     </div>
-                    <p className="text-lg text-gray-600 mb-6">{useCase.description}</p>
+                    <p className="text-lg text-gray-300 mb-6">{useCase.description}</p>
 
                     {/* Challenges */}
                     <div className="mb-6">
-                      <h4 className="text-lg font-semibold mb-3 text-gray-900">Common Challenges:</h4>
+                      <h4 className="text-lg font-semibold mb-3 text-white">Common Challenges:</h4>
                       <ul className="space-y-2">
                         {useCase.challenges?.map((challenge: string, i: number) => (
-                          <li key={i} className="flex items-start gap-2 text-gray-600">
-                            <span className="text-red-500 mt-1">✕</span>
+                          <li key={i} className="flex items-start gap-2 text-gray-400">
+                            <span className="text-red-400 mt-1">✕</span>
                             <span>{challenge}</span>
                           </li>
                         ))}
@@ -119,23 +132,23 @@ export default function RestoPage() {
                     </div>
 
                     {/* Story */}
-                    <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border-l-4 border-purple-600">
-                      <p className="text-gray-700 italic">{useCase.story}</p>
+                    <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl border" style={{borderColor: 'rgba(255, 107, 53, 0.3)'}}>
+                      <p className="text-gray-300 italic">{useCase.story}</p>
                     </div>
                   </div>
 
                   <div className={isEven ? '' : 'md:col-start-1 md:row-start-1'}>
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-8">
-                      <h4 className="text-xl font-bold mb-6 text-gray-900">How Kadai Resto Helps:</h4>
+                    <div className="backdrop-blur-sm border rounded-3xl p-8 shadow-2xl" style={{background: 'linear-gradient(to bottom right, rgba(255, 107, 53, 0.15), rgba(255, 140, 90, 0.15))', borderColor: 'rgba(255, 107, 53, 0.2)'}}>
+                      <h4 className="text-xl font-bold mb-6 text-white">How Kadai Resto Helps:</h4>
                       <div className="space-y-4">
                         {useCase.solutions?.map((solution: any, i: number) => (
-                          <div key={i} className="flex items-start gap-3 bg-white p-4 rounded-xl shadow-sm">
-                            <div className="p-1 bg-green-100 rounded-lg mt-0.5">
-                              <Check className="w-4 h-4 text-green-600" />
+                          <div key={i} className="flex items-start gap-3 bg-white/10 backdrop-blur-sm border border-white/10 p-4 rounded-xl hover:bg-white/20 transition-all">
+                            <div className="p-1 bg-green-500/20 rounded-lg mt-0.5">
+                              <Check className="w-4 h-4 text-green-400" />
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900">{solution.title}</p>
-                              <p className="text-sm text-gray-600">{solution.description}</p>
+                              <p className="font-semibold text-white">{solution.title}</p>
+                              <p className="text-sm text-gray-300">{solution.description}</p>
                             </div>
                           </div>
                         ))}
@@ -236,7 +249,7 @@ export default function RestoPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-purple-600 via-pink-600 to-purple-600 relative overflow-hidden">
+      <section className="py-20 relative overflow-hidden" style={{background: 'linear-gradient(to bottom right, #FF6B35, #FF8C5A)'}}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',

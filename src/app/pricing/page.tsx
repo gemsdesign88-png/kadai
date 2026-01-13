@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, Zap, Shield, Users, Store, ChefHat, TrendingUp, Info } from "lucide-react";
+import { Check, ArrowRight, Zap, Shield, Users, Store, ChefHat, TrendingUp, Info, Scissors } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/context";
 import { createClient } from "@/lib/supabase/client";
+import { FinalCTA } from "@/components/sections/final-cta";
 import { Container } from "@/components/ui/container";
 
 interface PricingPlan {
@@ -57,7 +58,7 @@ export default function PricingPage() {
   const pricing = t.pricing.pricing;
   const faqs = t.pricing.faqs;
 
-  // Fetch pricing plans from Supabase and transform into 2 packages
+  // Fetch pricing plans from Supabase and transform into 3 packages
   useEffect(() => {
     async function fetchPlans() {
       setIsLoading(true);
@@ -75,31 +76,71 @@ export default function PricingPage() {
 
         if (data) {
           // Group plans by type
-          const tokoPlans = data.filter((p: any) => p.plan_tier === 'lite');
+          const tokoPlans = data.filter((p: any) => 
+            p.plan_tier === 'toko' || p.plan_tier === 'lite' ||
+            p.id?.includes('toko_starter') || p.id?.includes('toko_growth') || p.id?.includes('toko_pro')
+          );
           const restoPlans = data.filter((p: any) => 
-            p.id.includes('promo') || p.id.includes('starter') || 
-            p.id.includes('growth') || p.id.includes('pro')
+            p.plan_tier === 'resto' ||
+            (p.id?.includes('promo') || p.id?.includes('starter') || 
+            p.id?.includes('growth') || p.id?.includes('pro')) && !p.id?.includes('toko')
           );
 
           const packagesData: PackageData[] = [];
 
-          // Toko Package
+          // Toko Package (revenue-based)
           if (tokoPlans.length > 0) {
-            const monthlyToko = tokoPlans.find((p: any) => p.period === 'monthly' || p.duration_months === 1);
-            const yearlyToko = tokoPlans.find((p: any) => p.period === 'yearly' || p.duration_months === 12);
+            // Group toko plans by billing period
+            const monthlyTokoPlans = tokoPlans.filter((p: any) => p.period === 'monthly' || p.duration_months === 1);
+            const yearlyTokoPlans = tokoPlans.filter((p: any) => p.period === 'yearly' || p.duration_months === 12);
+
+            // Get the lowest starter price for display
+            const starterMonthly = monthlyTokoPlans.find((p: any) => p.id?.includes('starter') || p.id?.includes('toko_starter'));
+            const starterYearly = yearlyTokoPlans.find((p: any) => p.id?.includes('starter') || p.id?.includes('toko_starter'));
+            
+            // Build revenue tiers info (using monthly plans)
+            const tiers = monthlyTokoPlans.map((plan: any) => {
+              let tierName = 'Starter';
+              if (plan.id?.includes('starter') || plan.id?.includes('toko_starter')) tierName = 'Starter';
+              else if (plan.id?.includes('growth') || plan.id?.includes('toko_growth')) tierName = 'Growth';
+              else if (plan.id?.includes('pro') || plan.id?.includes('toko_pro')) tierName = 'Pro';
+
+              let revenueRange = language === 'id' ? 'Skala kecil' : language === 'zh' ? '小规模' : 'Small scale';
+              if (plan.monthly_revenue_min !== null && plan.monthly_revenue_max !== null) {
+                const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
+                revenueRange = `Rp${(plan.monthly_revenue_min / 1000000).toFixed(0)}M - ${(plan.monthly_revenue_max / 1000000).toFixed(0)}M${unit}`;
+              } else if (plan.monthly_revenue_max !== null) {
+                const prefix = language === 'id' ? 'Hingga' : language === 'zh' ? '最多' : 'Up to';
+                const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
+                revenueRange = `${prefix} Rp${(plan.monthly_revenue_max / 1000000).toFixed(0)}M${unit}`;
+              } else if (plan.monthly_revenue_min !== null) {
+                const prefix = language === 'id' ? 'Di atas' : language === 'zh' ? '超过' : 'Above';
+                const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
+                revenueRange = `${prefix} Rp${(plan.monthly_revenue_min / 1000000).toFixed(0)}M${unit}`;
+              }
+
+              return {
+                name: tierName,
+                price: plan.price_display,
+                revenue: revenueRange,
+              };
+            });
 
             packagesData.push({
               type: 'toko',
               icon: <Store className="w-12 h-12 text-blue-600" />,
               name: 'Kadai Toko',
               tagline: t.pricing.tokoTagline,
-              monthlyPrice: monthlyToko?.price_idr || 49000,
-              yearlyPrice: yearlyToko?.price_idr || 529000,
-              monthlyPriceDisplay: monthlyToko?.price_display || 'Rp49K',
-              yearlyPriceDisplay: yearlyToko?.price_display || 'Rp529K',
+              monthlyPrice: starterMonthly?.price_idr || 49000,
+              yearlyPrice: starterYearly?.price_idr || 529000,
+              monthlyPriceDisplay: language === 'id' ? 'Rp49K - 349K' : language === 'zh' ? 'Rp49K - 349K' : 'Rp49K - 349K',
+              yearlyPriceDisplay: language === 'id' ? 'Rp529K - 3.769K' : language === 'zh' ? 'Rp529K - 3.769K' : 'Rp529K - 3.769K',
               suitableFor: t.pricing.tokoSuitable,
               features: [...t.pricing.tokoFeatures],
-              recommended: false,
+              badge: starterMonthly?.badge || t.pricing.badge1,
+              isRevenueBased: true,
+              revenueNote: t.pricing.tokoNote2,
+              tiers,
             });
           }
 
@@ -161,6 +202,26 @@ export default function PricingPage() {
               revenueNoteYearly: t.pricing.restoNoteYearly,
               tiers,
             });
+
+            // Pro Package (same pricing as Resto)
+            packagesData.push({
+              type: 'resto' as any,
+              icon: <Scissors className="w-12 h-12" style={{color: '#8B5CF6'}} />,
+              name: 'Kadai Pro',
+              tagline: language === 'id' ? 'Untuk Layanan Profesional' : language === 'zh' ? '专业服务' : 'For Professional Services',
+              monthlyPrice: 149000,
+              yearlyPrice: 1599000,
+              monthlyPriceDisplay: language === 'id' ? 'Rp149K - 499K' : language === 'zh' ? 'Rp149K - 499K' : 'Rp149K - 499K',
+              yearlyPriceDisplay: language === 'id' ? 'Rp1.599K - 5.388K' : language === 'zh' ? 'Rp1.599K - 5.388K' : 'Rp1.599K - 5.388K',
+              suitableFor: language === 'id' ? 'Salon, spa, klinik, gym, dan semua layanan profesional' : language === 'zh' ? '美容院、水疗、诊所、健身房等专业服务' : 'Salons, spas, clinics, gyms, and all professional services',
+              features: [...t.pricing.proFeatures],
+              badge: promoMonthly?.badge || t.pricing.badge2,
+              isRevenueBased: true,
+              revenueNote: t.pricing.restoNote2,
+              revenueNoteMonthly: t.pricing.restoNoteMonthly,
+              revenueNoteYearly: t.pricing.restoNoteYearly,
+              tiers,
+            });
           }
 
           setPackages(packagesData);
@@ -189,7 +250,7 @@ export default function PricingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
+            className="text-center mb-10"
           >
             <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white mb-6">
               {t.pricing.badge}
@@ -200,10 +261,10 @@ export default function PricingPage() {
                 {t.pricing.heroTitleHighlight}
               </span>
             </h1>
-            
-            <div className="max-w-5xl mx-auto space-y-6">
-              {/* Two Pricing Cards Side by Side */}
-              <div className="grid md:grid-cols-2 gap-6">
+          </motion.div>
+
+          {/* Three Pricing Cards Side by Side */}
+          <div className="grid md:grid-cols-3 gap-8 mb-6">
                 {/* Kadai Toko Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -222,11 +283,14 @@ export default function PricingPage() {
                         {t.pricing.heroToko}
                       </h3>
                       <div className="flex items-baseline gap-2 mb-3">
+                        <span className="text-lg text-gray-600 font-medium">
+                          {language === 'id' ? 'Mulai dari' : language === 'zh' ? '从' : 'Starting from'}
+                        </span>
                         <span className="text-4xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                          {t.pricing.tokoPrice.split('/')[0]}
+                          Rp49K
                         </span>
                         <span className="text-lg text-gray-600 font-semibold">
-                          /{t.pricing.tokoPrice.split('/')[1]}
+                          /{language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month'}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
@@ -247,11 +311,6 @@ export default function PricingPage() {
                   className="group relative"
                 >
                   <div className="relative bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-3xl p-8 border-2 border-purple-300 hover:border-purple-500 hover:shadow-2xl transition-all duration-300">
-                    {/* Popular Badge */}
-                    <div className="absolute -top-3 -right-3 px-4 py-1.5 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] rounded-full shadow-lg animate-pulse">
-                      <span className="text-xs font-bold text-white">⭐ {t.pricing.badge2}</span>
-                    </div>
-                    
                     {/* Icon Badge */}
                     <div className="absolute -top-4 left-8 w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <ChefHat className="w-8 h-8 text-white" />
@@ -263,13 +322,13 @@ export default function PricingPage() {
                       </h3>
                       <div className="flex items-baseline gap-2 mb-3">
                         <span className="text-lg text-gray-600 font-medium">
-                          {t.pricing.restoPrice.split('Rp')[0]}
+                          {language === 'id' ? 'Mulai dari' : language === 'zh' ? '从' : 'Starting from'}
                         </span>
                         <span className="text-4xl font-black bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                          Rp {t.pricing.restoPrice.split('Rp')[1]?.split('/')[0]}
+                          Rp149K
                         </span>
                         <span className="text-lg text-gray-600 font-semibold">
-                          /{t.pricing.restoPrice.split('/')[1]}
+                          /{language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month'}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
@@ -281,26 +340,62 @@ export default function PricingPage() {
                     <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-purple-100 to-transparent rounded-br-3xl opacity-50" />
                   </div>
                 </motion.div>
+
+                {/* Kadai Pro Card */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="group relative"
+                >
+                  <div className="relative rounded-3xl p-8 border-2 transition-all duration-300" style={{background: 'linear-gradient(to bottom right, #f3e8ff, #ffffff, #f3e8ff)', borderColor: '#8B5CF6'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#7C3AED'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#8B5CF6'}>
+                    {/* Icon Badge */}
+                    <div className="absolute -top-4 left-8 w-16 h-16 rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300" style={{background: 'linear-gradient(to right, #8B5CF6, #A78BFA)'}}>
+                      <Scissors className="w-8 h-8 text-white" />
+                    </div>
+                    
+                    <div className="pt-6">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        Kadai Pro
+                      </h3>
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <span className="text-lg text-gray-600 font-medium">
+                          {language === 'id' ? 'Mulai dari' : language === 'zh' ? '从' : 'Starting from'}
+                        </span>
+                        <span className="text-4xl font-black bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #8B5CF6, #A78BFA)'}}>
+                          Rp149K
+                        </span>
+                        <span className="text-lg text-gray-600 font-semibold">
+                          /{language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {language === 'id' ? 'Salon, spa, klinik, gym & layanan profesional' : language === 'zh' ? '美容院、水疗、诊所、健身房等' : 'Salons, spas, clinics, gyms & pro services'}
+                      </p>
+                    </div>
+                    
+                    {/* Decorative gradient */}
+                    <div className="absolute bottom-0 right-0 w-32 h-32 rounded-br-3xl opacity-50" style={{background: 'linear-gradient(to top left, #f3e8ff, transparent)'}} />
+                  </div>
+                </motion.div>
               </div>
 
-              {/* Info Note */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="bg-gradient-to-r from-purple-50 via-pink-50 to-purple-50 rounded-2xl p-6 border border-purple-200"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
-                    <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <p className="text-base text-gray-700 leading-relaxed font-medium">
-                    {t.pricing.restoNote}
-                  </p>
-                </div>
-              </motion.div>
+          {/* Info Note */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="bg-gradient-to-r from-purple-50 via-pink-50 to-purple-50 rounded-2xl p-6 border border-purple-200"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-base text-gray-700 leading-relaxed font-medium">
+                {t.pricing.restoNote}
+              </p>
             </div>
           </motion.div>
         </Container>
@@ -369,8 +464,8 @@ export default function PricingPage() {
               </div>
             ) : (
               <>
-                {/* 2 Main Packages Grid */}
-                <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+                {/* 3 Main Packages Grid */}
+                <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
                   {packages.map((pkg, index) => {
                     const price = billingPeriod === 'yearly' ? pkg.yearlyPrice : pkg.monthlyPrice;
                     const priceDisplay = billingPeriod === 'yearly' ? pkg.yearlyPriceDisplay : pkg.monthlyPriceDisplay;
@@ -380,25 +475,18 @@ export default function PricingPage() {
                     
                     return (
                       <motion.div
-                        key={pkg.type}
+                        key={pkg.name}
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: index * 0.15 }}
-                        className={`relative group ${pkg.recommended ? 'md:scale-105 z-10' : ''}`}
+                        className="relative group"
                       >
                         <div className={`h-full rounded-3xl p-8 md:p-10 transition-all duration-300 ${
-                          pkg.recommended
-                            ? 'bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 border-2 border-purple-400 shadow-2xl'
+                          pkg.name === 'Kadai Pro'
+                            ? 'border-2 border-purple-300 hover:border-purple-400 hover:shadow-xl'
                             : 'bg-white border-2 border-gray-200 hover:border-blue-300 hover:shadow-xl'
-                        }`}>
-                          {/* Badge */}
-                          {pkg.badge && (
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-2 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white text-sm font-bold rounded-full shadow-lg animate-pulse">
-                              ⭐ {pkg.badge}
-                            </div>
-                          )}
-
+                        }`} style={pkg.name === 'Kadai Pro' ? {background: 'linear-gradient(to bottom right, #ffffff, #f3e8ff)'} : undefined}>
                           {/* Icon & Name */}
                           <div className="mb-6">
                             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -418,11 +506,7 @@ export default function PricingPage() {
                           {/* Price */}
                           <div className="mb-6 pb-6 border-b-2 border-gray-200">
                             <div className="flex items-baseline gap-2 mb-1">
-                              <span className={`text-4xl font-black ${
-                                pkg.recommended 
-                                  ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
-                                  : 'text-gray-900'
-                              }`}>
+                              <span className="text-4xl font-black text-gray-900">
                                 {priceDisplay.split('/')[0]}
                               </span>
                               <span className="text-lg text-gray-600 font-semibold">
@@ -469,11 +553,7 @@ export default function PricingPage() {
                           {/* CTA Button */}
                           <a
                             href={`/register?plan=${pkg.type}`}
-                            className={`block w-full py-4 px-6 rounded-2xl font-bold text-center transition-all duration-300 ${
-                              pkg.recommended
-                                ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white shadow-lg hover:shadow-xl hover:scale-105'
-                                : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:scale-105'
-                            } flex items-center justify-center gap-2 group`}
+                            className="w-full py-4 px-6 rounded-2xl font-bold text-center transition-all duration-300 bg-gray-900 text-white hover:bg-gray-800 hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2 group"
                           >
                             <span>{t.pricing.getStarted}</span>
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -493,7 +573,76 @@ export default function PricingPage() {
         </Container>
       </section>
 
-      {/* Resto Pricing Tiers Section */}
+      {/* Toko Pricing Tiers Section */}
+      {!isLoading && packages.find(p => p.type === 'toko')?.tiers && (
+        <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
+          <Container>
+            {packages.find(p => p.type === 'toko')?.tiers && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="max-w-4xl mx-auto"
+              >
+                <div className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 rounded-3xl p-8 md:p-10 border-2 border-blue-200 shadow-lg">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-full mb-4">
+                      <TrendingUp className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-bold text-gray-900">
+                        {language === 'id' ? 'Harga Berdasarkan Omzet' : language === 'zh' ? '基于收入的定价' : 'Revenue-Based Pricing'}
+                      </span>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
+                      {language === 'id' ? 'Paket Kadai Toko' : language === 'zh' ? 'Kadai Toko 套餐' : 'Kadai Toko Packages'}
+                    </h3>
+                    <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                      {language === 'id' ? 'Harga disesuaikan dengan omzet bulanan toko Anda. Bayar sesuai skala bisnis.' : language === 'zh' ? '根据您的月营业额定价。按业务规模付费。' : 'Pricing based on your monthly revenue. Pay according to your business scale.'}
+                    </p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {packages.find(p => p.type === 'toko')?.tiers?.map((tier, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: idx * 0.1 }}
+                        className="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
+                      >
+                        <div className="text-center">
+                          <h4 className="text-lg font-bold text-gray-900 mb-2">
+                            {tier.name}
+                          </h4>
+                          <div className="text-3xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-3">
+                            {tier.price}
+                          </div>
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-full">
+                            <Store className="w-4 h-4 text-blue-600" />
+                            <span className="text-xs font-semibold text-gray-700">
+                              {tier.revenue}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      <strong className="text-gray-900">{language === 'id' ? 'Harga per outlet.' : language === 'zh' ? '每个门店的价格。' : 'Price per outlet.'}</strong><br/>
+                      {language === 'id' ? 'Tidak ada batasan jumlah device yang bisa digunakan.' : language === 'zh' ? '可使用设备数量无限制。' : 'No limit on number of devices used.'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </Container>
+        </section>
+      )}
+
+      {/* Resto & Pro Pricing Tiers Section */}
       {!isLoading && packages.find(p => p.type === 'resto')?.tiers && (
         <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
           <Container>
@@ -510,14 +659,14 @@ export default function PricingPage() {
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mb-4">
                       <TrendingUp className="w-5 h-5 text-purple-600" />
                       <span className="text-sm font-bold text-gray-900">
-                        Revenue-Based Pricing
+                        {language === 'id' ? 'Harga Berdasarkan Omzet' : language === 'zh' ? '基于收入的定价' : 'Revenue-Based Pricing'}
                       </span>
                     </div>
                     <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
-                      {t.pricing.tiersTitle}
+                      {language === 'id' ? 'Tingkatan Omzet Kadai Resto & Pro' : language === 'zh' ? 'Kadai Resto & Pro 收入等级' : 'Kadai Resto & Pro Revenue Tiers'}
                     </h3>
                     <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                      {t.pricing.tiersSubtitle}
+                      {language === 'id' ? 'Harga disesuaikan dengan omzet bulanan bisnis Anda. Berlaku untuk Resto & Pro.' : language === 'zh' ? '根据您的月营业额定价。适用于 Resto 和 Pro。' : 'Pricing based on your monthly revenue. Applies to both Resto & Pro packages.'}
                     </p>
                   </div>
 
@@ -548,9 +697,20 @@ export default function PricingPage() {
                     ))}
                   </div>
 
-                  <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 via-pink-50 to-purple-50 rounded-xl border border-purple-200">
+                    <div className="flex items-center justify-center gap-4 mb-2">
+                      <div className="flex items-center gap-2">
+                        <ChefHat className="w-5 h-5" style={{color: '#FF6B35'}} />
+                        <span className="font-bold text-gray-900">Kadai Resto</span>
+                      </div>
+                      <span className="text-gray-400">+</span>
+                      <div className="flex items-center gap-2">
+                        <Scissors className="w-5 h-5" style={{color: '#8B5CF6'}} />
+                        <span className="font-bold text-gray-900">Kadai Pro</span>
+                      </div>
+                    </div>
                     <p className="text-sm text-gray-700 text-center leading-relaxed">
-                      {t.pricing.tiersNote}
+                      {language === 'id' ? 'Harga per outlet. Tidak ada batasan jumlah device yang bisa digunakan.' : language === 'zh' ? '每个门店的价格。可使用设备数量无限制。' : 'Price per outlet. No limit on number of devices used.'}
                     </p>
                   </div>
                 </div>
@@ -582,7 +742,7 @@ export default function PricingPage() {
             </div>
 
             <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-8 md:p-10 border border-gray-200 shadow-sm">
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-3 gap-8">
                 {/* Kadai Toko */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-6">
@@ -605,8 +765,8 @@ export default function PricingPage() {
                 {/* Kadai Resto */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                      <ChefHat className="w-6 h-6 text-purple-600" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, #FF6B35, #FF8C5A)'}}>
+                      <ChefHat className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">Kadai Resto</h3>
                   </div>
@@ -614,7 +774,26 @@ export default function PricingPage() {
                   <div className="space-y-3">
                     {t.pricing.restoComparisonFeatures.map((feature, idx) => (
                       <div key={idx} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                        <Check className="w-5 h-5" style={{color: '#FF6B35'}} />
+                        <span className="text-sm text-gray-700">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Kadai Pro */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, #8B5CF6, #A78BFA)'}}>
+                      <Scissors className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900">Kadai Pro</h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {t.pricing.proComparisonFeatures.map((feature, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <Check className="w-5 h-5" style={{color: '#8B5CF6'}} />
                         <span className="text-sm text-gray-700">{feature}</span>
                       </div>
                     ))}
@@ -628,6 +807,7 @@ export default function PricingPage() {
                     <strong>{t.pricing.comparisonHelp}</strong><br/>
                     {t.pricing.comparisonToko}<br/>
                     {t.pricing.comparisonResto}<br/>
+                    {t.pricing.comparisonPro}<br/>
                     <span className="text-xs text-gray-600 mt-2 block">{t.pricing.comparisonNote}</span>
                   </p>
                 </div>
@@ -683,49 +863,8 @@ export default function PricingPage() {
         </Container>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-20 overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900">
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FF5A5F]/20 via-[#8B5CF6]/20 to-[#3B82F6]/20" />
-        
-        {/* Animated Blobs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#FF5A5F]/20 rounded-full blur-3xl animate-blob" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#8B5CF6]/20 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#3B82F6]/20 rounded-full blur-3xl animate-blob animation-delay-4000" />
-
-        <Container className="relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              {t.pricing.ctaTitle}
-            </h2>
-            <p className="text-xl text-white/80 mb-10 leading-relaxed">
-              {t.pricing.ctaSubtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="https://wa.me/6281339765775"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all duration-300 group"
-              >
-                {t.pricing.contactSales}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </a>
-              <a
-                href="/features"
-                className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-white/10 backdrop-blur-sm text-white rounded-full font-bold text-lg border-2 border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300"
-              >
-                {t.pricing.viewAllFeatures}
-              </a>
-            </div>
-          </motion.div>
-        </Container>
-      </section>
+      {/* Final CTA Component */}
+      <FinalCTA />
     </main>
   );
 }

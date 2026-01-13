@@ -1,12 +1,11 @@
-import { Hero } from "@/components/sections/hero"
-import { Testimonials } from "@/components/sections/testimonials"
+import { BusinessHealth } from "@/components/sections/business-health"
+import { IndustrySelector } from "@/components/sections/industry-selector"
+import { DualModeSystem } from "@/components/sections/dual-mode-system"
+import { MagicPasteShowcase } from "@/components/sections/magic-paste-showcase"
+import { WhyKadai } from "@/components/sections/why-kadai"
+import { FinalCTA } from "@/components/sections/final-cta"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import dynamic from "next/dynamic"
-
-const RealUIFeatures = dynamic(() => import("@/components/sections/real-ui-features").then(mod => mod.RealUIFeatures), {
-  loading: () => <div className="min-h-screen bg-black" />
-})
 
 export default async function Home() {
   const headersList = await headers()
@@ -19,9 +18,12 @@ export default async function Home() {
   
   return (
     <main className="relative">
-      <Hero />
-      <RealUIFeatures />
-      <Testimonials />
+      <BusinessHealth />
+      <IndustrySelector />
+      <MagicPasteShowcase />
+      <DualModeSystem />
+      <WhyKadai />
+      <FinalCTA />
     </main>
   )
 }

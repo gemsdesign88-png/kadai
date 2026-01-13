@@ -4,9 +4,6 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { ArrowLeft, CheckCircle2 } from "lucide-react"
-import { useLanguage } from "@/lib/i18n/context"
 import { MockupCarousel } from "@/components/ui/mockup-carousel"
 import {
   TablesOverviewMockup,
@@ -14,6 +11,10 @@ import {
   TableReservationMockup,
   TableMergingMockup,
 } from "@/components/mockups/tables-mockups"
+import Link from "next/link"
+import { ArrowLeft, CheckCircle2 } from "lucide-react"
+import { useLanguage } from "@/lib/i18n/context"
+import { FinalCTA } from "@/components/sections/final-cta"
 
 export default function TablesFeaturePage() {
   const { t, language } = useLanguage()
@@ -104,6 +105,8 @@ export default function TablesFeaturePage() {
           </div>
         </Container>
       </section>
+
+      <FinalCTA />
     </main>
   )
 }

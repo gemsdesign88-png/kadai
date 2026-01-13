@@ -210,7 +210,7 @@ export default function PricingPage() {
 
                   {/* CTA Button */}
                   <a
-                    href="https://wa.me/6281339765775"
+                    href="https://wa.me/628211031903"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full text-center px-6 py-3 mb-8 rounded-full font-semibold text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:shadow-lg transition-shadow"
@@ -344,7 +344,7 @@ export default function PricingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://wa.me/6281339765775"
+                href="https://wa.me/628211031903"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white rounded-full font-semibold hover:shadow-2xl hover:shadow-purple-500/50 transition-all"

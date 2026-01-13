@@ -87,7 +87,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
         <div className="px-4 py-3">
           {/* First Row - Logo and Menu */}
           <div className="flex items-center justify-between mb-3">
-            <img src="/logo-black.svg" alt="KadaiPOS" className="h-7 w-auto" />
+            <img src="/logo-black.svg" alt="Kadai" className="h-7 w-auto" />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
@@ -288,7 +288,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Logo */}
           <div className="p-6 border-b border-gray-200">
-            <img src="/logo-black.svg" alt="KadaiPOS" className="h-10 w-auto" />
+            <img src="/logo-black.svg" alt="Kadai" className="h-10 w-auto" />
           </div>
 
           {/* Restaurant Selector - Desktop */}

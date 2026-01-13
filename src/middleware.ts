@@ -13,10 +13,11 @@ export async function middleware(request: NextRequest) {
   
   // Redirect sibos.kadaipos.id to dashboard
   if (host.includes('sibos.kadaipos.id')) {
-    // If not already on dashboard/login/auth/register routes, redirect to dashboard
+    // If not already on dashboard/login/auth/admin/register routes, redirect to dashboard
     if (pathname === '/' || 
         (!pathname.startsWith('/dashboard') && 
          !pathname.startsWith('/login') && 
+         !pathname.startsWith('/admin') &&
          !pathname.startsWith('/auth') &&
          !pathname.startsWith('/register') &&
          !pathname.startsWith('/onboarding') &&
@@ -37,6 +38,16 @@ export async function middleware(request: NextRequest) {
     '/privacy',
     '/terms',
     '/cookies',
+    '/founder',
+    '/about',
+    '/contact',
+    '/demo',
+    '/admin/login',
+    '/features',
+    '/pricing',
+    '/benefits',
+    '/business',
+    '/careers',
     '/api/demo-request',
     '/register',
   ];

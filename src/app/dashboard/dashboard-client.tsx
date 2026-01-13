@@ -664,7 +664,7 @@ export default function DashboardClient({ restaurants }: DashboardClientProps) {
           </p>
           <button 
             className="px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
-            onClick={() => router.push('/dashboard/setup')}
+            onClick={() => router.push('/onboarding')}
           >
             {dt('addBusiness')}
           </button>

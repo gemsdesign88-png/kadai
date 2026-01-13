@@ -15,14 +15,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://kadaipos.id'),
   title: {
-    default: "KadaiPOS - POS Terbaik di Indonesia untuk Restoran & Toko",
-    template: "%s | KadaiPOS"
+    default: "Kadai - Business Operating System for Retail, F&B, and Services",
+    template: "%s | Kadai"
   },
-  description: "KadaiPOS adalah sistem POS terbaik di Indonesia untuk restoran, cafe, dan toko retail. Aplikasi kasir digital modern untuk kelola stok, penjualan, dan staff dengan mudah.",
-  keywords: ["POS terbaik di Indonesia", "Aplikasi Kasir Terbaik", "POS system", "Point of Sale", "Aplikasi Kasir", "Kasir Digital", "Restaurant POS", "Retail POS", "Cafe POS", "Inventory Management", "Sales Tracking", "KadaiPOS", "Indonesia POS", "Software Kasir"],
-  authors: [{ name: "KadaiPOS Team" }],
-  creator: "KadaiPOS",
-  publisher: "KadaiPOS",
+  description: "Kadai adalah platform manajemen bisnis lengkap untuk toko retail, restoran, kafe, dan bisnis jasa. Kelola inventori, penjualan, staff, dan operasional dari satu aplikasi powerful dengan AI Magic Paste.",
+  keywords: ["Business Operating System", "Business Management Platform", "Aplikasi Bisnis", "Retail Management", "Restaurant Management", "Inventory Management", "POS System", "Aplikasi Kasir", "Kasir Digital", "Sales Tracking", "Staff Management", "Kadai", "Indonesia Business Software", "AI Magic Paste", "Business Automation"],
+  authors: [{ name: "Kadai Team" }],
+  creator: "Kadai",
+  publisher: "Kadai",
   formatDetection: {
     email: false,
     address: false,
@@ -32,22 +32,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://kadaipos.id",
-    siteName: "KadaiPOS",
-    title: "KadaiPOS - Modern POS System for Your Business",
-    description: "The most intuitive and powerful POS system for modern businesses. Manage everything from one place.",
+    siteName: "Kadai",
+    title: "Kadai - Business Operating System for Modern Entrepreneurs",
+    description: "The complete business management platform for retail, F&B, and service businesses. Manage everything from one powerful app.",
     images: [
       {
         url: "/Logo.svg",
         width: 800,
         height: 600,
-        alt: "KadaiPOS Logo",
+        alt: "Kadai Logo",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KadaiPOS - Modern POS System",
-    description: "Streamline your business operations with KadaiPOS. Modern, intuitive point of sale system.",
+    title: "Kadai - Business Operating System",
+    description: "Complete business management platform for retail, restaurants, and services. Manage everything from one powerful app.",
     images: ["/Logo.svg"],
   },
   icons: {
@@ -79,7 +79,7 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "KadaiPOS",
+    "name": "Kadai",
     "operatingSystem": "Web, iOS, Android",
     "applicationCategory": "BusinessApplication",
     "offers": {
@@ -92,11 +92,11 @@ export default function RootLayout({
       "ratingValue": "4.9",
       "ratingCount": "120"
     },
-    "description": "Modern POS system for restaurants, cafes, and retail stores in Indonesia.",
+    "description": "Complete Business Operating System for retail, f&b, and service businesses.",
     "url": "https://kadaipos.id",
     "author": {
       "@type": "Organization",
-      "name": "KadaiPOS"
+      "name": "Kadai"
     }
   };
 

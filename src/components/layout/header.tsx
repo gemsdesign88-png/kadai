@@ -8,7 +8,7 @@ import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { useLanguage } from "@/lib/i18n/context"
-import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store } from "lucide-react"
+import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store, UtensilsCrossed, Scissors } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navigation = [
@@ -21,8 +21,9 @@ const navigation = [
 ]
 
 const businessMenu = [
-  { icon: Store, title: "tokoTitle", titleId: "tokoDesc", href: "/business/toko", color: "#0066FF" },
-  { icon: ChefHat, title: "restoTitle", titleId: "restoDesc", href: "/business/resto", color: "#8B5CF6" },
+  { icon: Store, titleId: "tokoTitle", descId: "tokoDesc", href: "/business/toko", color: "#0066FF" },
+  { icon: UtensilsCrossed, titleId: "restoTitle", descId: "restoDesc", href: "/business/resto", color: "#FF6B35" },
+  { icon: Scissors, titleId: "proTitle", descId: "proDesc", href: "/business/pro", color: "#8B5CF6" },
 ]
 
 const featuresMenu = [
@@ -150,7 +151,7 @@ export function Header() {
               <img 
                 ref={logoRef}
                 src={pathname === '/' && !shouldShowScrolled ? "/logo-white.svg" : "/logo-black.svg"} 
-                alt="KadaiPOS - Aplikasi Kasir Digital Terbaik" 
+                alt="Kadai - Business Operating System" 
                 className="h-10 w-auto transition-all duration-300" 
               />
             </Link>
@@ -162,9 +163,31 @@ export function Header() {
                   const isFeatures = item.name === 'features';
                   const isBusiness = item.name === 'business';
                   const isOpen = isFeatures ? featuresOpen : businessOpen;
-                  const handleMouseEnter = isFeatures ? handleFeaturesMouseEnter : handleBusinessMouseEnter;
-                  const handleMouseLeave = isFeatures ? handleFeaturesMouseLeave : handleBusinessMouseLeave;
+                  const handleMouseEnter = isBusiness ? handleBusinessMouseEnter : undefined;
+                  const handleMouseLeave = isBusiness ? handleBusinessMouseLeave : undefined;
                   
+                  // Features: just a link without dropdown
+                  if (isFeatures) {
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={`px-4 py-2 text-sm font-bold rounded-[12px] transition-all ${
+                          isActive
+                            ? pathname === '/' && !shouldShowScrolled
+                              ? 'text-white bg-white/20'
+                              : 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
+                            : pathname === '/' && !shouldShowScrolled
+                              ? 'text-white/90 hover:text-white hover:bg-white/10'
+                              : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
+                        }`}
+                      >
+                        {t.nav[item.name as keyof typeof t.nav]}
+                      </Link>
+                    );
+                  }
+                  
+                  // Business: dropdown with hover
                   return (
                     <div
                       key={item.name}
@@ -173,7 +196,7 @@ export function Header() {
                       onMouseLeave={handleMouseLeave}
                     >
                       <button
-                        ref={isBusiness ? businessButtonRef : undefined}
+                        ref={businessButtonRef}
                         className={`px-4 py-2 text-sm font-bold rounded-[12px] transition-all flex items-center gap-1 ${
                           isActive
                             ? pathname === '/' && !shouldShowScrolled
@@ -361,7 +384,6 @@ export function Header() {
                   className="text-sm font-bold text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] px-5 py-2.5 rounded-full transition-all shadow-lg shadow-[#FF5A5F]/30 hover:shadow-xl inline-flex items-center gap-2"
                 >
                   {t.nav.exploreAllFeatures}
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </Link>
               </div>
             </div>
@@ -381,7 +403,7 @@ export function Header() {
               top: 88,
               left: businessModalLeft,
               width: 'auto',
-              maxWidth: '600px',
+              maxWidth: '700px',
               zIndex: 100,
             } : undefined}
             className="bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden"
@@ -398,7 +420,7 @@ export function Header() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 {businessMenu.map((item, idx) => {
                   const Icon = item.icon
                   return (
@@ -406,46 +428,52 @@ export function Header() {
                       key={idx}
                       href={item.href}
                       onClick={() => setBusinessOpen(false)}
-                      className="group flex flex-col gap-4 p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50/50 border border-gray-200/60 hover:border-gray-300 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                      className="group relative flex flex-col items-center gap-4 p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50/50 border-2 border-gray-200/60 hover:border-gray-300 hover:shadow-2xl hover:scale-105 transition-all duration-300"
                       style={{
                         '--item-color': item.color,
-                        '--item-bg': `${item.color}2F`
+                        '--item-bg': `${item.color}15`
                       } as React.CSSProperties}
                     >
+                      {/* Icon with animated background */}
                       <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-300 shadow-sm"
+                        className="relative w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-all duration-300 shadow-lg"
                         style={{
-                          backgroundColor: `${item.color}3D`,
-                          boxShadow: `0 4px 12px ${item.color}40`
+                          backgroundColor: `${item.color}25`,
+                          boxShadow: `0 8px 24px ${item.color}30`
                         }}
                       >
-                        <Icon className="w-6 h-6" style={{ color: item.color }} />
+                        <Icon className="w-8 h-8 relative z-10" style={{ color: item.color }} />
+                        <div 
+                          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{
+                            background: `radial-gradient(circle at center, ${item.color}40, transparent)`
+                          }}
+                        />
                       </div>
-                      <div>
+                      
+                      {/* Text */}
+                      <div className="text-center">
                         <p
-                          className="font-bold text-gray-900 text-base leading-tight transition-colors mb-1 group-hover:text-[var(--item-color)]"
+                          className="font-bold text-gray-900 text-lg leading-tight transition-colors mb-2 group-hover:text-[var(--item-color)]"
                           style={{ '--item-color': item.color } as React.CSSProperties}
                         >
-                          {t.nav.businessMenu[item.title as keyof typeof t.nav.businessMenu]}
-                        </p>
-                        <p className="text-xs text-gray-500 leading-snug">
                           {t.nav.businessMenu[item.titleId as keyof typeof t.nav.businessMenu]}
                         </p>
+                        <p className="text-xs text-gray-500 leading-snug">
+                          {t.nav.businessMenu[item.descId as keyof typeof t.nav.businessMenu]}
+                        </p>
                       </div>
+
+                      {/* Hover effect overlay */}
+                      <div 
+                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        style={{
+                          background: `linear-gradient(135deg, ${item.color}05, transparent)`
+                        }}
+                      />
                     </Link>
                   )
                 })}
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-gray-200 flex items-center justify-center">
-                <Link
-                  href="/business"
-                  onClick={() => setBusinessOpen(false)}
-                  className="text-sm font-bold text-white bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] hover:from-[#E8484D] hover:to-[#7C3AED] px-5 py-2.5 rounded-full transition-all shadow-lg shadow-[#FF5A5F]/30 hover:shadow-xl inline-flex items-center gap-2"
-                >
-                  {t.nav.businessMenu.compare}
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </Link>
               </div>
             </div>
           </motion.div>,

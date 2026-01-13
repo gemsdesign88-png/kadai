@@ -26,6 +26,8 @@ import Link from "next/link"
 // FEATURE SECTION WITH SCROLL TRACKING
 // =============================================================================
 
+const MotionLink = motion(Link)
+
 interface Feature {
   title: string
   subtitle: string
@@ -66,7 +68,7 @@ function FeatureSection({ feature, index }: { feature: Feature; index: number })
           <h3 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">{feature.title}</h3>
           <p className="text-lg text-gray-600 leading-relaxed mb-6">{feature.description}</p>
           
-          <motion.a
+          <MotionLink
             href={`/features/${feature.slug}`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -76,7 +78,7 @@ function FeatureSection({ feature, index }: { feature: Feature; index: number })
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </motion.a>
+          </MotionLink>
         </div>
       </div>
 
@@ -92,7 +94,7 @@ function FeatureSection({ feature, index }: { feature: Feature; index: number })
 // =============================================================================
 
 export function RealUIFeatures() {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   
   const features: Feature[] = [
     {

@@ -7,9 +7,9 @@ const DASHBOARD_TEXT: Record<DashboardKey, { en: string; id: string; zh: string 
   currentRestaurant: { en: "Current Restaurant", id: "Restoran Aktif", zh: "当前餐厅" },
   noBusiness: { en: "No Business Yet", id: "Belum Ada Bisnis", zh: "暂无商家" },
   addFirstBusiness: {
-    en: "Add your first business to start using KadaiPOS",
-    id: "Tambahkan bisnis pertama Anda untuk mulai menggunakan KadaiPOS",
-    zh: "添加您的第一个商家以开始使用 KadaiPOS",
+    en: "Add your first business to start using Kadai",
+    id: "Tambahkan bisnis pertama Anda untuk mulai menggunakan Kadai",
+    zh: "添加您的第一个商家以开始使用 Kadai",
   },
   addBusiness: { en: "Add Business", id: "Tambah Bisnis", zh: "添加商家" },
   thisWeek: { en: "This Week", id: "Minggu Ini", zh: "本周" },

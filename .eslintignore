@@ -1,0 +1,16 @@
+.next
+out
+build
+node_modules
+
+# Repo artifacts / mirrors
+.git-rewrite
+kadaipos-cpanel-deploy
+
+# Generated archives / binaries
+*.tar.gz
+*.tgz
+
+# One-off node scripts (not part of Next app)
+*.js
+scripts

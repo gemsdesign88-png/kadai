@@ -380,7 +380,7 @@ Kami berhak menghentikan layanan jika:
         ? `For questions about these Terms and Conditions:
 
 Email: mamak@kadaipos.id
-Phone: +6281339765775
+Phone: +628211031903
 Address: 
 
 Business Hours:
@@ -390,7 +390,7 @@ Sunday & Holidays: Closed`
         : `Untuk pertanyaan tentang Syarat dan Ketentuan ini:
 
 Email: mamak@kadaipos.id
-Telepon: +6281339765775
+Telepon: +628211031903
 Alamat: 
 
 Jam Operasional:

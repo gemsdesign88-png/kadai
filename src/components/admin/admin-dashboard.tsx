@@ -46,6 +46,17 @@ interface DemoRequest {
   notified: boolean;
 }
 
+interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  whatsapp: string;
+  subject: string;
+  message: string;
+  created_at: string;
+  status: string;
+}
+
 interface UserProfile {
   id: string;
   email: string;
@@ -75,12 +86,19 @@ interface Restaurant {
 
 interface Props {
   demoRequests: DemoRequest[];
+  contactSubmissions: ContactSubmission[];
   users: UserProfile[];
   restaurants: Restaurant[];
   recentUsers: UserProfile[];
 }
 
-export default function FounderDashboard({ demoRequests, users, restaurants, recentUsers }: Props) {
+export default function AdminDashboard({ 
+  demoRequests, 
+  contactSubmissions = [], 
+  users, 
+  restaurants, 
+  recentUsers 
+}: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingRestaurant, setEditingRestaurant] = useState<string | null>(null);
@@ -96,6 +114,7 @@ export default function FounderDashboard({ demoRequests, users, restaurants, rec
   const totalRestaurants = restaurants.length;
   const totalDemoRequests = demoRequests.length;
   const unnotifiedDemos = demoRequests.filter((d) => !d.notified).length;
+  const newContacts = contactSubmissions.filter((c) => c.status === 'new').length;
 
   // Check for expired trials
   const now = new Date();
@@ -244,6 +263,14 @@ export default function FounderDashboard({ demoRequests, users, restaurants, rec
   const filteredDemoRequests = demoRequests.filter((d) =>
     d.whatsapp.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredContactSubmissions = contactSubmissions.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.whatsapp?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const filteredUsers = users.filter(
@@ -483,8 +510,12 @@ export default function FounderDashboard({ demoRequests, users, restaurants, rec
               Restaurants & Subscriptions
             </TabsTrigger>
             <TabsTrigger value="demos" id="demos-tab">
-              <MessageSquare className="w-4 h-4 mr-2" />
+              <Phone className="w-4 h-4 mr-2" />
               Demo Requests {unnotifiedDemos > 0 && `(${unnotifiedDemos})`}
+            </TabsTrigger>
+            <TabsTrigger value="leads" id="leads-tab">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Leads {newContacts > 0 && `(${newContacts})`}
             </TabsTrigger>
             <TabsTrigger value="users">
               <Users className="w-4 h-4 mr-2" />
@@ -764,6 +795,112 @@ export default function FounderDashboard({ demoRequests, users, restaurants, rec
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Contact Submissions (Leads) Tab */}
+          <TabsContent value="leads" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Contact Submissions (Leads)</CardTitle>
+                    <CardDescription>Messages from contact form</CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => exportData(contactSubmissions, 'contact-leads')}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </Button>
+                </div>
+                <div className="relative mt-4">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search by name, email, or message content..."
+                    value={searchQuery}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {filteredContactSubmissions.length === 0 ? (
+                    <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-lg border border-dashed">
+                      No matching leads found.
+                    </div>
+                  ) : (
+                    filteredContactSubmissions.map((lead) => (
+                      <div
+                        key={lead.id}
+                        className="p-4 rounded-lg border border-slate-200 hover:shadow-md transition-all bg-white"
+                      >
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-slate-900">{lead.name}</h3>
+                              {lead.status === 'new' && (
+                                <Badge variant="default" className="bg-blue-600">New</Badge>
+                              )}
+                              <Badge variant="outline" className="text-[10px] h-5">
+                                {new Date(lead.created_at).toLocaleDateString()}
+                              </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm text-slate-600">
+                              <div className="flex items-center gap-2">
+                                <Activity className="w-3 h-3 text-slate-400" />
+                                <span className="font-medium text-slate-700">{lead.email}</span>
+                              </div>
+                              {lead.whatsapp && (
+                                <div className="flex items-center gap-2">
+                                  <Phone className="w-3 h-3 text-green-600" />
+                                  <span className="font-medium text-green-700">{lead.whatsapp}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mt-3 pt-3 border-t border-slate-100">
+                              <p className="text-sm font-semibold text-slate-800 mb-1">
+                                Subject: {lead.subject}
+                              </p>
+                              <div className="p-3 bg-slate-50 rounded text-sm text-slate-700 whitespace-pre-wrap italic">
+                                "{lead.message}"
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-row md:flex-col gap-2 shrink-0">
+                            {lead.whatsapp && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => openWhatsApp(lead.whatsapp)}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                WhatsApp
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => window.location.href = `mailto:${lead.email}?subject=Re: ${lead.subject}`}
+                            >
+                              <MessageSquare className="w-4 h-4 mr-2" />
+                              Email
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

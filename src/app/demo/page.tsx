@@ -1,65 +1,26 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useLanguage } from '@/lib/i18n/context';
-import { Rocket, Bell, Sparkles, Calendar, Phone, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { MessageCircle, Mail, MapPin, Send, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import ContactForm from '@/components/forms/ContactForm';
 
 export default function DemoPage() {
   const { t } = useLanguage();
-  const [name, setName] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/demo-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, whatsapp }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit demo request');
-      }
-
-      setIsSubmitted(true);
-      setName('');
-      setWhatsapp('');
-      setTimeout(() => setIsSubmitted(false), 3000);
-    } catch (err) {
-      console.error('Demo request error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to submit request');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const features = [
+  const contactMethods = [
     {
-      icon: Rocket,
-      title: t.demo.features.liveDemo.title,
-      description: t.demo.features.liveDemo.description
+      icon: MessageCircle,
+      title: t.contact.contactMethods.whatsapp.title,
+      description: t.contact.contactMethods.whatsapp.description,
+      action: "https://wa.me/628211031903"
     },
     {
-      icon: Calendar,
-      title: t.demo.features.scheduleTour.title,
-      description: t.demo.features.scheduleTour.description
-    },
-    {
-      icon: Sparkles,
-      title: t.demo.features.tryAllFeatures.title,
-      description: t.demo.features.tryAllFeatures.description
+      icon: Mail,
+      title: t.contact.contactMethods.email.title,
+      description: t.contact.contactMethods.email.description,
+      action: "mailto:mamak@kadaipos.id"
     }
   ];
 
@@ -78,17 +39,17 @@ export default function DemoPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-4xl mx-auto"
+            className="text-center max-w-4xl mx-auto mb-20"
           >
-            {/* Coming Soon Badge */}
+            {/* Status Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF5A5F]/10 to-[#8B5CF6]/10 backdrop-blur-sm rounded-full border border-[#FF5A5F]/20 mb-8"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full border border-gray-100 mb-8 shadow-sm"
             >
               <Sparkles className="w-5 h-5 text-[#FF5A5F]" />
-              <span className="text-sm font-semibold bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
+              <span className="text-sm font-bold uppercase tracking-widest text-gray-900">
                 {t.demo.badge}
               </span>
             </motion.div>
@@ -98,14 +59,12 @@ export default function DemoPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6"
+              className="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9]"
             >
               {t.demo.title}{" "}
-              <span className="bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#FF5A5F] to-purple-600 bg-clip-text text-transparent">
                 {t.demo.titleHighlight}
               </span>
-              <br />
-              {t.demo.subtitle}
             </motion.h1>
 
             {/* Description */}
@@ -113,238 +72,132 @@ export default function DemoPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-lg sm:text-xl text-gray-600 mb-12 leading-relaxed px-4"
+              className="text-xl md:text-2xl text-gray-500 max-w-2xl mx-auto leading-relaxed font-medium"
             >
-              {t.demo.description}
+              {t.demo.subtitle}
             </motion.p>
-
-            {/* WhatsApp Notification Form */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="max-w-xl mx-auto mb-16"
-            >
-              <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 p-8 border border-gray-100">
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="relative group">
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder={t.demo.namePlaceholder}
-                      required
-                      minLength={2}
-                      disabled={isLoading}
-                      className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-[#FF5A5F] focus:bg-white focus:ring-4 focus:ring-[#FF5A5F]/10 outline-none transition-all disabled:opacity-50 text-gray-900 placeholder:text-gray-400 group-hover:border-gray-300"
-                    />
-                  </div>
-                  <div className="relative group">
-                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-[#FF5A5F] transition-colors" />
-                    <input
-                      type="tel"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      placeholder={t.demo.whatsappPlaceholder}
-                      required
-                      pattern="[0-9]{10,15}"
-                      disabled={isLoading}
-                      className="w-full pl-14 pr-6 py-4 rounded-2xl bg-gray-50 border-2 border-gray-200 focus:border-[#FF5A5F] focus:bg-white focus:ring-4 focus:ring-[#FF5A5F]/10 outline-none transition-all disabled:opacity-50 text-gray-900 placeholder:text-gray-400 group-hover:border-gray-300"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSubmitted || isLoading}
-                    className="w-full px-8 py-4 bg-gradient-to-r from-[#FF5A5F] via-[#FF5A5F] to-[#8B5CF6] text-white font-semibold rounded-2xl hover:shadow-xl hover:shadow-purple-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 text-lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <span className="animate-spin">⏳</span>
-                        <span>{t.demo.submitting}</span>
-                      </>
-                    ) : isSubmitted ? (
-                      <>
-                        <Bell className="w-5 h-5 animate-pulse" />
-                        <span>{t.demo.successMessage}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bell className="w-5 h-5" />
-                        <span>{t.demo.notifyMe}</span>
-                        <ArrowRight className="w-5 h-5" />
-                      </>
-                    )}
-                  </button>
-                </form>
-                {error && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-5 text-red-600 font-medium text-center"
-                  >
-                    {t.demo.errorPrefix} {error}
-                  </motion.p>
-                )}
-                {isSubmitted && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-5 text-green-600 font-medium text-center"
-                  >
-                    {t.demo.successNotification}
-                  </motion.p>
-                )}
-              </div>
-            </motion.div>
           </motion.div>
 
-          {/* Features Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto px-4"
-          >
-            {features.map((feature, index) => (
+          {/* Contact Form Section */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-start">
+              {/* Left Side: Info & Methods */}
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
-                className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-200 hover:border-[#FF5A5F]/30 hover:shadow-xl transition-all"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+                className="space-y-12"
               >
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#FF5A5F]/10 to-[#8B5CF6]/10 flex items-center justify-center mb-6">
-                  <feature.icon className="w-7 h-7 text-[#FF5A5F]" />
+                <div className="grid gap-6">
+                  {contactMethods.map((method, index) => (
+                    <motion.a
+                      key={index}
+                      href={method.action}
+                      target={method.action.startsWith('http') ? '_blank' : undefined}
+                      rel={method.action.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="group flex items-start gap-6 p-8 bg-white rounded-[32px] border border-gray-100 hover:border-[#FF5A5F]/30 hover:shadow-xl transition-all"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:bg-gray-900 group-hover:text-white transition-all duration-500">
+                        <method.icon className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{method.title}</h3>
+                        <p className="text-gray-500 font-medium leading-relaxed">{method.description}</p>
+                      </div>
+                    </motion.a>
+                  ))}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </div>
 
-      {/* Meanwhile Section */}
-      <div className="py-12 sm:py-20 bg-white/50">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              {t.demo.meanwhile.title}
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 mb-8">
-              {t.demo.meanwhile.subtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/features"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all"
-              >
-                {t.demo.meanwhile.exploreFeatures}
-                <ArrowRight className="w-5 h-5" />
-              </a>
-              <a
-                href="https://wa.me/6281339765775"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-900 font-semibold rounded-xl border-2 border-gray-200 hover:border-[#FF5A5F] hover:shadow-lg transition-all"
-              >
-                {t.demo.meanwhile.contactUs}
-              </a>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Progress Timeline */}
-      <div className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-4xl font-bold text-center mb-12">
-              {t.demo.whatsComing.title}
-            </h2>
-            <div className="space-y-6">
-              {t.demo.whatsComing.items.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex gap-4 items-start bg-white rounded-xl p-6 border border-gray-200 hover:border-[#FF5A5F]/30 transition-all"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] flex items-center justify-center flex-shrink-0 text-white font-bold">
-                    {index + 1}
+                {/* Professional Support Badge */}
+                <div className="p-10 bg-gradient-to-br from-gray-900 to-black rounded-[40px] text-white relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Sparkles className="w-20 h-20 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {item.description}
+                  <div className="relative z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/10 mb-6">
+                      <CheckCircle2 className="w-4 h-4 text-[#FF5A5F]" />
+                      <span className="text-xs font-black uppercase tracking-widest">{t.demo.supportCard.badge}</span>
+                    </div>
+                    <h3 className="text-2xl font-black mb-4 leading-tight">{t.demo.supportCard.title}</h3>
+                    <p className="text-gray-400 font-medium leading-relaxed">
+                      {t.demo.supportCard.description}
                     </p>
                   </div>
-                </motion.div>
-              ))}
+                </div>
+              </motion.div>
+
+              {/* Right Side: High Fidelity Form */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+                className="relative"
+              >
+                <ContactForm type="demo" subjectPrefix="[DEMO REQUEST]" />
+              </motion.div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#FF5A5F]/20 via-[#8B5CF6]/20 to-[#3B82F6]/20" />
+      {/* Location/Info Section */}
+      <section className="py-24 border-y border-gray-100 bg-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto flex flex-col items-center text-center"
+          >
+            <div className="w-16 h-16 bg-gray-900 text-white rounded-2xl flex items-center justify-center mb-10 rotate-3">
+              <MapPin className="w-8 h-8" />
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">
+              {t.contact.visitUs.title}
+            </h2>
+            <p className="text-xl text-gray-500 mb-12 font-medium max-w-2xl">
+              {t.contact.visitUs.subtitle}
+            </p>
+            
+            <div className="inline-flex items-center gap-4 px-8 py-4 bg-gray-50 rounded-full border border-gray-100 text-gray-900 font-bold uppercase tracking-widest text-sm shadow-sm hover:shadow-md transition-shadow">
+              <span className="w-2 h-2 rounded-full bg-[#FF5A5F] animate-pulse" />
+              {t.contact.visitUs.location}
+            </div>
+          </motion.div>
         </div>
+      </section>
 
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-[#FF5A5F]/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-[#8B5CF6]/30 rounded-full blur-3xl animate-pulse delay-1000" />
+      {/* CTA Section */}
+      <section className="relative py-32 overflow-hidden bg-gray-900">
+        <div className="absolute inset-0 z-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#FF5A5F]/20 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px]" />
 
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto"
+            className="text-center max-w-4xl mx-auto"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              {t.demo.cta.title}
+            <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter leading-[0.9]">
+              {t.contact.cta.title}
             </h2>
-            <p className="text-xl text-white/80 mb-8">
-              {t.demo.cta.subtitle}
+            <p className="text-xl md:text-2xl text-gray-400 mb-12 font-medium max-w-2xl mx-auto">
+              {t.contact.cta.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="https://wa.me/6281339765775"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-semibold rounded-xl hover:shadow-xl transition-all"
-              >
-                {t.demo.cta.chatOnWhatsApp}
-              </a>
-              <a
-                href="/pricing"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
-              >
-                {t.demo.cta.viewPricing}
-              </a>
-            </div>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-4 px-12 py-6 bg-white text-gray-900 rounded-full font-black uppercase tracking-widest hover:bg-[#FF5A5F] hover:text-white transition-all shadow-2xl shadow-white/10 group"
+            >
+              {t.contact.cta.button || 'View Pricing'}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            </Link>
           </motion.div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
+

@@ -55,6 +55,7 @@ export async function updateSession(request: NextRequest) {
       '/about',
       '/contact',
       '/demo',
+      '/founder',
       '/login',
       '/register',
       '/auth',
@@ -63,6 +64,7 @@ export async function updateSession(request: NextRequest) {
       '/cookies',
       '/benefits',
       '/business',
+      '/careers',
     ];
 
     const isPublicRoute = publicRoutes.some(route => 
@@ -74,8 +76,16 @@ export async function updateSession(request: NextRequest) {
       !user &&
       !isPublicRoute &&
       !request.nextUrl.pathname.startsWith('/login') &&
+      !request.nextUrl.pathname.startsWith('/admin/login') &&
       !request.nextUrl.pathname.startsWith('/auth')
     ) {
+      // if it is an admin route, redirect to admin/login
+      if (request.nextUrl.pathname.startsWith('/admin')) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/admin/login';
+        return NextResponse.redirect(url);
+      }
+
       // no user, potentially respond by redirecting the user to the login page
       const url = request.nextUrl.clone();
       url.pathname = '/login';

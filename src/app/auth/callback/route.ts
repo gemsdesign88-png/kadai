@@ -89,10 +89,23 @@ export async function GET(request: Request) {
 
       console.log('=== CALLBACK ROUTE END ===');
       
-      // Redirect to the next page or dashboard
-      // Use the origin from the request to handle local vs production
-      const redirectUrl = new URL(next, origin);
+      // Check if user has any restaurants
+      const { count: restaurantCount } = await supabase
+        .from('restaurants')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', userId);
       
+      // Redirect based on restaurant status
+      let redirectPath = next;
+      if (!restaurantCount || restaurantCount === 0) {
+        // No restaurants - go to onboarding
+        redirectPath = '/onboarding';
+        console.log('No restaurants found - redirecting to onboarding');
+      } else {
+        console.log(`Found ${restaurantCount} restaurant(s) - redirecting to dashboard`);
+      }
+      
+      const redirectUrl = new URL(redirectPath, origin);
       console.log('Redirecting to:', redirectUrl.toString());
       return NextResponse.redirect(redirectUrl);
     }
