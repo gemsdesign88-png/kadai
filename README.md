@@ -207,7 +207,7 @@ Proprietary - All rights reserved by KadaiPOS
 ## 💬 Support
 
 - Email: hello@kadaipos.id
-- WhatsApp: +62 813-3976-5775
+- WhatsApp: +62 821-1031-903
 - Website: [kadaipos.id](https://kadaipos.id)
 
 ---
