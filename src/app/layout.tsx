@@ -13,7 +13,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kadaipos.id'),
+  metadataBase: new URL('https://kadai.id'),
   title: {
     default: "Kadai - Business Operating System for Retail, F&B, and Services",
     template: "%s | Kadai"
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://kadaipos.id",
+    url: "https://kadai.id",
     siteName: "Kadai",
     title: "Kadai - Business Operating System for Modern Entrepreneurs",
     description: "The complete business management platform for retail, F&B, and service businesses. Manage everything from one powerful app.",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.webmanifest',
   alternates: {
-    canonical: 'https://kadaipos.id',
+    canonical: 'https://kadai.id',
   },
   robots: {
     index: true,
@@ -93,7 +93,7 @@ export default function RootLayout({
       "ratingCount": "120"
     },
     "description": "Complete Business Operating System for retail, f&b, and service businesses.",
-    "url": "https://kadaipos.id",
+    "url": "https://kadai.id",
     "author": {
       "@type": "Organization",
       "name": "Kadai"

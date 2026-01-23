@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/api/', '/auth/'],
     },
-    sitemap: 'https://kadaipos.id/sitemap.xml',
+    sitemap: 'https://kadai.id/sitemap.xml',
   };
 }

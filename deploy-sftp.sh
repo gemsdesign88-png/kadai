@@ -73,7 +73,7 @@ if [ $? -eq 0 ]; then
     echo "7. Click 'Run NPM Install'"
     echo "8. Click 'Restart'"
     echo ""
-    echo "Your site will be live at: https://kadaipos.id"
+    echo "Your site will be live at: https://kadai.id"
 else
     echo ""
     echo "❌ Upload failed. Please check:"

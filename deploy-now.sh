@@ -34,10 +34,28 @@ npm install --production >/dev/null 2>&1
 echo "✓ Dependencies ready"
 
 echo "Step 4: Configuring Nginx..."
-cat > /etc/nginx/sites-available/kadaipos.id << 'NGINX'
+cat > /etc/nginx/sites-available/kadai.id << 'NGINX'
 server {
     listen 80;
-    server_name kadaipos.id www.kadaipos.id srv123.kadaipos.id;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
     client_max_body_size 100M;
     location / {
         proxy_pass http://localhost:3000;
@@ -50,7 +68,7 @@ server {
 }
 NGINX
 
-ln -sf /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/
 nginx -t >/dev/null 2>&1 && systemctl restart nginx
 echo "✓ Nginx configured"
 
@@ -61,7 +79,86 @@ pm2 save >/dev/null 2>&1
 echo "✓ Application started"
 
 echo "Step 6: Setting up SSL..."
-certbot --nginx -d kadaipos.id -d www.kadaipos.id -d srv123.kadaipos.id --non-interactive --agree-tos -m admin@kadaipos.id >/dev/null 2>&1 || echo "⚠ SSL setup needs email verification"
+certbot certonly --nginx \
+  -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+  -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id \
+  --non-interactive --agree-tos -m admin@kadaipos.id >/dev/null 2>&1 || echo "⚠ SSL setup needs email verification"
+
+cat > /etc/nginx/sites-available/kadai.id << 'NGINX'
+server {
+    listen 80;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+    client_max_body_size 100M;
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name kadaipos.id www.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name order.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name sibos.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    client_max_body_size 100M;
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+NGINX
+
+nginx -t >/dev/null 2>&1 && systemctl restart nginx
 
 echo ""
 echo "✅ DEPLOYMENT COMPLETE!"
@@ -70,8 +167,8 @@ echo "📊 Status:"
 pm2 status
 echo ""
 echo "🌐 Your site is live at:"
-echo "   http://kadaipos.id"
-echo "   https://kadaipos.id"
+echo "   http://kadai.id"
+echo "   https://kadai.id"
 echo ""
 
 REMOTE

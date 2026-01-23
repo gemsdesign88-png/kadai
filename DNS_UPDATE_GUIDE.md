@@ -14,17 +14,17 @@ Update your domain's DNS records to point to the new VPS IP.
 ### 🟦 Niagahoster
 1. Go to [niagahoster.com](https://www.niagahoster.com)
 2. Log in to your account
-3. Go: **My Products** → **Domains** → Select **kadaipos.id**
+3. Go: **My Products** → **Domains** → Select **kadai.id**
 4. Click **Manage DNS**
 5. Find the record with old IP (72.60.76.34)
 6. Click **Edit** and change to: **103.175.207.51**
 7. Click **Save**
-8. Do the same for **www.kadaipos.id** if separate record
+8. Do the same for **www.kadai.id** if separate record
 
 ### 🟥 Domainesia
 1. Go to [domainesia.com](https://www.domainesia.com)
 2. Log in
-3. Go: **Domains** → Select **kadaipos.id**
+3. Go: **Domains** → Select **kadai.id**
 4. Click **DNS Settings**
 5. Find A record with old IP
 6. Edit and change to: **103.175.207.51**
@@ -69,15 +69,15 @@ Update your domain's DNS records to point to the new VPS IP.
 
 ## What To Change
 
-### Main Domain (kadaipos.id)
+### Main Domain (kadai.id)
 ```
 Type: A
-Name: @ (or blank, or kadaipos.id)
+Name: @ (or blank, or kadai.id)
 Value: 103.175.207.51
 TTL: 3600 (or shortest available)
 ```
 
-### WWW Subdomain (www.kadaipos.id)
+### WWW Subdomain (www.kadai.id)
 ```
 Type: A  
 Name: www
@@ -92,7 +92,7 @@ TTL: 3600
 ### Immediate Check (1-5 minutes)
 ```bash
 # Your DNS should update within minutes
-nslookup kadaipos.id
+nslookup kadai.id
 # Watch for: 103.175.207.51
 
 # If still shows old IP, flush your local cache:
@@ -104,7 +104,7 @@ nslookup kadaipos.id
 ### Verify Global Propagation (24-48 hours)
 ```bash
 # Check from different locations
-nslookup kadaipos.id
+nslookup kadai.id
 
 # Should eventually show:
 # 103.175.207.51
@@ -112,8 +112,8 @@ nslookup kadaipos.id
 
 ### Test in Browser
 ```
-Open: http://kadaipos.id
-(or https://kadaipos.id after DNS works)
+Open: http://kadai.id
+(or https://kadai.id after DNS works)
 ```
 
 ---

@@ -4,15 +4,33 @@ import { updateSession } from '@/lib/supabase/middleware';
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
-  
-  // Redirect kadaipos.id login/register to sibos.kadaipos.id
-  if (host === 'kadaipos.id' && (pathname === '/login' || pathname === '/register')) {
-    const targetUrl = new URL(`https://sibos.kadaipos.id${pathname}`);
-    return NextResponse.redirect(targetUrl);
+
+  const search = request.nextUrl.search;
+
+  const isApexOldDomain = host === 'kadaipos.id' || host === 'www.kadaipos.id';
+  const isSibosOldDomain = host === 'sibos.kadaipos.id';
+  const isSibosNewDomain = host === 'sibos.kadai.id';
+  const isOrderOldDomain = host === 'order.kadaipos.id';
+  const isOrderNewDomain = host === 'order.kadai.id';
+
+  // Permanent redirects: old domains -> new domains
+  if (isOrderOldDomain) {
+    return NextResponse.redirect(new URL(`https://order.kadai.id${pathname}${search}`), 308);
+  }
+
+  if (isSibosOldDomain) {
+    return NextResponse.redirect(new URL(`https://sibos.kadai.id${pathname}${search}`), 308);
+  }
+
+  if (isApexOldDomain) {
+    if (pathname === '/login' || pathname === '/register') {
+      return NextResponse.redirect(new URL(`https://sibos.kadai.id${pathname}${search}`), 308);
+    }
+    return NextResponse.redirect(new URL(`https://kadai.id${pathname}${search}`), 308);
   }
   
-  // Redirect sibos.kadaipos.id to dashboard
-  if (host.includes('sibos.kadaipos.id')) {
+  // Redirect sibos.* to dashboard
+  if (isSibosNewDomain) {
     // If not already on dashboard/login/auth/admin/register routes, redirect to dashboard
     if (pathname === '/' || 
         (!pathname.startsWith('/dashboard') && 
@@ -55,14 +73,14 @@ export async function middleware(request: NextRequest) {
   // Check if the path starts with any public route
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   
-  // Rewrite order.kadaipos.id requests to /order path
-  if (host === 'order.kadaipos.id' && !pathname.startsWith('/order') && !pathname.startsWith('/_next')) {
+  // Rewrite order.* requests to /order path
+  if (isOrderNewDomain && !pathname.startsWith('/order') && !pathname.startsWith('/_next')) {
     const url = request.nextUrl.clone();
     url.pathname = `/order${pathname}`;
     return NextResponse.rewrite(url);
   }
   
-  if (host === 'order.kadaipos.id' || isPublicRoute) {
+  if (isOrderNewDomain || isPublicRoute) {
     return NextResponse.next();
   }
   

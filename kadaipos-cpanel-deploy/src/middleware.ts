@@ -3,7 +3,13 @@ import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
-  if (host === 'order.kadaipos.id' || request.nextUrl.pathname.startsWith('/order')) {
+  if (host === 'order.kadaipos.id') {
+    const pathname = request.nextUrl.pathname;
+    const search = request.nextUrl.search;
+    return NextResponse.redirect(new URL(`https://order.kadai.id${pathname}${search}`), 308);
+  }
+
+  if (host === 'order.kadai.id' || request.nextUrl.pathname.startsWith('/order')) {
     return NextResponse.next();
   }
   return await updateSession(request);

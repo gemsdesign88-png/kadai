@@ -65,7 +65,7 @@ Choose ONE method:
 
 #### Step 3: Verify ✅ AFTER DEPLOYMENT
 
-- [ ] Create test order at: http://order.kadaipos.id/order/test123
+- [ ] Create test order at: http://order.kadai.id/order/test123
 - [ ] Fill form:
   - Name: "Test User"
   - Phone: "081234567890"

@@ -11,8 +11,8 @@ export default async function Home() {
   const headersList = await headers()
   const host = headersList.get('host') || ''
   
-  // Redirect sibos.kadaipos.id to dashboard
-  if (host.includes('sibos.kadaipos.id')) {
+  // Redirect sibos.* to dashboard
+  if (host.includes('sibos.kadai.id') || host.includes('sibos.kadaipos.id')) {
     redirect('/dashboard')
   }
   

@@ -10,7 +10,7 @@ echo "=================================="
 echo ""
 
 # Configuration - Update these with your cPanel details
-FTP_HOST="${FTP_HOST:-ftp.kadaipos.id}"
+FTP_HOST="${FTP_HOST:-ftp.kadai.id}"
 FTP_USER="${FTP_USER:-}"
 FTP_PASS="${FTP_PASS:-}"
 FTP_PATH="${FTP_PATH:-/public_html}"
@@ -25,7 +25,7 @@ NC='\033[0m'
 if [ -z "$FTP_USER" ] || [ -z "$FTP_PASS" ]; then
     echo -e "${YELLOW}FTP credentials not set in environment variables${NC}"
     echo ""
-    read -p "Enter FTP host (e.g., ftp.kadaipos.id or 72.60.76.34): " FTP_HOST
+    read -p "Enter FTP host (e.g., ftp.kadai.id or 72.60.76.34): " FTP_HOST
     read -p "Enter FTP username: " FTP_USER
     read -sp "Enter FTP password: " FTP_PASS
     echo ""
@@ -62,7 +62,7 @@ echo ""
 echo -e "${GREEN}✅ Deployment package uploaded successfully!${NC}"
 echo ""
 echo -e "${YELLOW}📋 Next steps (via cPanel):${NC}"
-echo "1. Login to cPanel at https://kadaipos.id:2083"
+echo "1. Login to cPanel at https://kadai.id:2083"
 echo "2. Open File Manager"
 echo "3. Navigate to $FTP_PATH"
 echo "4. Right-click 'kadaipos-cpanel.zip' and select 'Extract'"
@@ -76,4 +76,4 @@ echo "7. Add environment variables (from .env.local inside ZIP)"
 echo "8. Click 'Run NPM Install'"
 echo "9. Click 'Restart'"
 echo ""
-echo "🌐 Your site will be live at: https://kadaipos.id"
+echo "🌐 Your site will be live at: https://kadai.id"

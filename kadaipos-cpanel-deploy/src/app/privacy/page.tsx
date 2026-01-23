@@ -25,12 +25,12 @@ export default function PrivacyPage() {
 
 We are committed to protecting your privacy and ensuring the security of your data. By using KadaiPOS, you agree to the collection and use of information in accordance with this policy.
 
-Last updated: December 3, 2025`
+Last updated: January 23, 2026`
         : `Selamat datang di Kebijakan Privasi KadaiPOS. Kebijakan ini menjelaskan bagaimana kami mengumpulkan, menggunakan, melindungi, dan membagikan informasi pribadi Anda saat menggunakan sistem Point of Sale kami untuk manajemen restoran.
 
 Kami berkomitmen untuk melindungi privasi Anda dan memastikan keamanan data Anda. Dengan menggunakan KadaiPOS, Anda setuju dengan pengumpulan dan penggunaan informasi sesuai dengan kebijakan ini.
 
-Terakhir diperbarui: 3 Desember 2025`
+Terakhir diperbarui: 23 Januari 2026`
     },
     {
       id: "collection",
@@ -154,7 +154,7 @@ Terakhir diperbarui: 3 Desember 2025`
       title: isEnglish ? "4. Data Protection & Security" : "4. Perlindungan & Keamanan Data",
       content: isEnglish
         ? `4.1 Security Measures:
-• End-to-end encryption for sensitive data
+• Encryption for sensitive data in transit (TLS) and at rest
 • Secure cloud storage with Supabase
 • Regular security audits and updates
 • SSL/TLS encryption for data transmission
@@ -178,7 +178,7 @@ Terakhir diperbarui: 3 Desember 2025`
 • Incident response protocols
 • Privacy policy compliance`
         : `4.1 Langkah Keamanan:
-• Enkripsi end-to-end untuk data sensitif
+      • Enkripsi data sensitif saat transit (TLS) dan saat tersimpan
 • Penyimpanan cloud aman dengan Supabase
 • Audit dan pembaruan keamanan rutin
 • Enkripsi SSL/TLS untuk transmisi data
@@ -576,7 +576,7 @@ Kami akan menanggapi pertanyaan Anda dalam 7 hari kerja.`
                 : "Privasi Anda penting bagi kami. Pelajari bagaimana kami mengumpulkan, menggunakan, dan melindungi data Anda."}
             </p>
             <p className="text-sm text-gray-400 mt-4">
-              {isEnglish ? "Last updated: December 3, 2025" : "Terakhir diperbarui: 3 Desember 2025"}
+              {isEnglish ? "Last updated: January 23, 2026" : "Terakhir diperbarui: 23 Januari 2026"}
             </p>
           </div>
         </Container>

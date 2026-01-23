@@ -15,7 +15,18 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        // Rewrite order.kadaipos.id subdomain paths to /order route
+        // Rewrite order.kadai.id subdomain paths to /order route
+        {
+          source: '/:path*',
+          destination: '/order/:path*',
+          has: [
+            {
+              type: 'host',
+              value: 'order.kadai.id',
+            },
+          ],
+        },
+        // Backward-compatible: keep old subdomain working (middleware should redirect permanently)
         {
           source: '/:path*',
           destination: '/order/:path*',

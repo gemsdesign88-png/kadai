@@ -51,7 +51,7 @@ KadaiPOS cPanel Deployment Instructions
      * Node.js version: 18.x or 20.x
      * Application mode: Production
      * Application root: (your domain folder, e.g., public_html)
-     * Application URL: kadaipos.id
+   * Application URL: kadai.id
      * Application startup file: node_modules/next/dist/bin/next
      * Passenger log file: (leave default)
    
@@ -78,13 +78,15 @@ KadaiPOS cPanel Deployment Instructions
 8. CONFIGURE SUPABASE
    - Login to Supabase dashboard
    - Go to Authentication > URL Configuration
-   - Site URL: https://kadaipos.id
+    - Site URL: https://kadai.id
    - Redirect URLs:
-     * https://kadaipos.id/auth/callback
-     * https://www.kadaipos.id/auth/callback
+       * https://kadai.id/auth/callback
+       * https://www.kadai.id/auth/callback
+       * https://kadaipos.id/auth/callback (legacy redirect domain)
+       * https://www.kadaipos.id/auth/callback (legacy redirect domain)
 
 9. TEST
-   - Open https://kadaipos.id
+   - Open https://kadai.id
    - Test signup/login functionality
 
 TROUBLESHOOTING:
@@ -112,5 +114,6 @@ echo "1. Upload kadaipos-cpanel.zip to your cPanel File Manager"
 echo "2. Extract it in your domain folder (public_html or subdomain)"
 echo "3. Follow DEPLOY_INSTRUCTIONS.txt inside the ZIP"
 echo ""
-echo "🔗 Your site will be live at: https://kadaipos.id"
+echo "🔗 Your site will be live at: https://kadai.id"
 echo ""
+

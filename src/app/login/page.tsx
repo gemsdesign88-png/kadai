@@ -157,7 +157,7 @@ export default function LoginPage() {
     try {
       const redirectUrl = typeof window !== 'undefined' 
         ? `${window.location.origin}/auth/reset-password`
-        : 'https://sibos.kadaipos.id/auth/reset-password';
+        : 'https://sibos.kadai.id/auth/reset-password';
 
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: redirectUrl,

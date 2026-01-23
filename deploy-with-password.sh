@@ -166,10 +166,28 @@ log_info "Step 6: Configuring Nginx..."
 sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${VPS_USER}@${NEW_VPS} 'bash -s' << 'ENDSSH'
 
 # Create Nginx configuration
-cat > /etc/nginx/sites-available/kadaipos.id << 'EOF'
+cat > /etc/nginx/sites-available/kadai.id << 'EOF'
 server {
     listen 80;
-    server_name kadaipos.id www.kadaipos.id srv123.kadaipos.id;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
 
     client_max_body_size 100M;
 
@@ -188,7 +206,7 @@ server {
 EOF
 
 # Enable the site
-ln -sf /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/kadaipos.id
+ln -sf /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/kadai.id
 
 # Test configuration
 if nginx -t >/dev/null 2>&1; then
@@ -208,9 +226,98 @@ log_info "Step 7: Setting up SSL certificate..."
 
 sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${VPS_USER}@${NEW_VPS} 'bash -s' << 'ENDSSH'
 
-if [ ! -f "/etc/letsencrypt/live/kadaipos.id/fullchain.pem" ]; then
+if [ ! -f "/etc/letsencrypt/live/kadai.id/fullchain.pem" ]; then
     echo "[INFO] Setting up Let's Encrypt certificate..."
-    certbot --nginx -d kadaipos.id -d www.kadaipos.id -d srv123.kadaipos.id --non-interactive --agree-tos -m admin@kadaipos.id >/dev/null 2>&1 || echo "[WARNING] Certbot setup needs manual intervention"
+    certbot certonly --nginx \
+      -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+      -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id \
+      --non-interactive --agree-tos -m admin@kadaipos.id >/dev/null 2>&1 || echo "[WARNING] Certbot setup needs manual intervention"
+
+    cat > /etc/nginx/sites-available/kadai.id << 'EOF'
+server {
+    listen 80;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name kadaipos.id www.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name order.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name sibos.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+EOF
+
+    nginx -t >/dev/null 2>&1 && systemctl restart nginx || true
     echo "[SUCCESS] SSL certificate ready"
 else
     echo "[INFO] SSL certificate already exists"
@@ -276,8 +383,8 @@ echo ""
 pm2 status
 echo ""
 echo "🌐 Application URLs:"
-echo "   HTTP:  http://kadaipos.id"
-echo "   HTTPS: https://kadaipos.id"
+echo "   HTTP:  http://kadai.id"
+echo "   HTTPS: https://kadai.id"
 echo "   IP:    http://103.175.207.51"
 echo ""
 echo "📝 Quick Commands:"
@@ -303,7 +410,7 @@ echo ""
 echo "🎯 Next Steps:"
 echo "   1. Update DNS records pointing to: ${NEW_VPS}"
 echo "   2. Wait for DNS propagation (up to 48 hours)"
-echo "   3. Test application at: https://kadaipos.id"
+echo "   3. Test application at: https://kadai.id"
 echo "   4. Monitor logs: pm2 logs kadaipos"
 echo ""
 echo "💻 SSH Access:"

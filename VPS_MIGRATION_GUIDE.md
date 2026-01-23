@@ -1,4 +1,4 @@
-# VPS Migration Guide - KadaiPOS
+# VPS Migration Guide - Kadai
 
 ## New VPS Details
 - **Hostname:** srv123.kadaipos.id
@@ -35,11 +35,30 @@ apt install -y certbot python3-certbot-nginx
 ### Step 2: Configure Nginx
 ```bash
 # Create Nginx config
-nano /etc/nginx/sites-available/kadaipos.id
+nano /etc/nginx/sites-available/kadai.id
 
 # Paste this config:
 server {
-    server_name kadaipos.id www.kadaipos.id srv123.kadaipos.id;
+    listen 80;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
     
     location / {
         proxy_pass http://localhost:3000;
@@ -52,7 +71,7 @@ server {
 }
 
 # Enable site
-ln -s /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/
 
 # Test and reload
 nginx -t
@@ -61,7 +80,9 @@ systemctl reload nginx
 
 ### Step 3: Setup SSL Certificate
 ```bash
-certbot --nginx -d kadaipos.id -d www.kadaipos.id -d srv123.kadaipos.id
+certbot certonly --nginx \
+    -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+    -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id
 ```
 
 ### Step 4: Prepare Application on Old VPS
@@ -104,9 +125,16 @@ pm2 startup
 ### Step 7: Update DNS Records
 Update your domain registrar to point to new IP:
 ```
-kadaipos.id         A       103.175.207.51
-www.kadaipos.id     A       103.175.207.51
-srv123.kadaipos.id  A       103.175.207.51
+kadai.id          A       103.175.207.51
+www.kadai.id      A       103.175.207.51
+order.kadai.id    A       103.175.207.51
+sibos.kadai.id    A       103.175.207.51
+
+# Optional: keep old domains pointed too so redirects work
+kadaipos.id       A       103.175.207.51
+www.kadaipos.id   A       103.175.207.51
+order.kadaipos.id A       103.175.207.51
+sibos.kadaipos.id A       103.175.207.51
 ```
 
 ### Step 8: Verify Migration

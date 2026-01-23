@@ -112,5 +112,5 @@ export async function GET(request: Request) {
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect('https://sibos.kadaipos.id/auth/auth-code-error');
+  return NextResponse.redirect('https://sibos.kadai.id/auth/auth-code-error');
 }

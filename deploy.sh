@@ -11,7 +11,8 @@ echo ""
 # Configuration
 SERVER_IP="72.60.76.34"
 SERVER_USER="${SERVER_USER:-root}"
-DOMAIN="kadaipos.id"
+PRIMARY_DOMAIN="kadai.id"
+OLD_DOMAIN="kadaipos.id"
 APP_DIR="/var/www/kadaipos.id"
 NODE_VERSION="18"
 
@@ -116,10 +117,29 @@ if command -v nginx &> /dev/null; then
     echo "🔧 Configuring Nginx..."
     
     # Create Nginx config
-    $SUDO bash -c 'cat > /etc/nginx/sites-available/kadaipos.id' << 'NGINX'
+    # Phase 1: HTTP-only config (so certbot can validate)
+    $SUDO bash -c 'cat > /etc/nginx/sites-available/kadai.id' << 'NGINX'
 server {
     listen 80;
     server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -135,7 +155,7 @@ server {
 }
 NGINX
 
-    $SUDO ln -sf /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/kadaipos.id
+    $SUDO ln -sf /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/kadai.id
     $SUDO nginx -t && $SUDO systemctl reload nginx || echo "Nginx config test failed"
     
     # Install Certbot if not present
@@ -146,7 +166,95 @@ NGINX
     fi
     
     echo "🔒 Setting up SSL (this requires DNS to be pointed to this server)..."
-    $SUDO certbot --nginx -d kadaipos.id -d www.kadaipos.id --non-interactive --agree-tos --email mamak@kadaipos.id --redirect || echo "SSL setup failed - DNS might not be pointed yet"
+    # One SAN certificate covering new + old + key subdomains.
+    # Note: email can remain the existing mailbox; update if needed.
+    $SUDO certbot certonly --nginx \
+      -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+      -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id \
+      --non-interactive --agree-tos --email mamak@kadaipos.id || echo "SSL setup failed - DNS might not be pointed yet"
+
+    # Phase 2: HTTPS + redirects
+    $SUDO bash -c 'cat > /etc/nginx/sites-available/kadai.id' << 'NGINX'
+server {
+    listen 80;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name kadaipos.id www.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name order.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name sibos.kadaipos.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+    ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+NGINX
+
+    $SUDO nginx -t && $SUDO systemctl reload nginx || echo "Nginx config test failed"
 else
     echo "⚠️  Nginx not found. Please install Nginx and configure reverse proxy manually."
     echo "   Or ensure your firewall/hosting panel forwards port 80/443 to 3000"
@@ -156,13 +264,15 @@ echo ""
 echo "✅ Deployment complete!"
 echo ""
 echo "📝 Next steps:"
-echo "1. Point DNS: A record kadaipos.id → 153.92.8.133"
-echo "2. Point DNS: A record www → 153.92.8.133"
+echo "1. Point DNS: A record kadai.id → 153.92.8.133"
+echo "2. Point DNS: A record www.kadai.id → 153.92.8.133"
+echo "3. Point DNS: A record order.kadai.id → 153.92.8.133"
+echo "4. Point DNS: A record sibos.kadai.id → 153.92.8.133"
 echo "3. Wait for DNS propagation (5-30 minutes)"
 echo "4. Update Supabase:"
-echo "   - Site URL: https://kadaipos.id"
-echo "   - Redirect URLs: https://kadaipos.id/auth/callback"
-echo "5. Test: https://kadaipos.id"
+echo "   - Site URL: https://kadai.id"
+echo "   - Redirect URLs: https://kadai.id/auth/callback"
+echo "5. Test: https://kadai.id"
 echo ""
 echo "PM2 commands:"
 echo "  pm2 status              # Check status"
@@ -176,10 +286,12 @@ echo -e "${GREEN}✅ Deployment script completed!${NC}"
 echo ""
 echo -e "${YELLOW}Important: Update DNS records${NC}"
 echo "Add these records in your DNS manager (ns1/ns2.dns-parking.com):"
-echo "  A    kadaipos.id    →  153.92.8.133"
-echo "  A    www           →  153.92.8.133"
+echo "  A    kadai.id        →  153.92.8.133"
+echo "  A    www.kadai.id    →  153.92.8.133"
+echo "  A    order.kadai.id  →  153.92.8.133"
+echo "  A    sibos.kadai.id  →  153.92.8.133"
 echo ""
 echo "Then update Supabase (https://supabase.com/dashboard):"
 echo "  Authentication → URL Configuration"
-echo "  - Site URL: https://kadaipos.id"
-echo "  - Redirect URLs: https://kadaipos.id/auth/callback, https://www.kadaipos.id/auth/callback"
+echo "  - Site URL: https://kadai.id"
+echo "  - Redirect URLs: https://kadai.id/auth/callback, https://www.kadai.id/auth/callback"

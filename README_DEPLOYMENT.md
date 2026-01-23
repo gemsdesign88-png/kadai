@@ -54,14 +54,14 @@ http://103.175.207.51:3000
 
 ### After DNS Update (Recommended)
 ```
-https://kadaipos.id
-https://www.kadaipos.id
+https://kadai.id
+https://www.kadai.id
 ```
 
 **Update DNS at your registrar:**
 ```
-kadaipos.id     →  103.175.207.51 (A record)
-www.kadaipos.id →  103.175.207.51 (A record)
+kadai.id       →  103.175.207.51 (A record)
+www.kadai.id   →  103.175.207.51 (A record)
 ```
 
 ---
@@ -157,7 +157,7 @@ Your complete KadaiPOS system with:
 **New Server IP:** `103.175.207.51`  
 **Root Password:** `kadaiPOS12345@@@`  
 **Application URL:** `http://103.175.207.51` (now)  
-**Final URL:** `https://kadaipos.id` (after DNS update)  
+**Final URL:** `https://kadai.id` (after DNS update)  
 
 **Important Port Numbers:**
 - 80 (HTTP) - Nginx

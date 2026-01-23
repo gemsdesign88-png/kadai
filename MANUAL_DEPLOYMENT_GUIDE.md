@@ -1,4 +1,4 @@
-# 🚀 KadaiPOS VPS Migration - Manual Deployment Guide
+# 🚀 Kadai VPS Migration - Manual Deployment Guide
 
 **New VPS Details:**
 - IP Address: `103.175.207.51`
@@ -41,10 +41,28 @@ npm install --production
 
 ### Step 5: Configure Nginx
 ```bash
-cat > /etc/nginx/sites-available/kadaipos.id << 'EOF'
+cat > /etc/nginx/sites-available/kadai.id << 'EOF'
 server {
     listen 80;
-    server_name kadaipos.id www.kadaipos.id srv123.kadaipos.id;
+    server_name kadaipos.id www.kadaipos.id;
+    return 301 https://kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name order.kadaipos.id;
+    return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name sibos.kadaipos.id;
+    return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+    listen 80;
+    server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
     client_max_body_size 100M;
     
     location / {
@@ -60,14 +78,17 @@ server {
 }
 EOF
 
-ln -sf /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/
 nginx -t
 systemctl restart nginx
 ```
 
 ### Step 6: Setup SSL Certificate
 ```bash
-certbot --nginx -d kadaipos.id -d www.kadaipos.id -d srv123.kadaipos.id --non-interactive --agree-tos -m admin@kadaipos.id
+certbot certonly --nginx \
+    -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+    -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id \
+    --non-interactive --agree-tos -m admin@kadaipos.id
 ```
 
 ### Step 7: Start Application with PM2
@@ -108,9 +129,16 @@ curl -s http://103.175.207.51:3000 | head -n 20
 
 Update your domain registrar with these A records:
 ```
-kadaipos.id         → 103.175.207.51
-www.kadaipos.id     → 103.175.207.51
-srv123.kadaipos.id  → 103.175.207.51
+kadai.id          → 103.175.207.51
+www.kadai.id      → 103.175.207.51
+order.kadai.id    → 103.175.207.51
+sibos.kadai.id    → 103.175.207.51
+
+# Optional: keep old domains pointed too so redirects work
+kadaipos.id       → 103.175.207.51
+www.kadaipos.id   → 103.175.207.51
+order.kadaipos.id → 103.175.207.51
+sibos.kadaipos.id → 103.175.207.51
 ```
 
 DNS propagation: 24-48 hours (usually faster)

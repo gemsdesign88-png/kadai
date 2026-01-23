@@ -50,7 +50,7 @@
 | **Root Password** | kadaiPOS12345@@@ |
 | **OS** | Ubuntu 22.04.5 LTS |
 | **Application Port** | 3000 (proxied through Nginx) |
-| **Domain** | kadaipos.id, www.kadaipos.id, srv123.kadaipos.id |
+| **Domain** | kadai.id, www.kadai.id (primary) + kadaipos.id, www.kadaipos.id (legacy redirects) |
 
 ---
 
@@ -105,9 +105,16 @@ pm2 restart kadaipos # Restart app
 
 **Update your domain registrar with:**
 ```
+kadai.id           A   103.175.207.51
+www.kadai.id       A   103.175.207.51
+order.kadai.id     A   103.175.207.51
+sibos.kadai.id     A   103.175.207.51
+
+# Optional (legacy redirect domains)
 kadaipos.id         A   103.175.207.51
 www.kadaipos.id     A   103.175.207.51
-srv123.kadaipos.id  A   103.175.207.51
+order.kadaipos.id   A   103.175.207.51
+sibos.kadaipos.id   A   103.175.207.51
 ```
 
 **Propagation Time:** 24-48 hours (usually faster)
@@ -120,8 +127,9 @@ srv123.kadaipos.id  A   103.175.207.51
 |-----|--------|
 | `http://103.175.207.51` | Direct IP access |
 | `http://103.175.207.51:3000` | Direct app port |
-| `http://kadaipos.id` | After DNS update |
-| `https://kadaipos.id` | After SSL (auto-redirect) |
+| `http://kadai.id` | After DNS update |
+| `https://kadai.id` | After SSL (auto-redirect) |
+| `https://kadaipos.id` | Legacy domain (redirects to kadai.id) |
 
 ---
 
@@ -147,7 +155,7 @@ srv123.kadaipos.id  A   103.175.207.51
 4. Test all functionality
 
 ### After DNS Propagation (24-48 hours)
-1. Primary access via `https://kadaipos.id`
+1. Primary access via `https://kadai.id`
 2. Monitor old VPS for cleanup
 3. Archive old server data (optional)
 

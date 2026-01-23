@@ -1,4 +1,4 @@
-# Deployment Guide for KadaiPOS Website
+# Deployment Guide for Kadai Website
 
 ## Server Requirements
 
@@ -77,7 +77,7 @@ pm2 startup
 Create Nginx configuration:
 
 ```bash
-sudo nano /etc/nginx/sites-available/kadaipos.id
+sudo nano /etc/nginx/sites-available/kadai.id
 ```
 
 Add this configuration:
@@ -85,7 +85,25 @@ Add this configuration:
 ```nginx
 server {
     listen 80;
-    server_name kadaipos.id www.kadaipos.id;
+  server_name kadaipos.id www.kadaipos.id;
+  return 301 https://kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name order.kadaipos.id;
+  return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name sibos.kadaipos.id;
+  return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -104,7 +122,7 @@ server {
 Enable the site:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -113,17 +131,19 @@ sudo systemctl reload nginx
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d kadaipos.id -d www.kadaipos.id
+sudo certbot certonly --nginx \
+  -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+  -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id
 ```
 
 ### 7. Update Supabase Settings
 
 In your Supabase dashboard:
 1. Go to Authentication → URL Configuration
-2. Set **Site URL**: `https://kadaipos.id`
+2. Set **Site URL**: `https://kadai.id`
 3. Add **Redirect URLs**:
-   - `https://kadaipos.id/auth/callback`
-   - `https://www.kadaipos.id/auth/callback`
+  - `https://kadai.id/auth/callback`
+  - `https://www.kadai.id/auth/callback`
 
 ## Quick Deployment Script
 

@@ -135,7 +135,7 @@ pm2 logs kadaipos
 NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-NEXT_PUBLIC_API_URL=https://kadaipos.id
+NEXT_PUBLIC_API_URL=https://kadai.id
 NODE_ENV=production
 ```
 

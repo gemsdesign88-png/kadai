@@ -70,10 +70,28 @@ EOF
 # Configure Nginx
 log_info "Configuring Nginx..."
 sshpass -e ssh -o StrictHostKeyChecking=no ${VPS_USER}@${NEW_VPS} 'bash -s' << 'EOF'
-cat > /etc/nginx/sites-available/kadaipos.id << 'NGINX'
+cat > /etc/nginx/sites-available/kadai.id << 'NGINX'
 server {
     listen 80;
-    server_name kadaipos.id www.kadaipos.id srv123.kadaipos.id;
+  server_name kadaipos.id www.kadaipos.id;
+  return 301 https://kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name order.kadaipos.id;
+  return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name sibos.kadaipos.id;
+  return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
     client_max_body_size 100M;
     location / {
         proxy_pass http://localhost:3000;
@@ -86,7 +104,7 @@ server {
 }
 NGINX
 
-ln -sf /etc/nginx/sites-available/kadaipos.id /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/kadai.id /etc/nginx/sites-enabled/
 nginx -t >/dev/null 2>&1 && systemctl restart nginx
 echo "[SUCCESS] Nginx configured"
 EOF
@@ -94,8 +112,87 @@ EOF
 # Setup SSL
 log_info "Setting up SSL certificate..."
 sshpass -e ssh -o StrictHostKeyChecking=no ${VPS_USER}@${NEW_VPS} 'bash -s' << 'EOF'
-[ ! -f "/etc/letsencrypt/live/kadaipos.id/fullchain.pem" ] && \
-  certbot --nginx -d kadaipos.id -d www.kadaipos.id -d srv123.kadaipos.id --non-interactive --agree-tos -m admin@kadaipos.id >/dev/null 2>&1 || true
+[ ! -f "/etc/letsencrypt/live/kadai.id/fullchain.pem" ] && \
+  certbot certonly --nginx \
+  -d kadai.id -d www.kadai.id -d order.kadai.id -d sibos.kadai.id \
+  -d kadaipos.id -d www.kadaipos.id -d order.kadaipos.id -d sibos.kadaipos.id \
+  --non-interactive --agree-tos -m admin@kadaipos.id >/dev/null 2>&1 || true
+
+cat > /etc/nginx/sites-available/kadai.id << 'NGINX'
+server {
+  listen 80;
+  server_name kadaipos.id www.kadaipos.id;
+  return 301 https://kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name order.kadaipos.id;
+  return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name sibos.kadaipos.id;
+  return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+  listen 80;
+  server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+  client_max_body_size 100M;
+  location / {
+    proxy_pass http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+}
+
+server {
+  listen 443 ssl;
+  server_name kadaipos.id www.kadaipos.id;
+  ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+  return 301 https://kadai.id$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name order.kadaipos.id;
+  ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+  return 301 https://order.kadai.id$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name sibos.kadaipos.id;
+  ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+  return 301 https://sibos.kadai.id$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name kadai.id www.kadai.id order.kadai.id sibos.kadai.id;
+  ssl_certificate /etc/letsencrypt/live/kadai.id/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/kadai.id/privkey.pem;
+  client_max_body_size 100M;
+  location / {
+    proxy_pass http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+}
+NGINX
+
+nginx -t >/dev/null 2>&1 && systemctl restart nginx || true
 echo "[SUCCESS] SSL ready"
 EOF
 
@@ -113,8 +210,8 @@ echo "📊 Status:"
 pm2 status
 echo ""
 echo "✅ URLs:"
-echo "   http://kadaipos.id"
-echo "   https://kadaipos.id"
+echo "   http://kadai.id"
+echo "   https://kadai.id"
 echo "   http://103.175.207.51:3000"
 echo ""
 echo "⚡ Commands:"
@@ -128,5 +225,5 @@ echo ""
 echo "🎯 Next Steps:"
 echo "   1. Update DNS to point to: 103.175.207.51"
 echo "   2. Wait for DNS propagation"
-echo "   3. Visit: https://kadaipos.id"
+echo "   3. Visit: https://kadai.id"
 echo ""

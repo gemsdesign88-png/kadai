@@ -250,7 +250,7 @@ export function Header() {
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <Link href="https://sibos.kadaipos.id/login">{t.nav.login}</Link>
+                <Link href="https://sibos.kadai.id/login">{t.nav.login}</Link>
               </Button> */}
               <Button 
                 ref={tryDemoButtonRef}
@@ -532,7 +532,7 @@ export function Header() {
                     size="sm" 
                     asChild
                   >
-                    <Link href="https://sibos.kadaipos.id/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Link href="https://sibos.kadai.id/login" onClick={() => setMobileMenuOpen(false)}>
                       {t.nav.login}
                     </Link>
                   </Button> */}

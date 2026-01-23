@@ -17,7 +17,7 @@ export function QRMenuDisplayMockup({ color, language }: { color: string; langua
             <div className="text-6xl">📱</div>
           </div>
           <p className="text-center text-sm font-bold text-gray-900 mb-2">{t('Scan to View Menu', 'Scan untuk Lihat Menu', '扫码查看菜单')}</p>
-          <p className="text-center text-xs text-gray-600">{t('Or visit: menu.kadaipos.id/t5', 'Atau kunjungi: menu.kadaipos.id/t5', '或访问：menu.kadaipos.id/t5')}</p>
+          <p className="text-center text-xs text-gray-600">{t('Or visit: menu.kadai.id/t5', 'Atau kunjungi: menu.kadai.id/t5', '或访问：menu.kadai.id/t5')}</p>
         </div>
         <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
           <div className="flex items-start gap-3">
