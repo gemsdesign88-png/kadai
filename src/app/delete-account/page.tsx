@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function DeleteAccountPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-neutral-950 to-black">
-      <div className="container mx-auto px-4 pt-32 pb-16 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 pt-48 pb-16 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
