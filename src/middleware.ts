@@ -45,6 +45,7 @@ export async function middleware(request: NextRequest) {
          !pathname.startsWith('/auth') &&
          !pathname.startsWith('/register') &&
          !pathname.startsWith('/onboarding') &&
+         !pathname.startsWith('/delete-account') &&
          !pathname.startsWith('/_next'))) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
@@ -58,6 +59,7 @@ export async function middleware(request: NextRequest) {
   
   // Public routes that don't require authentication
   const publicRoutes = [
+    '/delete-account',
     '/order',
     '/privacy',
     '/terms',

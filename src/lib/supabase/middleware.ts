@@ -59,6 +59,7 @@ export async function updateSession(request: NextRequest) {
       '/login',
       '/register',
       '/auth',
+      '/delete-account',
       '/privacy',
       '/terms',
       '/cookies',
