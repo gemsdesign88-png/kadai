@@ -22,7 +22,14 @@ function getInitialLanguage(): Language {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(getInitialLanguage)
+  const [language, setLanguageState] = useState<Language>("en")
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("language") as Language
+    if (savedLang && (savedLang === "en" || savedLang === "id" || savedLang === "zh")) {
+      setLanguageState(savedLang)
+    }
+  }, [])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)

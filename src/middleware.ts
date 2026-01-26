@@ -10,6 +10,8 @@ export async function middleware(request: NextRequest) {
   const isApexOldDomain = host === 'kadaipos.id' || host === 'www.kadaipos.id';
   const isSibosOldDomain = host === 'sibos.kadaipos.id';
   const isSibosNewDomain = host === 'sibos.kadai.id';
+  const isAppOldDomain = host === 'app.kadaipos.id';
+  const isAppNewDomain = host === 'app.kadai.id';
   const isOrderOldDomain = host === 'order.kadaipos.id';
   const isOrderNewDomain = host === 'order.kadai.id';
 
@@ -22,15 +24,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`https://sibos.kadai.id${pathname}${search}`), 308);
   }
 
+  if (isAppOldDomain) {
+    return NextResponse.redirect(new URL(`https://app.kadai.id${pathname}${search}`), 308);
+  }
+
   if (isApexOldDomain) {
     if (pathname === '/login' || pathname === '/register') {
-      return NextResponse.redirect(new URL(`https://sibos.kadai.id${pathname}${search}`), 308);
+      return NextResponse.redirect(new URL(`https://app.kadai.id${pathname}${search}`), 308);
     }
     return NextResponse.redirect(new URL(`https://kadai.id${pathname}${search}`), 308);
   }
   
-  // Redirect sibos.* to dashboard
-  if (isSibosNewDomain) {
+  // Redirect sibos.* and app.* to dashboard
+  if (isSibosNewDomain || isAppNewDomain) {
     // If not already on dashboard/login/auth/admin/register routes, redirect to dashboard
     if (pathname === '/' || 
         (!pathname.startsWith('/dashboard') && 
