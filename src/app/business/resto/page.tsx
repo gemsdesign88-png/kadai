@@ -20,6 +20,9 @@ import {
   Soup
 } from "lucide-react";
 import Link from "next/link";
+import { MobileUIShowcase, MobileUIShowcaseSection } from "@/components/sections/MobileUIShowcase";
+import { SalesDashboardScreen } from "@/components/mobile-ui/screens/SalesDashboardScreen";
+import { TableManagementScreen } from "@/components/mobile-ui/screens/resto/TableManagementScreen";
 
 export default function RestoPage() {
   const { t } = useLanguage();
@@ -161,6 +164,37 @@ export default function RestoPage() {
           </div>
         </Container>
       </section>
+
+      {/* Mobile UI Showcase Section */}
+      <MobileUIShowcaseSection
+        title="See Real Business Impact"
+        subtitle="Experience the actual mobile app interface that helps restaurant owners track revenue and manage operations in real-time"
+      >
+        <MobileUIShowcase
+          title="Live Sales Dashboard"
+          description="Monitor your restaurant's performance in real-time. Track today's revenue, order count, customer flow, and identify your best-selling items instantly - all from your phone."
+          screen={<SalesDashboardScreen />}
+          features={[
+            'Real-time revenue tracking with trend indicators',
+            'Hourly sales visualization to identify peak hours',
+            'Top-selling products with profit insights',
+            'Quick export for accounting and tax reporting',
+          ]}
+        />
+
+        <MobileUIShowcase
+          title="Visual Table Management"
+          description="Manage your restaurant floor plan with an intuitive, color-coded interface. See all table statuses at a glance and tap to manage orders instantly."
+          screen={<TableManagementScreen />}
+          features={[
+            'Real-time status updates with color indicators',
+            'Quick overview of guests and order totals',
+            'Tap any table to view or edit orders',
+            'Track available, occupied, and reserved tables',
+          ]}
+          reverse
+        />
+      </MobileUIShowcaseSection>
 
       {/* Features Section */}
       <section className="py-20 bg-gray-50">

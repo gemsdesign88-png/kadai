@@ -22,6 +22,9 @@ import {
   Home
 } from "lucide-react";
 import Link from "next/link";
+import { MobileUIShowcase, MobileUIShowcaseSection } from '@/components/sections/MobileUIShowcase';
+import { QuickSaleScreen } from '@/components/mobile-ui/screens/toko/QuickSaleScreen';
+import { InventoryAlertsScreen } from '@/components/mobile-ui/screens/toko/InventoryAlertsScreen';
 
 export default function TokoPage() {
   const { t } = useLanguage();
@@ -251,6 +254,47 @@ export default function TokoPage() {
               ))}
             </div>
           </div>
+        </Container>
+      </section>
+
+      {/* Mobile UI Showcase */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <Container>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              {toko.mobileShowcase?.title || 'Lihat Dampak Nyata untuk Bisnis'}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {toko.mobileShowcase?.subtitle || 'Rasakan bagaimana KadaiPOS membantu pemilik toko mengelola operasional harian dengan cepat dan efisien.'}
+            </p>
+          </div>
+          
+          <MobileUIShowcaseSection>
+            <MobileUIShowcase
+              screen={<QuickSaleScreen />}
+              title="Kasir Super Cepat"
+              description="Scan barcode atau pilih produk favorit dalam hitungan detik. Proses transaksi lebih cepat, antrian lebih pendek."
+              features={[
+                'Scan barcode otomatis - tanpa ketik manual',
+                'Quick access produk favorit',
+                'Hitung kembalian otomatis',
+                'Cetak struk instant',
+              ]}
+            />
+            
+            <MobileUIShowcase
+              screen={<InventoryAlertsScreen />}
+              title="Stok Selalu Terkontrol"
+              description="Notifikasi real-time saat stok menipis. Jangan sampai kehabisan produk laris."
+              features={[
+                'Alert stok menipis otomatis',
+                'Saran jumlah restock yang tepat',
+                'Track produk fast-moving',
+                'Analisis profit margin per produk',
+              ]}
+              reverse
+            />
+          </MobileUIShowcaseSection>
         </Container>
       </section>
 

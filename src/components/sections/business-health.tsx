@@ -13,8 +13,8 @@ export function BusinessHealth() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-950 to-black overflow-hidden pt-20">
-      {/* Animated pulse background */}
-      <div className="absolute inset-0">
+      {/* Animated pulse background - optimized for mobile performance */}
+      <div className="absolute inset-0 pointer-events-none">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -25,12 +25,17 @@ export function BusinessHealth() {
             repeat: Infinity,
             ease: "easeInOut"
           }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-full blur-[128px]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-full will-change-transform"
+          style={{
+            filter: 'blur(96px)', // Reduced blur for better mobile performance
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+          }}
         />
       </div>
       
-      {/* Animated background grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]" />
+      {/* Animated background grid - simplified for mobile */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)] pointer-events-none" style={{ willChange: 'auto' }} />
 
       <Container className="relative z-10 py-20">
         <motion.div

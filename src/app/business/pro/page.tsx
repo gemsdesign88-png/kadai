@@ -28,6 +28,9 @@ import {
   Shirt
 } from "lucide-react";
 import Link from "next/link";
+import { MobileUIShowcase, MobileUIShowcaseSection } from '@/components/sections/MobileUIShowcase';
+import { MultiStoreDashboardScreen } from '@/components/mobile-ui/screens/pro/MultiStoreDashboardScreen';
+import { CustomerInsightsScreen } from '@/components/mobile-ui/screens/pro/CustomerInsightsScreen';
 
 export default function ProPage() {
   const { t, language } = useLanguage();
@@ -406,6 +409,47 @@ export default function ProPage() {
               ))}
             </div>
           </div>
+        </Container>
+      </section>
+
+      {/* Mobile UI Showcase */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <Container>
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              {pro.mobileShowcase?.title || 'Lihat Dampak Nyata untuk Bisnis'}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {pro.mobileShowcase?.subtitle || 'Rasakan bagaimana KadaiPOS Pro membantu pemilik enterprise mengelola banyak lokasi dan memahami perilaku pelanggan.'}
+            </p>
+          </div>
+          
+          <MobileUIShowcaseSection>
+            <MobileUIShowcase
+              screen={<MultiStoreDashboardScreen />}
+              title="Kelola Multi Cabang"
+              description="Monitor semua cabang dalam 1 dashboard. Compare performance, track trends, dan kelola operasional dari mana saja."
+              features={[
+                'Real-time monitoring semua lokasi',
+                'Compare revenue antar cabang',
+                'Track produk terlaris per toko',
+                'Centralized inventory management',
+              ]}
+            />
+            
+            <MobileUIShowcase
+              screen={<CustomerInsightsScreen />}
+              title="Analisis Pelanggan Cerdas"
+              description="Kenali pelanggan setia Anda. Track purchase behavior, reward loyalty, dan tingkatkan customer lifetime value."
+              features={[
+                'Automatic customer profiling',
+                'Purchase history & preferences',
+                'Loyalty tier management',
+                'Targeted marketing campaigns',
+              ]}
+              reverse
+            />
+          </MobileUIShowcaseSection>
         </Container>
       </section>
 

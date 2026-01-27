@@ -261,6 +261,10 @@ export function Header() {
                 <Link href="/demo">{t.nav.getDemo}</Link>
               </Button>
             </div>
+            {/* Mobile: Language switcher on the left, hamburger on the right */}
+            <div className="lg:hidden">
+              <LanguageSwitcher isScrolled={pathname !== '/' || shouldShowScrolled} />
+            </div>
             <button
               type="button"
               className={`lg:hidden p-2 rounded-[12px] transition-all ${
@@ -525,7 +529,8 @@ export function Header() {
                   })}
                 </div>
                 <div className="border-t border-gray-200 pt-6 space-y-3">
-                  <LanguageSwitcher isScrolled={true} />
+                  {/* Language switcher moved to header - keeping here as backup */}
+                  {/* <LanguageSwitcher isScrolled={true} /> */}
                   {/* <Button 
                     variant="ghost" 
                     className="w-full justify-start font-bold hover:bg-gray-50 rounded-[12px]" 
