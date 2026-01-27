@@ -201,7 +201,7 @@ export function Header() {
                           isActive
                             ? pathname === '/' && !shouldShowScrolled
                               ? 'text-white bg-white/20'
-                              : ''
+                              : 'bg-gray-50'
                             : pathname === '/' && !shouldShowScrolled
                               ? 'text-white/90 hover:text-white hover:bg-white/10'
                               : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
