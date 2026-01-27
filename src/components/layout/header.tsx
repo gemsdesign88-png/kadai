@@ -201,14 +201,26 @@ export function Header() {
                           isActive
                             ? pathname === '/' && !shouldShowScrolled
                               ? 'text-white bg-white/20'
-                              : 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
+                              : ''
                             : pathname === '/' && !shouldShowScrolled
                               ? 'text-white/90 hover:text-white hover:bg-white/10'
                               : 'text-gray-700 hover:text-[#FF5A5F] hover:bg-gray-50'
                         }`}
                       >
-                        {t.nav[item.name as keyof typeof t.nav]}
-                        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                        <span className={
+                          isActive && pathname !== '/' 
+                            ? 'bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent'
+                            : ''
+                        }>
+                          {t.nav[item.name as keyof typeof t.nav]}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''} ${
+                          isActive && pathname !== '/' 
+                            ? 'text-[#FF5A5F]'
+                            : pathname === '/' && !shouldShowScrolled
+                              ? 'text-white/90'
+                              : 'text-gray-700'
+                        }`} />
                       </button>
                     </div>
                   )
