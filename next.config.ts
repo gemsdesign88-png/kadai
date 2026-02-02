@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
             },
           ],
         },
+        {
+          source: '/po/:path*',
+          destination: '/api/po/:path*',
+        },
       ],
     };
   },
