@@ -60,6 +60,8 @@ export async function middleware(request: NextRequest) {
   // Public routes that don't require authentication
   const publicRoutes = [
     '/delete-account',
+    '/po',
+    '/api/po',
     '/order',
     '/privacy',
     '/terms',
