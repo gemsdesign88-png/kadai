@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 export const runtime = "nodejs";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: { path?: string[] } }
 ) {
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -16,7 +16,11 @@ export async function GET(
 
   const segments = Array.isArray(params?.path) ? params.path : [];
   const rawPath = segments.filter(Boolean).join("/");
-  const objectPath = rawPath ? decodeURIComponent(rawPath) : '';
+  const fallbackPath = (() => {
+    const pathname = new URL(req.url).pathname;
+    return pathname.replace(/^\/api\/po\/?/, '');
+  })();
+  const objectPath = decodeURIComponent(rawPath || fallbackPath || '');
 
   if (!objectPath) {
     return NextResponse.json({ error: "Missing file path" }, { status: 400 });
