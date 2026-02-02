@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -58,45 +56,52 @@ export async function POST(request: Request) {
 
     // Try to send email notifications
     try {
-      // 1. Send notification to admin
-      await resend.emails.send({
-        from: 'Kadai Marketing <onboarding@resend.dev>',
-        to: 'mamak@kadaipos.id',
-        subject: `New Lead: ${subject}`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #FF5A5F;">New Contact Submission</h2>
-            <p><strong>From:</strong> ${name} (${email})</p>
-            <p><strong>WhatsApp:</strong> ${whatsapp}</p>
-            <p><strong>Subject:</strong> ${subject}</p>
-            <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
-              <p style="white-space: pre-wrap;">${message}</p>
-            </div>
-            <p style="margin-top: 20px; font-size: 12px; color: #888;">Submitted via Kadai Marketing Website</p>
-          </div>
-        `
-      });
+      const resendApiKey = process.env.RESEND_API_KEY;
+      if (!resendApiKey) {
+        console.warn('Email sending skipped: RESEND_API_KEY is not set');
+      } else {
+        const resend = new Resend(resendApiKey);
 
-      // 2. Send confirmation to user
-      await resend.emails.send({
-        from: 'Kadai <onboarding@resend.dev>',
-        to: email,
-        subject: 'We received your message!',
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #FF5A5F;">Hello ${name},</h2>
-            <p>Thank you for reaching out to us. We have received your message regarding "<strong>${subject}</strong>" and our team will get back to you shortly.</p>
-            <p>Our typical response time is within 24 hours.</p>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p style="font-size: 14px;"><strong>Your message:</strong></p>
-            <p style="font-style: italic; color: #666;">${message}</p>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #888;">This is an automated confirmation from Kadai. Please do not reply directly to this email.</p>
-          </div>
-        `
-      });
+        // 1. Send notification to admin
+        await resend.emails.send({
+          from: 'Kadai Marketing <onboarding@resend.dev>',
+          to: 'mamak@kadaipos.id',
+          subject: `New Lead: ${subject}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #FF5A5F;">New Contact Submission</h2>
+              <p><strong>From:</strong> ${name} (${email})</p>
+              <p><strong>WhatsApp:</strong> ${whatsapp}</p>
+              <p><strong>Subject:</strong> ${subject}</p>
+              <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+                <p style="white-space: pre-wrap;">${message}</p>
+              </div>
+              <p style="margin-top: 20px; font-size: 12px; color: #888;">Submitted via Kadai Marketing Website</p>
+            </div>
+          `
+        });
+
+        // 2. Send confirmation to user
+        await resend.emails.send({
+          from: 'Kadai <onboarding@resend.dev>',
+          to: email,
+          subject: 'We received your message!',
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #FF5A5F;">Hello ${name},</h2>
+              <p>Thank you for reaching out to us. We have received your message regarding "<strong>${subject}</strong>" and our team will get back to you shortly.</p>
+              <p>Our typical response time is within 24 hours.</p>
+              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="font-size: 14px;"><strong>Your message:</strong></p>
+              <p style="font-style: italic; color: #666;">${message}</p>
+              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="font-size: 12px; color: #888;">This is an automated confirmation from Kadai. Please do not reply directly to this email.</p>
+            </div>
+          `
+        });
+      }
     } catch (mailError) {
-      // We don't want to fail the whole request if email fails, 
+      // We don't want to fail the whole request if email fails,
       // as long as it's saved in the database.
       console.error('Email sending error:', mailError);
     }
