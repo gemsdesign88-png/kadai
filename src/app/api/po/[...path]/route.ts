@@ -15,7 +15,8 @@ export async function GET(
   }
 
   const segments = Array.isArray(params?.path) ? params.path : [];
-  const objectPath = segments.filter(Boolean).join("/");
+  const rawPath = segments.filter(Boolean).join("/");
+  const objectPath = rawPath ? decodeURIComponent(rawPath) : '';
 
   if (!objectPath) {
     return NextResponse.json({ error: "Missing file path" }, { status: 400 });
