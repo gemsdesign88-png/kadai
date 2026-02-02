@@ -20,7 +20,10 @@ export async function GET(
     const pathname = new URL(req.url).pathname;
     return pathname.replace(/^\/api\/po\/?/, '');
   })();
-  const objectPath = decodeURIComponent(rawPath || fallbackPath || '');
+  let objectPath = decodeURIComponent(rawPath || fallbackPath || '');
+  if (objectPath.startsWith('po/po/')) {
+    objectPath = objectPath.replace(/^po\//, '');
+  }
 
   if (!objectPath) {
     return NextResponse.json({ error: "Missing file path" }, { status: 400 });
