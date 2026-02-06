@@ -52,10 +52,20 @@ export function Warehouse() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
             >
-              {hero.title.split('Multi-Lokasi')[0]}
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-                Multi-Lokasi
-              </span>
+              {(() => {
+                const title = hero.title;
+                const highlightWord = title.includes('Multi-Lokasi') ? 'Multi-Lokasi' : 'Multi-Location';
+                const parts = title.split(highlightWord);
+                return (
+                  <>
+                    {parts[0]}
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                      {highlightWord}
+                    </span>
+                    {parts[1]}
+                  </>
+                );
+              })()}
             </motion.h1>
 
             {/* Description */}
