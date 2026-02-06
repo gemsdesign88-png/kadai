@@ -76,6 +76,7 @@ export async function middleware(request: NextRequest) {
     '/benefits',
     '/business',
     '/careers',
+    '/warehouse',
     '/api/demo-request',
     '/register',
   ];
