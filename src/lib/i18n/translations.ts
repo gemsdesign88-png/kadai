@@ -38,6 +38,7 @@ export const translations = {
       staff: "Staff",
       inventory: "Inventory",
       tables: "Tables",
+      warehouse: "Warehouse",
       settings: "Settings",
       ownerProfile: "Owner Profile",
       logout: "Logout",
@@ -1168,13 +1169,383 @@ export const translations = {
         noCard: "No credit card required"
       }
     },
+    warehousePage: {
+      hero: {
+        badge: "📦 Warehouse Management",
+        title: "Multi-Location Warehouse Management System",
+        subtitle: "Manage central warehouse inventory and automatically distribute to all outlets. Equipped with par level and reorder level systems to maintain optimal stock at every location.",
+        stats: {
+          efficiency: {
+            value: "80%",
+            label: "More Efficient"
+          },
+          automation: {
+            value: "100%",
+            label: "Auto Distribution"
+          },
+          accuracy: {
+            value: "99.9%",
+            label: "Accurate"
+          }
+        },
+        cta: {
+          demo: "Free Demo",
+          consultation: "Consultation"
+        }
+      },
+      uiShowcase: {
+        title: "See How The System Works",
+        subtitle: "Intuitive dashboard displaying real-time stock status across all locations",
+        dashboard: {
+          title: "Warehouse Dashboard",
+          nav: {
+            overview: "Overview",
+            products: "Products",
+            transfers: "Transfers",
+            analytics: "Analytics"
+          },
+          stockStatus: {
+            title: "Multi-Location Stock Status",
+            columns: {
+              product: "Product",
+              warehouse: "Warehouse",
+              parLevel: "Par Level",
+              reorderLevel: "Reorder Level",
+              status: "Status",
+              action: "Action"
+            },
+            status: {
+              needsRestock: "Needs Restock",
+              good: "Good",
+              critical: "Critical"
+            },
+            action: {
+              distribute: "Distribute"
+            }
+          },
+          distributionNeeds: {
+            title: "Distribution Needs",
+            stores: {
+              baliOne: "Bali Branch 1",
+              baliTwo: "Bali Branch 2",
+              jakarta: "Jakarta Branch"
+            },
+            product: "Product",
+            needed: "Needed"
+          }
+        },
+        stockItems: {
+          warehouseStock: "Warehouse Stock",
+          parLevelTotal: "Par Level Total",
+          reorderLevel: "Reorder Level",
+          needOrder: "Need to Order",
+          toReachPar: "(to reach par level)",
+          critical: "CRITICAL! Order",
+          belowReorder: "(below reorder level)",
+          optimalStock: "Stock optimal - ready to distribute",
+          distributionNeeded: "Distribution Needed:",
+          urgentDistribution: "⚠️ Urgent Distribution:",
+          allStoresOptimal: "All stores optimal",
+          allBranches: "All branches"
+        },
+        howItWorks: {
+          title: "How It Works",
+          steps: [
+            {
+              number: "1",
+              title: "Set Par & Reorder Level",
+              description: "Determine optimal stock level for each product at each outlet"
+            },
+            {
+              number: "2",
+              title: "Monitor Real-Time",
+              description: "System automatically monitors stock and alerts when approaching reorder level"
+            },
+            {
+              number: "3",
+              title: "Auto Transfer",
+              description: "Create automatic transfer order from warehouse to outlets needing restock"
+            }
+          ]
+        }
+      },
+      featuresSection: {
+        badge: "Warehouse Features",
+        title: "Complete Features for Multi-Location Warehouse Management",
+        subtitle: "Everything you need to manage central warehouse inventory and distribute to all outlets",
+        features: [
+          {
+            title: "Auto Par Level & Reorder",
+            description: "System automatically calculates stock needs based on par level and reorder level you set. No more manual calculations.",
+            highlights: [
+              "Set par level for each product",
+              "Automatic alert when reaching reorder level",
+              "Order quantity recommendations",
+              "Track consumption patterns"
+            ]
+          },
+          {
+            title: "Smart Transfer Management",
+            description: "Stock transfer from warehouse to outlets made easy with system fully integrated with POS at each location.",
+            highlights: [
+              "Transfer between warehouses & outlets",
+              "Real-time delivery status tracking",
+              "Auto update stock upon receipt",
+              "Complete transfer history"
+            ]
+          },
+          {
+            title: "Purchase Order (PO) Management",
+            description: "Manage supplier POs with integrated system. Track status, receive goods, and update stock automatically.",
+            highlights: [
+              "Create PO directly from system",
+              "Real-time PO status tracking",
+              "Receive & verify goods",
+              "Auto update warehouse stock"
+            ]
+          },
+          {
+            title: "Multi-Location Analytics",
+            description: "Complete analytics dashboard to monitor stock performance at all locations. View fast-moving, slow-moving products, and optimal stock levels.",
+            highlights: [
+              "Stock value per location",
+              "Fast vs slow moving products",
+              "Stock turnover ratio",
+              "Cost analysis per location"
+            ]
+          },
+          {
+            title: "Smart Distribution Planning",
+            description: "AI system helps you determine optimal distribution based on sales patterns and stock levels at each outlet.",
+            highlights: [
+              "AI-powered distribution planning",
+              "Sales pattern analysis",
+              "Optimal stock recommendations",
+              "Minimize waste & stockouts"
+            ]
+          },
+          {
+            title: "Team & Access Management",
+            description: "Manage warehouse team with role-based access. Determine who can approve PO, transfers, or just view data.",
+            highlights: [
+              "Role-based permissions",
+              "Complete activity log",
+              "Multi-user collaboration",
+              "Approval workflow"
+            ]
+          }
+        ]
+      },
+      warehouseFeatures: {
+        badge: "Complete Features",
+        title: "Everything You Need to",
+        titleHighlight: "Manage Multi-Location",
+        subtitle: "Powerful yet easy-to-use warehouse management system",
+        features: [
+          {
+            title: "Centralized Warehouse",
+            description: "Manage inventory from one central warehouse for all branches. Track stock in real-time at every location.",
+            benefits: [
+              "Centralized dashboard for all locations",
+              "Real-time stock visibility",
+              "Automatic stock calculations"
+            ]
+          },
+          {
+            title: "Inter-Branch Transfer",
+            description: "Send stock between branches easily. Complete tracking from delivery to receipt.",
+            benefits: [
+              "Transfer request & approval system",
+              "Barcode scanning for receiving",
+              "Complete transfer history"
+            ]
+          },
+          {
+            title: "Integrated Purchase Order",
+            description: "Create PO from central warehouse or branches. Auto update stock when goods received.",
+            benefits: [
+              "Multi-supplier management",
+              "Automatic stock updates",
+              "PO approval workflow"
+            ]
+          },
+          {
+            title: "Stock Level Optimization",
+            description: "Monitor par level at each branch. Auto alerts for restock and overstock.",
+            benefits: [
+              "Customizable par levels per location",
+              "Low stock alerts",
+              "Smart reorder suggestions"
+            ]
+          },
+          {
+            title: "Analytics & Reporting",
+            description: "Complete reports on stock movement, inventory value, and distribution efficiency.",
+            benefits: [
+              "Stock movement reports",
+              "Inventory valuation",
+              "Distribution efficiency metrics"
+            ]
+          },
+          {
+            title: "Multi-Location Team Management",
+            description: "Manage warehouse and branch teams with different permissions for each location.",
+            benefits: [
+              "Role-based access control",
+              "Location-specific permissions",
+              "Team activity tracking"
+            ]
+          }
+        ],
+        integration: {
+          title: "Full Integration with Store & Restaurant",
+          description: "Warehouse fully integrated with your Store and Restaurant modules"
+        }
+      },
+      warehouseUseCases: {
+        badge: "Use Cases",
+        title: "Solutions for",
+        titleHighlight: "Various Business Types",
+        subtitle: "Warehouse module suitable for various multi-location business models",
+        useCases: [
+          {
+            title: "Retail Chain",
+            business: "Multi-Branch Retail",
+            scenario: "Have 5+ retail stores with same products?",
+            challengesTitle: "Common Challenges:",
+            challenges: [
+              "Stock imbalance between branches",
+              "Manual transfers complicated and error prone",
+              "Hard to track total inventory value"
+            ],
+            solutionsTitle: "Warehouse Solutions:",
+            solutions: [
+              "Central warehouse for distribution to all stores",
+              "Automatic transfers with barcode scanning",
+              "Real-time inventory value monitoring",
+              "Automatic restock alerts per branch"
+            ]
+          },
+          {
+            title: "Restaurant Group",
+            business: "Restaurant Group",
+            scenario: "Manage 3+ restaurants with same ingredients?",
+            challengesTitle: "Common Challenges:",
+            challenges: [
+              "Buy ingredients separately, different prices",
+              "Waste due to imbalance between outlets",
+              "Difficult to control food cost"
+            ],
+            solutionsTitle: "Warehouse Solutions:",
+            solutions: [
+              "Central kitchen for prep ingredients",
+              "Bulk purchasing for better pricing",
+              "Transfer ingredients between kitchens",
+              "Unified food cost calculation"
+            ]
+          },
+          {
+            title: "Distribution Business",
+            business: "Distribution Business",
+            scenario: "Distributor supplying many retailers?",
+            challengesTitle: "Common Challenges:",
+            challenges: [
+              "Manual PO handling from customers",
+              "Tracking deliveries difficult",
+              "Manual goods movement reports"
+            ],
+            solutionsTitle: "Warehouse Solutions:",
+            solutions: [
+              "Central warehouse management",
+              "Automated PO processing",
+              "Delivery tracking system",
+              "Complete distribution analytics"
+            ]
+          }
+        ],
+        cta: {
+          button: "Free Consultation with Our Team",
+          note: "Not sure which module fits? Our team is ready to help analyze your business"
+        }
+      },
+      pricing: {
+        badge: "💰 Warehouse Pricing",
+        title: "Choose the Right Package",
+        subtitle: "All packages include full features. Only capacity differs.",
+        billing: {
+          monthly: "Monthly",
+          yearly: "Yearly",
+          save: "Save 10%"
+        },
+        tiers: {
+          starter: {
+            name: "Starter",
+            monthlyPrice: "Rp 499,000",
+            yearlyPrice: "Rp 5,388,000",
+            period: "/month",
+            popular: "Most Popular",
+            capacity: {
+              warehouses: "1 Central Warehouse",
+              outlets: "Up to 3 Outlets",
+              users: "Up to 5 Users",
+              products: "Unlimited Products"
+            },
+            cta: "Get Started"
+          },
+          growth: {
+            name: "Growth",
+            monthlyPrice: "Rp 799,000",
+            yearlyPrice: "Rp 8,628,000",
+            period: "/month",
+            popular: "Most Popular",
+            capacity: {
+              warehouses: "1 Central Warehouse",
+              outlets: "Up to 10 Outlets",
+              users: "Up to 15 Users",
+              products: "Unlimited Products"
+            },
+            cta: "Get Started"
+          },
+          pro: {
+            name: "Pro",
+            monthlyPrice: "Rp 1,499,000",
+            yearlyPrice: "Rp 16,188,000",
+            period: "/month",
+            capacity: {
+              warehouses: "Multiple Warehouses",
+              outlets: "Unlimited Outlets",
+              users: "Unlimited Users",
+              products: "Unlimited Products"
+            },
+            cta: "Contact Sales"
+          }
+        },
+        footer: {
+          note: "All packages include priority support & complete training",
+          consultation: "Need consultation? Contact our team"
+        }
+      },
+      cta: {
+        badge: "🚀 Ready to Start?",
+        title: "Transform Your Warehouse Management Today",
+        subtitle: "Join hundreds of businesses already using Kadai Warehouse",
+        benefits: [
+          "Free demo & consultation",
+          "Complete setup & training",
+          "24/7 Support",
+          "Free data migration"
+        ],
+        button: "Schedule Demo",
+        contact: "or contact sales"
+      }
+    },
     restoPage: {
       hero: {
         badge: "🍽️ For Food & Beverage",
         title: "Smart POS for",
         titleHighlight: "Restaurants & Cafes",
         subtitle: "Kitchen display system, table management, and real-time reporting. Everything you need to run a modern restaurant efficiently.",
-        price: "Rp 99,000/month",
+        price: "Rp 149,000/month",
         getStarted: "Get Started Now"
       },
       useCases: {
@@ -3049,6 +3420,7 @@ We will respond to your inquiry within 7 business days.`
       staff: "Staff",
       inventory: "Stok",
       tables: "Meja",
+      warehouse: "Gudang",
       settings: "Pengaturan",
       ownerProfile: "Profil Owner",
       logout: "Keluar",
@@ -4024,13 +4396,382 @@ We will respond to your inquiry within 7 business days.`
         noCard: "Tanpa kartu kredit"
       }
     },
+    warehousePage: {
+      hero: {
+        badge: "📦 Warehouse Management",
+        title: "Sistem Manajemen Gudang Multi-Lokasi",
+        subtitle: "Kelola stok di gudang pusat & distribusi otomatis ke semua outlet. Dilengkapi sistem par level dan reorder level untuk menjaga stok optimal di setiap lokasi.",
+        stats: {
+          efficiency: {
+            value: "80%",
+            label: "Lebih Efisien"
+          },
+          automation: {
+            value: "100%",
+            label: "Distribusi Otomatis"
+          },
+          accuracy: {
+            value: "99.9%",
+            label: "Akurat"
+          }
+        },
+        cta: {
+          demo: "Demo Gratis",
+          consultation: "Konsultasi"
+        }
+      },
+      uiShowcase: {
+        title: "Lihat Bagaimana Sistem Bekerja",
+        subtitle: "Dashboard intuitif yang menampilkan status stok real-time di semua lokasi",
+        dashboard: {
+          title: "Dashboard Gudang",
+          nav: {
+            overview: "Overview",
+            products: "Produk",
+            transfers: "Transfer",
+            analytics: "Analytics"
+          },
+          stockStatus: {
+            title: "Status Stok Multi-Lokasi",
+            columns: {
+              product: "Produk",
+              warehouse: "Gudang",
+              parLevel: "Par Level",
+              reorderLevel: "Reorder Level",
+              status: "Status",
+              action: "Aksi"
+            },
+            status: {
+              needsRestock: "Perlu Restock",
+              good: "Baik",
+              critical: "Kritis"
+            },
+            action: {
+              distribute: "Distribusikan"
+            }
+          },
+          distributionNeeds: {
+            title: "Kebutuhan Distribusi",
+            stores: {
+              baliOne: "Cabang Bali 1",
+              baliTwo: "Cabang Bali 2",
+              jakarta: "Cabang Jakarta"
+            },
+            product: "Produk",
+            needed: "Dibutuhkan"
+          }
+        },
+        stockItems: {
+          warehouseStock: "Warehouse Stock",
+          parLevelTotal: "Par Level Total",
+          reorderLevel: "Reorder Level",
+          needOrder: "Perlu Order",
+          toReachPar: "(untuk mencapai par level)",
+          critical: "CRITICAL! Order",
+          belowReorder: "(di bawah reorder level)",
+          optimalStock: "Stock optimal - siap distribusi",
+          distributionNeeded: "Distribution Needed:",
+          urgentDistribution: "⚠️ Urgent Distribution:",
+          allStoresOptimal: "All stores optimal",
+          allBranches: "Semua cabang"
+        },
+        howItWorks: {
+          title: "Bagaimana Cara Kerjanya",
+          steps: [
+            {
+              number: "1",
+              title: "Set Par & Reorder Level",
+              description: "Tentukan level stok optimal untuk setiap produk di setiap outlet"
+            },
+            {
+              number: "2",
+              title: "Monitor Real-Time",
+              description: "Sistem otomatis monitor stok dan alert ketika mendekati reorder level"
+            },
+            {
+              number: "3",
+              title: "Auto Transfer",
+              description: "Create transfer order otomatis dari gudang ke outlet yang butuh restock"
+            }
+          ]
+        }
+      },
+      featuresSection: {
+        badge: "Fitur Warehouse",
+        title: "Fitur Lengkap untuk Manajemen Gudang Multi-Lokasi",
+        subtitle: "Semua yang Anda butuhkan untuk mengelola stok di gudang pusat dan distribusi ke semua outlet",
+        features: [
+          {
+            title: "Auto Par Level & Reorder",
+            description: "Sistem otomatis hitung kebutuhan stok berdasarkan par level dan reorder level yang Anda tentukan. Tidak perlu hitung manual lagi.",
+            highlights: [
+              "Set par level untuk setiap produk",
+              "Alert otomatis saat mencapai reorder level",
+              "Rekomendasi order quantity",
+              "Track consumption pattern"
+            ]
+          },
+          {
+            title: "Smart Transfer Management",
+            description: "Transfer stok dari gudang ke outlet jadi mudah dengan sistem yang terintegrasi penuh dengan POS di setiap lokasi.",
+            highlights: [
+              "Transfer antar gudang & outlet",
+              "Track status pengiriman real-time",
+              "Auto update stok saat terima barang",
+              "History transfer lengkap"
+            ]
+          },
+          {
+            title: "Purchase Order (PO) Management",
+            description: "Kelola PO dari supplier dengan sistem yang terintegrasi. Track status, terima barang, dan update stok otomatis.",
+            highlights: [
+              "Create PO langsung dari sistem",
+              "Track PO status real-time",
+              "Receive & verify barang",
+              "Auto update stok gudang"
+            ]
+          },
+          {
+            title: "Multi-Location Analytics",
+            description: "Dashboard analytics lengkap untuk monitor performa stok di semua lokasi. Lihat produk fast-moving, slow-moving, dan optimal stock level.",
+            highlights: [
+              "Stock value per lokasi",
+              "Fast vs slow moving products",
+              "Stock turnover ratio",
+              "Cost analysis per lokasi"
+            ]
+          },
+          {
+            title: "Smart Distribution Planning",
+            description: "Sistem AI bantu Anda tentukan distribusi optimal berdasarkan sales pattern dan stock level di setiap outlet.",
+            highlights: [
+              "AI-powered distribution planning",
+              "Sales pattern analysis",
+              "Optimal stock recommendation",
+              "Minimize waste & stockout"
+            ]
+          },
+          {
+            title: "Team & Access Management",
+            description: "Kelola tim warehouse dengan role-based access. Tentukan siapa bisa approve PO, transfer, atau hanya lihat data.",
+            highlights: [
+              "Role-based permissions",
+              "Activity log lengkap",
+              "Multi-user collaboration",
+              "Approval workflow"
+            ]
+          }
+        ]
+      },
+      warehouseFeatures: {
+        badge: "Fitur Lengkap",
+        title: "Semua yang Anda Butuhkan untuk",
+        titleHighlight: "Kelola Multi-Cabang",
+        subtitle: "Sistem warehouse management yang powerful namun mudah digunakan",
+        features: [
+          {
+            title: "Gudang Pusat Terpusat",
+            description: "Kelola inventory dari satu gudang pusat untuk semua cabang. Lacak stok real-time di setiap lokasi.",
+            benefits: [
+              "Dashboard terpusat untuk semua lokasi",
+              "Real-time stock visibility",
+              "Automatic stock calculations"
+            ]
+          },
+          {
+            title: "Transfer Antar Cabang",
+            description: "Kirim stok antar cabang dengan mudah. Tracking lengkap dari pengiriman hingga penerimaan.",
+            benefits: [
+              "Transfer request & approval system",
+              "Barcode scanning untuk receiving",
+              "Complete transfer history"
+            ]
+          },
+          {
+            title: "Purchase Order Terpadu",
+            description: "Buat PO dari gudang pusat atau cabang. Otomatis update stok saat barang diterima.",
+            benefits: [
+              "Multi-supplier management",
+              "Automatic stock updates",
+              "PO approval workflow"
+            ]
+          },
+          {
+            title: "Stock Level Optimization",
+            description: "Monitor par level setiap cabang. Alert otomatis untuk restock dan overstock.",
+            benefits: [
+              "Customizable par levels per location",
+              "Low stock alerts",
+              "Smart reorder suggestions"
+            ]
+          },
+          {
+            title: "Analytics & Reporting",
+            description: "Laporan lengkap pergerakan stok, nilai inventory, dan efisiensi distribusi.",
+            benefits: [
+              "Stock movement reports",
+              "Inventory valuation",
+              "Distribution efficiency metrics"
+            ]
+          },
+          {
+            title: "Multi-Location Team Management",
+            description: "Kelola tim gudang dan cabang dengan permission berbeda untuk setiap lokasi.",
+            benefits: [
+              "Role-based access control",
+              "Location-specific permissions",
+              "Team activity tracking"
+            ]
+          }
+        ],
+        integration: {
+          title: "Integrasi Penuh dengan Toko & Resto",
+          description: "Warehouse terintegrasi sempurna dengan modul Toko dan Resto Anda"
+        }
+      },
+      warehouseUseCases: {
+        badge: "Use Cases",
+        title: "Solusi untuk",
+        titleHighlight: "Berbagai Jenis Bisnis",
+        subtitle: "Warehouse module cocok untuk berbagai model bisnis multi-lokasi",
+        useCases: [
+          {
+            title: "Retail Chain",
+            business: "Multi-Cabang Retail",
+            scenario: "Punya 5+ toko retail dengan produk yang sama?",
+            challengesTitle: "Tantangan Umum:",
+            challenges: [
+              "Stok tidak balance antar cabang",
+              "Transfer manual ribet dan error prone",
+              "Susah track inventory value total"
+            ],
+            solutionsTitle: "Solusi Warehouse:",
+            solutions: [
+              "Gudang pusat untuk distribusi ke semua toko",
+              "Transfer otomatis dengan barcode scanning",
+              "Real-time inventory value monitoring",
+              "Automatic restock alerts per cabang"
+            ]
+          },
+          {
+            title: "Restaurant Group",
+            business: "Grup Restoran",
+            scenario: "Kelola 3+ restoran dengan bahan baku sama?",
+            challengesTitle: "Tantangan Umum:",
+            challenges: [
+              "Beli bahan baku terpisah, harga beda-beda",
+              "Waste karena tidak balance antar outlet",
+              "Sulit kontrol food cost"
+            ],
+            solutionsTitle: "Solusi Warehouse:",
+            solutions: [
+              "Central kitchen untuk prep ingredients",
+              "Bulk purchasing untuk better pricing",
+              "Transfer ingredient antar kitchen",
+              "Unified food cost calculation"
+            ]
+          },
+          {
+            title: "Distribution Business",
+            business: "Bisnis Distribusi",
+            scenario: "Distributor yang supply ke banyak retailer?",
+            challengesTitle: "Tantangan Umum:",
+            challenges: [
+              "Manual PO handling dari customers",
+              "Tracking pengiriman susah",
+              "Laporan pergerakan barang manual"
+            ],
+            solutionsTitle: "Solusi Warehouse:",
+            solutions: [
+              "Central warehouse management",
+              "Automated PO processing",
+              "Delivery tracking system",
+              "Complete distribution analytics"
+            ]
+          }
+        ],
+        cta: {
+          button: "Konsultasi Gratis dengan Tim Kami",
+          note: "Tidak yakin module mana yang cocok? Tim kami siap bantu analisis bisnis Anda"
+        }
+      },
+      pricing: {
+        badge: "💰 Harga Warehouse",
+        title: "Pilih Paket yang Sesuai",
+        subtitle: "Semua paket include fitur lengkap. Perbedaan hanya di kapasitas.",
+        billing: {
+          monthly: "Bulanan",
+          yearly: "Tahunan",
+          save: "Hemat 10%"
+        },
+        tiers: {
+          starter: {
+            name: "Starter",
+            monthlyPrice: "Rp 499,000",
+            yearlyPrice: "Rp 5,388,000",
+            period: "/bulan",
+            capacity: {
+              warehouses: "1 Gudang Pusat",
+              outlets: "Sampai 3 Outlet",
+              users: "Sampai 5 User",
+              products: "Unlimited Produk"
+            },
+            cta: "Mulai Sekarang"
+          },
+          growth: {
+            name: "Growth",
+            monthlyPrice: "Rp 799,000",
+            yearlyPrice: "Rp 8,628,000",
+            period: "/bulan",
+            popular: "Paling Populer",
+            capacity: {
+              warehouses: "1 Gudang Pusat",
+              outlets: "Sampai 10 Outlet",
+              users: "Sampai 15 User",
+              products: "Unlimited Produk"
+            },
+            cta: "Mulai Sekarang"
+          },
+          pro: {
+            name: "Pro",
+            monthlyPrice: "Rp 1,499,000",
+            yearlyPrice: "Rp 16,188,000",
+            period: "/bulan",
+            capacity: {
+              warehouses: "Multi Gudang",
+              outlets: "Unlimited Outlet",
+              users: "Unlimited User",
+              products: "Unlimited Produk"
+            },
+            cta: "Hubungi Sales"
+          }
+        },
+        footer: {
+          note: "Semua paket include support prioritas & training lengkap",
+          consultation: "Butuh konsultasi? Hubungi tim kami"
+        }
+      },
+      cta: {
+        badge: "🚀 Siap Mulai?",
+        title: "Transform Manajemen Gudang Anda Hari Ini",
+        subtitle: "Bergabung dengan ratusan bisnis yang sudah pakai Kadai Warehouse",
+        benefits: [
+          "Demo gratis & konsultasi",
+          "Setup & training lengkap",
+          "Support 24/7",
+          "Migrasi data gratis"
+        ],
+        button: "Jadwalkan Demo",
+        contact: "atau hubungi sales"
+      }
+    },
     restoPage: {
       hero: {
         badge: "🍽️ Untuk Kuliner & Minuman",
         title: "POS Pintar untuk",
         titleHighlight: "Restoran & Kafe",
         subtitle: "Sistem tampilan dapur, manajemen meja, dan laporan real-time. Semua yang Anda butuhkan untuk menjalankan restoran modern dengan efisien.",
-        price: "Rp 99.000/bulan",
+        price: "Rp 149.000/bulan",
         getStarted: "Mulai Sekarang"
       },
       useCases: {
@@ -5672,6 +6413,7 @@ Kami akan menanggapi pertanyaan Anda dalam 7 hari kerja.`
       staff: "员工",
       inventory: "库存",
       tables: "餐桌",
+      warehouse: "仓库",
       settings: "设置",
       ownerProfile: "老板档案",
       logout: "退出",
@@ -6798,13 +7540,382 @@ Kami akan menanggapi pertanyaan Anda dalam 7 hari kerja.`
         noCard: "无需信用卡"
       }
     },
+    warehousePage: {
+      hero: {
+        badge: "📦 仓库管理",
+        title: "多地点仓库管理系统",
+        subtitle: "管理中央仓库库存并自动分配至所有门店。配备库存水平和再订购水平系统，确保每个位置的最佳库存。",
+        stats: {
+          efficiency: {
+            value: "80%",
+            label: "更高效"
+          },
+          automation: {
+            value: "100%",
+            label: "自动分配"
+          },
+          accuracy: {
+            value: "99.9%",
+            label: "准确"
+          }
+        },
+        cta: {
+          demo: "免费演示",
+          consultation: "咨询"
+        }
+      },
+      uiShowcase: {
+        title: "查看系统如何工作",
+        subtitle: "直观的仪表板显示所有位置的实时库存状态",
+        dashboard: {
+          title: "仓库仪表板",
+          nav: {
+            overview: "概览",
+            products: "产品",
+            transfers: "调拨",
+            analytics: "分析"
+          },
+          stockStatus: {
+            title: "多地点库存状态",
+            columns: {
+              product: "产品",
+              warehouse: "仓库",
+              parLevel: "标准水平",
+              reorderLevel: "再订购水平",
+              status: "状态",
+              action: "操作"
+            },
+            status: {
+              needsRestock: "需要补货",
+              good: "良好",
+              critical: "紧急"
+            },
+            action: {
+              distribute: "分配"
+            }
+          },
+          distributionNeeds: {
+            title: "分配需求",
+            stores: {
+              baliOne: "巴厘岛分店 1",
+              baliTwo: "巴厘岛分店 2",
+              jakarta: "雅加达分店"
+            },
+            product: "产品",
+            needed: "需要"
+          }
+        },
+        stockItems: {
+          warehouseStock: "仓库库存",
+          parLevelTotal: "标准水平总计",
+          reorderLevel: "再订购水平",
+          needOrder: "需要订购",
+          toReachPar: "(达到标准水平)",
+          critical: "紧急！订购",
+          belowReorder: "(低于再订购水平)",
+          optimalStock: "库存最佳 - 准备分配",
+          distributionNeeded: "分配需求：",
+          urgentDistribution: "⚠️ 紧急分配：",
+          allStoresOptimal: "所有门店最佳",
+          allBranches: "所有分店"
+        },
+        howItWorks: {
+          title: "如何运作",
+          steps: [
+            {
+              number: "1",
+              title: "设置标准和再订购水平",
+              description: "为每个门店的每个产品确定最佳库存水平"
+            },
+            {
+              number: "2",
+              title: "实时监控",
+              description: "系统自动监控库存并在接近再订购水平时发出警报"
+            },
+            {
+              number: "3",
+              title: "自动调拨",
+              description: "从仓库自动创建调拨单到需要补货的门店"
+            }
+          ]
+        }
+      },
+      featuresSection: {
+        badge: "仓库功能",
+        title: "多地点仓库管理的完整功能",
+        subtitle: "管理中央仓库库存并分配到所有门店所需的一切",
+        features: [
+          {
+            title: "自动标准水平和再订购",
+            description: "系统根据您设定的标准水平和再订购水平自动计算库存需求。无需再手动计算。",
+            highlights: [
+              "为每个产品设置标准水平",
+              "达到再订购水平时自动警报",
+              "订购数量建议",
+              "跟踪消费模式"
+            ]
+          },
+          {
+            title: "智能调拨管理",
+            description: "通过与每个位置的POS完全集成的系统，从仓库到门店的库存调拨变得容易。",
+            highlights: [
+              "仓库和门店之间调拨",
+              "实时跟踪配送状态",
+              "收货时自动更新库存",
+              "完整的调拨历史"
+            ]
+          },
+          {
+            title: "采购订单(PO)管理",
+            description: "使用集成系统管理供应商的采购订单。跟踪状态、收货和自动更新库存。",
+            highlights: [
+              "直接从系统创建采购订单",
+              "实时跟踪采购订单状态",
+              "收货和验货",
+              "自动更新仓库库存"
+            ]
+          },
+          {
+            title: "多地点分析",
+            description: "完整的分析仪表板用于监控所有位置的库存表现。查看快速移动、慢速移动的产品和最佳库存水平。",
+            highlights: [
+              "每个位置的库存价值",
+              "快速与慢速移动产品",
+              "库存周转率",
+              "每个位置的成本分析"
+            ]
+          },
+          {
+            title: "智能分配规划",
+            description: "AI系统帮助您根据每个门店的销售模式和库存水平确定最佳分配。",
+            highlights: [
+              "AI驱动的分配规划",
+              "销售模式分析",
+              "最佳库存建议",
+              "最小化浪费和缺货"
+            ]
+          },
+          {
+            title: "团队和访问管理",
+            description: "使用基于角色的访问管理仓库团队。确定谁可以批准采购订单、调拨或仅查看数据。",
+            highlights: [
+              "基于角色的权限",
+              "完整的活动日志",
+              "多用户协作",
+              "审批工作流"
+            ]
+          }
+        ]
+      },
+      warehouseFeatures: {
+        badge: "完整功能",
+        title: "管理多门店所需的",
+        titleHighlight: "一切功能",
+        subtitle: "强大但易于使用的仓库管理系统",
+        features: [
+          {
+            title: "集中中央仓库",
+            description: "从一个中央仓库管理所有分店的库存。实时跟踪每个位置的库存。",
+            benefits: [
+              "所有位置的集中仪表板",
+              "实时库存可见性",
+              "自动库存计算"
+            ]
+          },
+          {
+            title: "门店间调拨",
+            description: "轻松在门店之间发送库存。从发货到收货的完整跟踪。",
+            benefits: [
+              "调拨申请和审批系统",
+              "条码扫描接收",
+              "完整调拨历史"
+            ]
+          },
+          {
+            title: "统一采购订单",
+            description: "从中央仓库或分店创建采购订单。收货时自动更新库存。",
+            benefits: [
+              "多供应商管理",
+              "自动库存更新",
+              "采购订单审批流程"
+            ]
+          },
+          {
+            title: "库存水平优化",
+            description: "监控每个分店的标准水平。自动提醒补货和过量库存。",
+            benefits: [
+              "每个位置可自定义标准水平",
+              "低库存警报",
+              "智能补货建议"
+            ]
+          },
+          {
+            title: "分析与报告",
+            description: "完整的库存流动、库存价值和分销效率报告。",
+            benefits: [
+              "库存流动报告",
+              "库存评估",
+              "分销效率指标"
+            ]
+          },
+          {
+            title: "多位置团队管理",
+            description: "为每个位置管理不同权限的仓库和分店团队。",
+            benefits: [
+              "基于角色的访问控制",
+              "特定位置权限",
+              "团队活动跟踪"
+            ]
+          }
+        ],
+        integration: {
+          title: "与门店和餐厅完全集成",
+          description: "仓库与您的门店和餐厅模块完美集成"
+        }
+      },
+      warehouseUseCases: {
+        badge: "使用案例",
+        title: "适合",
+        titleHighlight: "各种业务类型",
+        subtitle: "仓库模块适合各种多门店业务模式",
+        useCases: [
+          {
+            title: "零售连锁",
+            business: "多门店零售",
+            scenario: "有 5+ 家销售相同产品的零售店？",
+            challengesTitle: "常见挑战：",
+            challenges: [
+              "门店间库存不平衡",
+              "手动调拨繁琐且容易出错",
+              "难以跟踪总库存价值"
+            ],
+            solutionsTitle: "仓库解决方案：",
+            solutions: [
+              "中央仓库分销到所有商店",
+              "条码扫描自动调拨",
+              "实时库存价值监控",
+              "每个分店自动补货警报"
+            ]
+          },
+          {
+            title: "餐厅集团",
+            business: "餐厅集团",
+            scenario: "管理 3+ 家使用相同原料的餐厅？",
+            challengesTitle: "常见挑战：",
+            challenges: [
+              "分别购买原料，价格不同",
+              "门店间不平衡造成浪费",
+              "难以控制食品成本"
+            ],
+            solutionsTitle: "仓库解决方案：",
+            solutions: [
+              "中央厨房准备食材",
+              "批量采购获得更好价格",
+              "厨房间食材调拨",
+              "统一食品成本计算"
+            ]
+          },
+          {
+            title: "分销业务",
+            business: "分销业务",
+            scenario: "向许多零售商供货的经销商？",
+            challengesTitle: "常见挑战：",
+            challenges: [
+              "客户手动采购订单处理",
+              "难以跟踪发货",
+              "手动货物流动报告"
+            ],
+            solutionsTitle: "仓库解决方案：",
+            solutions: [
+              "中央仓库管理",
+              "自动化采购订单处理",
+              "发货跟踪系统",
+              "完整分销分析"
+            ]
+          }
+        ],
+        cta: {
+          button: "与我们的团队免费咨询",
+          note: "不确定哪个模块适合？我们的团队随时帮助分析您的业务"
+        }
+      },
+      pricing: {
+        badge: "💰 仓库价格",
+        title: "选择适合的套餐",
+        subtitle: "所有套餐包含完整功能。仅在容量上有差异。",
+        billing: {
+          monthly: "每月",
+          yearly: "每年",
+          save: "节省10%"
+        },
+        tiers: {
+          starter: {
+            name: "入门版",
+            monthlyPrice: "Rp 499,000",
+            yearlyPrice: "Rp 5,388,000",
+            period: "/月",
+            capacity: {
+              warehouses: "1 个中央仓库",
+              outlets: "最多 3 个门店",
+              users: "最多 5 个用户",
+              products: "无限产品"
+            },
+            cta: "立即开始"
+          },
+          growth: {
+            name: "增长版",
+            monthlyPrice: "Rp 799,000",
+            yearlyPrice: "Rp 8,628,000",
+            period: "/月",
+            popular: "最受欢迎",
+            capacity: {
+              warehouses: "1 个中央仓库",
+              outlets: "最多 10 个门店",
+              users: "最多 15 个用户",
+              products: "无限产品"
+            },
+            cta: "立即开始"
+          },
+          pro: {
+            name: "专业版",
+            monthlyPrice: "Rp 1,499,000",
+            yearlyPrice: "Rp 16,188,000",
+            period: "/月",
+            capacity: {
+              warehouses: "多个仓库",
+              outlets: "无限门店",
+              users: "无限用户",
+              products: "无限产品"
+            },
+            cta: "联系销售"
+          }
+        },
+        footer: {
+          note: "所有套餐包含优先支持和完整培训",
+          consultation: "需要咨询？联系我们的团队"
+        }
+      },
+      cta: {
+        badge: "🚀 准备开始了吗？",
+        title: "立即转型您的仓库管理",
+        subtitle: "加入数百家已使用 Kadai Warehouse 的企业",
+        benefits: [
+          "免费演示和咨询",
+          "完整设置和培训",
+          "24/7 支持",
+          "免费数据迁移"
+        ],
+        button: "安排演示",
+        contact: "或联系销售"
+      }
+    },
     restoPage: {
       hero: {
         badge: "🍽️ 适用于餐饮业",
         title: "智能 POS 适用于",
         titleHighlight: "餐厅和咖啡馆",
         subtitle: "厨房显示系统、餐桌管理和实时报告。高效运营现代餐厅所需的一切。",
-        price: "Rp 99,000/月",
+        price: "Rp 149,000/月",
         getStarted: "立即开始"
       },
       useCases: {

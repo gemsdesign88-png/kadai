@@ -287,10 +287,10 @@ export default function PricingPage() {
                           {language === 'id' ? 'Mulai dari' : language === 'zh' ? '从' : 'Starting from'}
                         </span>
                         <span className="text-4xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                          Rp49K
+                          {billingPeriod === 'monthly' ? 'Rp49K' : 'Rp529K'}
                         </span>
                         <span className="text-lg text-gray-600 font-semibold">
-                          /{language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month'}
+                          /{billingPeriod === 'monthly' ? (language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month') : (language === 'id' ? 'tahun' : language === 'zh' ? '年' : 'year')}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
@@ -325,10 +325,10 @@ export default function PricingPage() {
                           {language === 'id' ? 'Mulai dari' : language === 'zh' ? '从' : 'Starting from'}
                         </span>
                         <span className="text-4xl font-black bg-gradient-to-r from-[#FF5A5F] to-[#8B5CF6] bg-clip-text text-transparent">
-                          Rp149K
+                          {billingPeriod === 'monthly' ? 'Rp149K' : 'Rp1.599K'}
                         </span>
                         <span className="text-lg text-gray-600 font-semibold">
-                          /{language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month'}
+                          /{billingPeriod === 'monthly' ? (language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month') : (language === 'id' ? 'tahun' : language === 'zh' ? '年' : 'year')}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
@@ -363,10 +363,10 @@ export default function PricingPage() {
                           {language === 'id' ? 'Mulai dari' : language === 'zh' ? '从' : 'Starting from'}
                         </span>
                         <span className="text-4xl font-black bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #8B5CF6, #A78BFA)'}}>
-                          Rp149K
+                          {billingPeriod === 'monthly' ? 'Rp149K' : 'Rp1.599K'}
                         </span>
                         <span className="text-lg text-gray-600 font-semibold">
-                          /{language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month'}
+                          /{billingPeriod === 'monthly' ? (language === 'id' ? 'bulan' : language === 'zh' ? '月' : 'month') : (language === 'id' ? 'tahun' : language === 'zh' ? '年' : 'year')}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600">
@@ -719,6 +719,191 @@ export default function PricingPage() {
           </Container>
         </section>
       )}
+
+      {/* Warehouse Add-on Section */}
+      <section className="py-20 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+        <Container>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-6xl mx-auto"
+          >
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 border border-gray-200 backdrop-blur-xl rounded-full mb-6">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-bold text-gray-900">
+                  {language === 'id' ? 'Multi-Location Add-on' : language === 'zh' ? '多店扩展' : 'Multi-Location Add-on'}
+                </span>
+              </div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                {language === 'id' ? 'Punya Banyak Cabang?' : language === 'zh' ? '有多个分店？' : 'Multiple Locations?'}
+                <br />
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                  {language === 'id' ? 'Tambahkan Warehouse Module' : language === 'zh' ? '添加仓库模块' : 'Add Warehouse Module'}
+                </span>
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {language === 'id' 
+                  ? 'Kelola inventory semua cabang dari satu gudang pusat. Transfer stok antar lokasi dengan mudah.' 
+                  : language === 'zh' 
+                  ? '从中央仓库管理所有分店的库存。轻松转移店铺间的库存。' 
+                  : 'Manage inventory across all branches from one central warehouse. Transfer stock between locations easily.'}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Warehouse Starter */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="relative"
+              >
+                <div className="h-full rounded-3xl bg-gradient-to-br from-blue-500 to-cyan-500 p-[2px]">
+                  <div className="h-full rounded-3xl bg-white p-8 backdrop-blur-xl">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Warehouse Starter</h3>
+                    <p className="text-sm text-gray-600 mb-6">
+                      {language === 'id' ? 'Hingga 10 lokasi' : language === 'zh' ? '最多 10 个店' : 'Up to 10 locations'}
+                    </p>
+                    <div className="flex items-baseline gap-2 mb-6">
+                      <span className="text-4xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                        Rp499K
+                      </span>
+                      <span className="text-gray-600">/{language === 'id' ? 'gudang/bln' : language === 'zh' ? '仓/月' : 'wh/mo'}</span>
+                    </div>
+                    <ul className="space-y-3">
+                      {[
+                        language === 'id' ? 'Stock transfer' : 'Stock transfer',
+                        language === 'id' ? 'Purchase orders' : 'Purchase orders',
+                        language === 'id' ? 'Advanced analytics' : 'Advanced analytics',
+                        language === 'id' ? 'Email support' : 'Email support',
+                      ].map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Warehouse Pro */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="relative md:-mt-4 md:mb-4"
+              >
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                  <div className="px-4 py-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold shadow-lg">
+                    {language === 'id' ? 'Populer' : language === 'zh' ? '热门' : 'Popular'}
+                  </div>
+                </div>
+                <div className="h-full rounded-3xl bg-gradient-to-br from-purple-500 to-pink-500 p-[2px]">
+                  <div className="h-full rounded-3xl bg-white p-8 backdrop-blur-xl">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Warehouse Growth</h3>
+                    <p className="text-sm text-gray-600 mb-6">
+                      {language === 'id' ? 'Hingga 30 lokasi' : language === 'zh' ? '最多 30 个店' : 'Up to 30 locations'}
+                    </p>
+                    <div className="flex items-baseline gap-2 mb-6">
+                      <span className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        Rp799K
+                      </span>
+                      <span className="text-gray-600">/{language === 'id' ? 'gudang/bln' : language === 'zh' ? '仓/月' : 'wh/mo'}</span>
+                    </div>
+                    <ul className="space-y-3">
+                      {[
+                        language === 'id' ? 'Stock transfer' : 'Stock transfer',
+                        language === 'id' ? 'Purchase orders' : 'Purchase orders',
+                        language === 'id' ? 'Advanced analytics' : 'Advanced analytics',
+                        language === 'id' ? 'Par level monitoring' : 'Par level monitoring',
+                        language === 'id' ? 'Priority support' : 'Priority support',
+                      ].map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Warehouse Enterprise */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="relative"
+              >
+                <div className="h-full rounded-3xl bg-gradient-to-br from-orange-500 to-red-500 p-[2px]">
+                  <div className="h-full rounded-3xl bg-white p-8 backdrop-blur-xl">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Warehouse Pro</h3>
+                    <p className="text-sm text-gray-600 mb-6">
+                      {language === 'id' ? 'Unlimited lokasi' : language === 'zh' ? '无限店铺' : 'Unlimited locations'}
+                    </p>
+                    <div className="flex items-baseline gap-2 mb-6">
+                      <span className="text-4xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        Rp1.499JT
+                      </span>
+                      <span className="text-gray-600">/{language === 'id' ? 'gudang/bln' : language === 'zh' ? '仓/月' : 'wh/mo'}</span>
+                    </div>
+                    <ul className="space-y-3">
+                      {[
+                        language === 'id' ? 'Stock transfer' : 'Stock transfer',
+                        language === 'id' ? 'Purchase orders' : 'Purchase orders',
+                        language === 'id' ? 'Advanced analytics' : 'Advanced analytics',
+                        language === 'id' ? 'Par level monitoring' : 'Par level monitoring',
+                        language === 'id' ? '24/7 support' : '24/7 support',
+                        language === 'id' ? 'Dedicated manager' : 'Dedicated manager',
+                      ].map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <Check className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-12 text-center"
+            >
+              <div className="inline-flex flex-col gap-4 p-6 rounded-3xl bg-white/80 backdrop-blur-xl border border-gray-200 max-w-2xl">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  <strong className="text-gray-900">
+                    {language === 'id' ? 'Warehouse adalah add-on untuk paket Toko atau Resto Anda.' : language === 'zh' ? '仓库是 Toko 或 Resto 套餐的附加模块。' : 'Warehouse is an add-on to your Toko or Resto package.'}
+                  </strong><br />
+                  {language === 'id' 
+                    ? 'Terintegrasi penuh dengan sistem Anda. Kelola stok pusat dan distribusi ke semua cabang.' 
+                    : language === 'zh' 
+                    ? '完全集成到您的系统。管理中央库存并分发到所有分店。' 
+                    : 'Fully integrated with your system. Manage central stock and distribution to all branches.'}
+                </p>
+                <a
+                  href="/warehouse"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-300 group shadow-lg hover:shadow-xl"
+                >
+                  {language === 'id' ? 'Pelajari Warehouse Lebih Lanjut' : language === 'zh' ? '了解更多仓库信息' : 'Learn More About Warehouse'}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        </Container>
+      </section>
 
       {/* Package Comparison Section */}
       <section className="py-20 bg-white">

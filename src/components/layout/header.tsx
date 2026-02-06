@@ -8,13 +8,14 @@ import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { useLanguage } from "@/lib/i18n/context"
-import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store, UtensilsCrossed, Scissors } from "lucide-react"
+import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store, UtensilsCrossed, Scissors, Warehouse } from "lucide-react"
 import { motion } from "framer-motion"
 
 const navigation = [
   { name: "features", href: "/features", hasDropdown: true },
   { name: "pricing", href: "/pricing" },
   { name: "business", href: "/business", hasDropdown: true },
+  { name: "warehouse", href: "/warehouse" },
   { name: "benefits", href: "/benefits" },
   { name: "about", href: "/about" },
   { name: "contact", href: "/contact" },

@@ -77,6 +77,7 @@ export default function DashboardLayout({ children, user, profile, restaurants }
     { path: '/dashboard/customers', icon: Users, label: t.nav.customers },
     { path: '/dashboard/staff', icon: Users, label: t.nav.staff },
     { path: '/dashboard/inventory', icon: Archive, label: t.nav.inventory },
+    { path: '/dashboard/gudang', icon: Package, label: t.nav.warehouse },
     { path: '/dashboard/tables', icon: Building2, label: t.nav.tables },
   ];
 
