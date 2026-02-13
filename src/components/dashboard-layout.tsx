@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, Building2, Home, BarChart3, ShoppingCart, Users, Archive, UtensilsCrossed, ChevronDown, Check, Globe, Menu } from 'lucide-react';
+import { LogOut, Building2, Home, BarChart3, ShoppingCart, Users, Archive, Package, UtensilsCrossed, ChevronDown, Check, Globe, Menu } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/lib/i18n/context';
 

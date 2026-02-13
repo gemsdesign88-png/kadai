@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
@@ -15,7 +15,18 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    // Use service role key to bypass RLS for public contact submissions
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+    
     const body = await request.json();
     
     const { 

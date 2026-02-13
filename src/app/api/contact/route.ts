@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
         // 1. Send notification to admin
         await resend.emails.send({
-          from: 'Kadai Marketing <onboarding@resend.dev>',
+          from: 'Kadai Marketing <no-reply@kadaipos.id>',
           to: 'mamak@kadaipos.id',
           subject: `New Lead: ${subject}`,
           html: `
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 
         // 2. Send confirmation to user
         await resend.emails.send({
-          from: 'Kadai <onboarding@resend.dev>',
+          from: 'Kadai <no-reply@kadaipos.id>',
           to: email,
           subject: 'We received your message!',
           html: `

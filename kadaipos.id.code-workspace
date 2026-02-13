@@ -7,5 +7,12 @@
 			"path": "../Kadai"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"chat.tools.terminal.autoApprove": {
+			"/^node -e \"const\\{createClient:c\\}=require\\('@supabase/supabase-js'\\);const s=c\\('https://bigjlzrnlzcfxwlkstpp\\.supabase\\.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\\.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpZ2psenJubHpjZnh3bGtzdHBwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjcxMzE1NCwiZXhwIjoyMDc4Mjg5MTU0fQ\\.GcZT8vuuD_8eOU4pr6X5vYjAnmH81arHOBnQTJbqpZM'\\);s\\.from\\('appointments'\\)\\.select\\('staff_id'\\)\\.not\\('staff_id','is',null\\)\\.limit\\(1\\)\\.then\\(r=>console\\.log\\(r\\)\\)\"$/": {
+				"approve": true,
+				"matchCommandLine": true
+			}
+		}
+	}
 }

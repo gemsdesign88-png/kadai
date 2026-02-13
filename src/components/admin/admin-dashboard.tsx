@@ -247,6 +247,53 @@ export default function AdminDashboard({
     }
   };
 
+  const handleApproveUpgrade = async (lead: ContactSubmission) => {
+    // Extract info from message
+    const userIdMatch = lead.message.match(/User ID: ([a-z0-9-]+)/i);
+    const outletCountMatch = lead.message.match(/Outlet Count: (\d+)/i);
+    const businessTypeMatch = lead.message.match(/Business Type: (\w+)/i);
+
+    const userId = userIdMatch ? userIdMatch[1] : null;
+    const outletCount = outletCountMatch ? parseInt(outletCountMatch[1]) : 1;
+    const businessType = businessTypeMatch ? businessTypeMatch[1].toLowerCase() : 'resto';
+
+    if (!userId) {
+      alert('Could not find User ID in the message.');
+      return;
+    }
+
+    if (!confirm(`Approve upgrade for ${lead.name}?\nUserID: ${userId}\nOutlets: ${outletCount}\nType: ${businessType}`)) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await fetch('/api/founder/approve-upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submissionId: lead.id,
+          userId,
+          outletCount,
+          businessType
+        }),
+      });
+
+      if (response.ok) {
+        alert('Upgrade approved successfully');
+        window.location.reload();
+      } else {
+        const err = await response.json();
+        alert(`Failed: ${err.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error approving upgrade:', error);
+      alert('Error approving upgrade');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const exportData = (data: any[], filename: string) => {
     const csv = [
       Object.keys(data[0]).join(','),
@@ -896,6 +943,19 @@ export default function AdminDashboard({
                               <MessageSquare className="w-4 h-4 mr-2" />
                               Email
                             </Button>
+                            
+                            {lead.subject.includes('Upgrade Request') && lead.status === 'new' && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                onClick={() => handleApproveUpgrade(lead)}
+                                disabled={saving}
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-2" />
+                                Approve Upgrade
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
