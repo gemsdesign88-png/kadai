@@ -237,10 +237,10 @@ export async function POST(request: Request) {
           // 2. Fallback for different headers
           let summaryText = '';
           const patterns = [
-            /Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Total Nominal:/i,
-            /Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Total:/i,
-            /Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Informasi/i,
-            /Paket Yang Dipilih:[\n\s]*([\s\S]+?)[\n\s]*Pilihan Tier/i
+            /Ringkasan Pesanan:[\n\r\s]*([\s\S]+?)[\n\r\s]*Total Nominal:/i,
+            /Ringkasan Pesanan:[\n\r\s]*([\s\S]+?)[\n\r\s]*Total:/i,
+            /Paket Yang Dipilih:[\n\r\s]*([\s\S]+?)[\n\r\s]*Pilihan Tier/i,
+            /Paket Yang Dipilih:[\n\r\s]*([\s\S]+?)[\n\r\s]*Kode Unik/i
           ];
 
           for (const pattern of patterns) {
@@ -255,32 +255,51 @@ export async function POST(request: Request) {
           if (summaryText) {
             console.log('✅ Found summary text:', summaryText);
             orderSummaryLines = summaryText.split(/\n/).filter(line => line.trim());
-            console.log('📋 Order lines count:', orderSummaryLines.length);
             
-            // For single outlet with multiple licenses, expand into list
-            if (orderSummaryLines.length === 1) {
+            // Clean emojis from lines for better processing
+            orderSummaryLines = orderSummaryLines.map(l => l.replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim());
+            console.log('📋 Order lines (cleaned):', JSON.stringify(orderSummaryLines));
+            
+            // If it's the emoji format, it might have multiple lines for one outlet
+            // Line 1: Kadai Preppo
+            // Line 2: Tahunan
+            // Line 3: Rp6.396.000 (1 tahun) (x4 Outlet)
+            if (orderSummaryLines.length >= 2 && orderSummaryLines.some(l => l.includes('Outlet'))) {
+               const outletLine = orderSummaryLines.find(l => l.includes('Outlet')) || '';
+               const countMatch = outletLine.match(/\(x(\d+)\s+Outlet\)/i);
+               const billingMatch = orderSummaryLines.find(l => /Tahunan|Bulanan|Thn|Bln/i.test(l)) || '';
+               const tierTarget = orderSummaryLines[0]; // e.g. "Kadai Preppo"
+               
+               if (countMatch) {
+                 const outletCount = parseInt(countMatch[1]);
+                 tier_name = tierTarget.trim();
+                 const billing = billingMatch.trim() || 'Thn';
+                 
+                 // Get total from price line or metadata
+                 const priceLine = orderSummaryLines.find(l => l.includes('Rp')) || '';
+                 const priceVal = parseInt(priceLine.replace(/[^0-9]/g, '')) || total_amount;
+                 const pricePerOutlet = priceVal / outletCount;
+                 
+                 const expandedLines: string[] = [];
+                 expandedLines.push(`1. Slot Outlet #1 - ${tier_name} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                 for (let i = 2; i <= outletCount; i++) {
+                   expandedLines.push(`${i}. Slot Outlet #${i} (Pending Setup) - ${tier_name} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                 }
+                 orderSummaryLines = expandedLines;
+               }
+            } else if (orderSummaryLines.length === 1) {
               const line = orderSummaryLines[0];
-              console.log('🔍 Testing expansion for line:', line);
-              
-              // Flexible regex to catch: Store -> Tier (xN Outlet) (Billing) [Price]
-              // Also catch simpler formats: Store -> Tier (xN Outlet)
+              // Robust expansion for "Store -> Tier (xN Outlet)" format
               const multiMatch = line.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)/i);
               
               if (multiMatch) {
                 const [, storeName, tierName, count] = multiMatch;
                 const outletCount = parseInt(count);
-                
-                // Try to find billing and price if they exist
                 const billingMatch = line.match(/\((Tahunan|Bulanan|Thn|Bln)\)/i);
-                const priceMatch = line.match(/\[(Rp[\d.,]+)\]/i);
-                
                 const billing = billingMatch ? billingMatch[1] : 'Thn';
-                const totalPriceStr = priceMatch ? priceMatch[1] : formatIdr(total_amount);
-                const totalVal = parseInt(totalPriceStr.replace(/[^0-9]/g, '')) || total_amount;
-                const pricePerOutlet = totalVal / outletCount;
+                const pricePerOutlet = total_amount / outletCount;
                 
                 tier_name = tierName.trim();
-                
                 const expandedLines: string[] = [];
                 expandedLines.push(`1. ${storeName.trim()} - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
                 for (let i = 2; i <= outletCount; i++) {
@@ -288,11 +307,8 @@ export async function POST(request: Request) {
                 }
                 orderSummaryLines = expandedLines;
               } else {
-                // Tier extraction for single outlet: Store -> Tier (Billing) [Price]
                 const tierMatch = line.match(/->\s*([^(]+)/);
-                if (tierMatch) {
-                  tier_name = tierMatch[1].trim();
-                }
+                if (tierMatch) tier_name = tierMatch[1].trim();
               }
             }
           } else {
@@ -676,12 +692,38 @@ Tim Kadai`,
         console.log('✅ Customer email result:', customerEmailResult);
         
         // Also notify admin
-        console.log('📧 Sending admin notification...');
+        console.log('📧 Sending admin notification to:', 'gemmyadyendra@gmail.com');
         const adminEmailResult = await resend.emails.send({
           from: 'Kadai System <no-reply@kadaipos.id>',
           to: 'gemmyadyendra@gmail.com',
-          subject: `NEW UPGRADE REQUEST: ${name}`,
-          html: `<p>User <b>${name}</b> (${email}) requested: ${subject}</p><p>Message: ${message}</p>`
+          subject: `NEW UPGRADE REQUEST: ${name} (${business_type})`,
+          html: `
+<!DOCTYPE html>
+<html>
+<body style="font-family: sans-serif; padding: 20px; line-height: 1.6; color: #333;">
+  <div style="max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; padding: 20px;">
+    <h2 style="color: #FF5A5F; border-bottom: 2px solid #FF5A5F; padding-bottom: 10px;">New Subscription Request</h2>
+    <p><strong>Customer:</strong> ${name} (${email})</p>
+    <p><strong>WhatsApp:</strong> ${whatsapp}</p>
+    <p><strong>Type:</strong> ${business_type}</p>
+    <p><strong>Outlet Count:</strong> ${outlet_count}</p>
+    <p><strong>Total Amount:</strong> ${formatIdr(total_amount + paymentCode)}</p>
+    
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+       <h3 style="margin-top: 0; font-size: 14px; color: #666;">ORDER SUMMARY</h3>
+       ${orderSummaryLines.map(line => `<p style="margin: 5px 0; font-weight: bold;">${line}</p>`).join('')}
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+       <a href="https://app.kadai.id/payment/${submission.id}" style="background: #8B5CF6; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">View Payment Page</a>
+    </div>
+    
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+    <p style="font-size: 12px; color: #888;">Raw Message:<br>${message.replace(/\n/g, '<br>')}</p>
+  </div>
+</body>
+</html>
+          `
         });
         
         console.log('✅ Admin email result:', adminEmailResult);
