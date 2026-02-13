@@ -90,7 +90,8 @@ export async function POST(request: Request) {
         const restaurant_name = metadata?.restaurant_name || name || 'Tidak disebutkan';
         const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
         const package_type = metadata?.packageType || metadata?.package_type || metadata?.tier || 'Tidak disebutkan';
-        const paymentPageUrl = `https://kadaipos.id/payment/${submission.id}`;
+        const paymentDeepLink = `kadai://payment/${submission.id}`;
+        const paymentWebFallback = `https://app.kadai.id/payment/${submission.id}`;
         
         const customerEmailResult = await resend.emails.send({
           from: 'Kadai <no-reply@kadaipos.id>',
@@ -231,9 +232,16 @@ Tim Kadai`,
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                 <tr>
                                     <td align="center" style="padding: 10px 0;">
-                                        <a href="${paymentPageUrl}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
+                                        <a href="${paymentDeepLink}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
                                             💳 Lihat Detail Pembayaran
                                         </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 10px 0;">
+                                        <p style="color: #6b7280; font-size: 12px; margin: 0;">
+                                            Tidak bisa dibuka? <a href="${paymentWebFallback}" style="color: #FF5A5F; text-decoration: none; font-weight: 600;">Klik di sini</a>
+                                        </p>
                                     </td>
                                 </tr>
                             </table>
