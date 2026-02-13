@@ -42,8 +42,9 @@ export async function updateSession(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Allow /order routes completely (customer ordering pages - no auth needed)
-    if (request.nextUrl.pathname.startsWith('/order')) {
+    // Allow /order and /api routes completely 
+    // (/api handles its own auth or is public, /order is for customers)
+    if (request.nextUrl.pathname.startsWith('/order') || request.nextUrl.pathname.startsWith('/api/')) {
       return supabaseResponse;
     }
 

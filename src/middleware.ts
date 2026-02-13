@@ -7,6 +7,27 @@ export async function middleware(request: NextRequest) {
 
   const search = request.nextUrl.search;
 
+  // Bypass redirection for all API calls to ensure mobile apps and integrations work
+  if (pathname.startsWith('/api/')) {
+    const response = await updateSession(request);
+    
+    // Add CORS headers for API requests in middleware to handle preflight and cross-origin
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-requested-with');
+    response.headers.set('X-Middleware-Processed', 'true');
+    
+    // Handle preflight directly in middleware if it's an OPTIONS request
+    if (request.method === 'OPTIONS') {
+      return new NextResponse(null, { 
+        status: 204, 
+        headers: response.headers
+      });
+    }
+    
+    return response;
+  }
+
   const isApexOldDomain = host === 'kadaipos.id' || host === 'www.kadaipos.id';
   const isSibosOldDomain = host === 'sibos.kadaipos.id';
   const isSibosNewDomain = host === 'sibos.kadai.id';
