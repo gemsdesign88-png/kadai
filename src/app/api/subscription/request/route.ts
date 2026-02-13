@@ -62,6 +62,22 @@ export async function POST(request: Request) {
 
     if (dbError) throw dbError;
 
+    // Generate unique payment code (last 3 digits)
+    const paymentCode = Math.floor(Math.random() * 900) + 100; // 100-999
+
+    // Update submission with payment code
+    const { error: updateError } = await supabase
+      .from('contact_submissions')
+      .update({ 
+        metadata: { 
+          ...metadata, 
+          payment_code: paymentCode 
+        } 
+      })
+      .eq('id', submission.id);
+
+    if (updateError) console.error('Error updating payment code:', updateError);
+
     // 2. Send confirmation email to customer
     try {
       const resendApiKey = process.env.RESEND_API_KEY;
@@ -74,6 +90,7 @@ export async function POST(request: Request) {
         const restaurant_name = metadata?.restaurant_name || 'Tidak disebutkan';
         const business_type = metadata?.business_type || 'Tidak disebutkan';
         const package_type = metadata?.package_type || 'Tidak disebutkan';
+        const paymentPageUrl = `https://kadaipos.id/payment/${submission.id}`;
         
         const customerEmailResult = await resend.emails.send({
           from: 'Kadai <no-reply@kadaipos.id>',
@@ -206,6 +223,17 @@ Tim Kadai`,
                                                 </td>
                                             </tr>
                                         </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Payment Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0;">
+                                        <a href="${paymentPageUrl}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
+                                            💳 Lihat Detail Pembayaran
+                                        </a>
                                     </td>
                                 </tr>
                             </table>
