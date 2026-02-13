@@ -87,9 +87,9 @@ export async function POST(request: Request) {
         console.log('📧 Sending customer email to:', email);
         
         // Parse metadata to get request details
-        const restaurant_name = metadata?.restaurant_name || 'Tidak disebutkan';
-        const business_type = metadata?.business_type || 'Tidak disebutkan';
-        const package_type = metadata?.package_type || 'Tidak disebutkan';
+        const restaurant_name = metadata?.restaurant_name || name || 'Tidak disebutkan';
+        const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
+        const package_type = metadata?.packageType || metadata?.package_type || metadata?.tier || 'Tidak disebutkan';
         const paymentPageUrl = `https://kadaipos.id/payment/${submission.id}`;
         
         const customerEmailResult = await resend.emails.send({
