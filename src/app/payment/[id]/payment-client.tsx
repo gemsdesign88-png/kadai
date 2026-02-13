@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, Copy } from 'lucide-react';
 
 interface Submission {
@@ -35,6 +35,22 @@ const PLAN_PRICES = {
 
 export default function PaymentClient({ submission }: PaymentClientProps) {
   const [copied, setCopied] = useState(false);
+  
+  // Try to open app first, fallback to web app
+  useEffect(() => {
+    const deepLink = `kadai://payment/${submission.id}`;
+    
+    // Try to open app
+    window.location.href = deepLink;
+    
+    // Fallback: if app not installed, redirect to web app after 2 seconds
+    const fallbackTimer = setTimeout(() => {
+      window.location.href = `https://app.kadai.id/payment/${submission.id}`;
+    }, 2000);
+    
+    // Clean up timer if component unmounts
+    return () => clearTimeout(fallbackTimer);
+  }, [submission.id]);
   
   const businessType = submission.business_type?.toLowerCase() as keyof typeof PLAN_PRICES;
   const paymentCode = submission.metadata?.payment_code || 0;
