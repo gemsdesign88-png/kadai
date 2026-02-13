@@ -111,7 +111,7 @@ export async function POST(request: Request) {
             subtotal: 'Subtotal',
             uniqueCode: 'Kode Unik Verifikasi',
             totalPayment: 'Total Pembayaran',
-            paymentButton: '💳 Lihat Detail Pembayaran',
+            paymentButton: '✅ Konfirmasi Sudah Bayar',
             buttonFallback: 'Jika tombol tidak berfungsi, buka:',
             nextSteps: 'Langkah Selanjutnya 🚀',
             step1: 'Klik tombol di atas untuk melihat detail pembayaran lengkap',
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
             subtotal: 'Subtotal',
             uniqueCode: 'Verification Code',
             totalPayment: 'Total Payment',
-            paymentButton: '💳 View Payment Details',
+            paymentButton: '✅ Confirm Payment Made',
             buttonFallback: 'If the button doesn\'t work, open:',
             nextSteps: 'Next Steps 🚀',
             step1: 'Click the button above to view full payment details',
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
             subtotal: '小计',
             uniqueCode: '验证码',
             totalPayment: '总付款',
-            paymentButton: '💳 查看付款详情',
+            paymentButton: '✅ 确认已付款',
             buttonFallback: '如果按钮无法使用，请打开：',
             nextSteps: '下一步 🚀',
             step1: '点击上方按钮查看完整付款详情',
@@ -209,18 +209,23 @@ export async function POST(request: Request) {
         if (message) {
           // Extract summary between "Ringkasan Pesanan:" and "Total Nominal:"
           const summaryMatch = message.match(/Ringkasan Pesanan:[\s]*([\s\S]+?)[\s]*Total Nominal:/i);
+          console.log('🔍 Regex test result:', summaryMatch ? 'MATCHED' : 'NO MATCH');
           if (summaryMatch) {
             const summaryText = summaryMatch[1].trim();
             console.log('✅ Found summary text:', summaryText);
+            console.log('📝 Summary text length:', summaryText.length);
             orderSummaryLines = summaryText.split(/\n/).filter(line => line.trim());
             console.log('📋 Order lines count:', orderSummaryLines.length);
             console.log('📋 Order lines:', JSON.stringify(orderSummaryLines));
             
             // For single outlet with multiple licenses, expand into list
             if (orderSummaryLines.length === 1) {
+              console.log('🔍 Testing expansion for single line:', orderSummaryLines[0]);
               const multiOutletMatch = orderSummaryLines[0].match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/);
+              console.log('🔍 Multi-outlet regex result:', multiOutletMatch ? 'MATCHED' : 'NO MATCH');
               if (multiOutletMatch) {
                 const [, storeName, tierName, count, billing, totalPrice] = multiOutletMatch;
+                console.log('🏪 Store:', storeName, 'Tier:', tierName, 'Count:', count, 'Price:', totalPrice);
                 const outletCount = parseInt(count);
                 const pricePerOutlet = parseInt(totalPrice.replace(/[^0-9]/g, '')) / outletCount;
                 
@@ -440,12 +445,9 @@ Tim Kadai`,
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                 <tr>
                                     <td align="center" style="padding: 10px 0;">
-                                        <a href="${paymentDeepLink}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
+                                        <a href="${paymentWebFallback}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
                                             ${t.paymentButton}
                                         </a>
-                                        <p style="color: #64748B; font-size: 12px; margin: 8px 0 0; text-align: center;">
-                                            ${t.buttonFallback} <a href="${paymentWebFallback}" style="color: #8B5CF6; text-decoration: underline;">${paymentWebFallback}</a>
-                                        </p>
                                     </td>
                                 </tr>
                             </table>
