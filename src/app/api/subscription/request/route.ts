@@ -68,47 +68,101 @@ export async function POST(request: Request) {
       if (resendApiKey) {
         const resend = new Resend(resendApiKey);
         
-        await resend.emails.send({
+        console.log('📧 Sending customer email to:', email);
+        const customerEmailResult = await resend.emails.send({
           from: 'Kadai <no-reply@kadaipos.id>',
           to: email,
-          subject: 'Permintaan Aktivasi Kadai Diterima',
+          subject: 'Konfirmasi Permintaan Aktivasi - Kadai POS',
+          text: `Halo ${name || 'Pelanggan'},
+
+Terima kasih telah mengajukan permintaan aktivasi paket di Kadai.
+
+PERMINTAAN SEDANG DIPROSES
+Tim kami telah menerima detail permintaan Anda dan akan segera melakukan aktivasi dalam waktu maksimal 1x24 jam.
+
+RINGKASAN PERMINTAAN:
+- Layanan: ${subject}
+- Email: ${email}
+- WhatsApp: ${whatsapp || '-'}
+
+Anda akan menerima email konfirmasi kedua setelah akun Anda diaktifkan oleh admin kami.
+
+---
+Ini adalah email otomatis dari sistem Kadai POS.
+Jika ada pertanyaan, hubungi kami di support@kadaipos.id
+
+Salam,
+Tim Kadai`,
           html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #FF5A5F;">Halo ${name || 'Pelanggan'},</h2>
-              <p>Terima kasih telah mengajukan permintaan aktivasi paket di Kadai.</p>
-              
-              <div style="margin: 20px 0; padding: 15px; background-color: #FFF8F1; border-left: 4px solid #F6AD55; border-radius: 4px;">
-                <p style="margin: 0; font-weight: bold; color: #DD6B20;">Permintaan Sedang Diproses</p>
-                <p style="margin: 5px 0 0 0; color: #C05621;">Tim kami telah menerima detail permintaan Anda dan akan segera melakukan aktivasi dalam waktu maksimal 1x24 jam.</p>
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0; padding: 0;">
+              <div style="background-color: #f8f9fa; padding: 24px; text-align: center;">
+                <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #111827;">Kadai POS</h1>
               </div>
-
-              <div style="margin: 20px 0; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
-                <p style="margin: 0; font-weight: bold;">Ringkasan Permintaan:</p>
-                <ul style="margin: 10px 0 0 0; color: #555;">
-                  <li><strong>Layanan:</strong> ${subject}</li>
-                  <li><strong>Email:</strong> ${email}</li>
-                  <li><strong>WhatsApp:</strong> ${whatsapp || '-'}</li>
-                </ul>
-              </div>
-
-              <p>Anda akan menerima email konfirmasi kedua setelah akun Anda diaktifkan oleh admin kami.</p>
               
-              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-              <p style="font-size: 12px; color: #888;">Ini adalah email otomatis. Untuk bantuan lebih lanjut, hubungi kami di support@kadaipos.id atau WhatsApp.</p>
+              <div style="background-color: #ffffff; padding: 32px 24px;">
+                <p style="margin: 0 0 16px 0; font-size: 16px; color: #111827;">Halo ${name || 'Pelanggan'},</p>
+                
+                <p style="margin: 0 0 24px 0; font-size: 14px; color: #4b5563; line-height: 1.6;">
+                  Terima kasih telah mengajukan permintaan aktivasi paket di Kadai.
+                </p>
+                
+                <div style="margin: 24px 0; padding: 16px; background-color: #fef3c7; border-left: 4px solid #f59e0b;">
+                  <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #92400e;">Permintaan Sedang Diproses</p>
+                  <p style="margin: 0; font-size: 13px; color: #78350f; line-height: 1.5;">
+                    Tim kami telah menerima detail permintaan Anda dan akan segera melakukan aktivasi dalam waktu maksimal 1x24 jam.
+                  </p>
+                </div>
+
+                <div style="margin: 24px 0; padding: 16px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                  <p style="margin: 0 0 12px 0; font-size: 13px; font-weight: 600; color: #111827;">Ringkasan Permintaan:</p>
+                  <table style="width: 100%; font-size: 13px; color: #4b5563;">
+                    <tr>
+                      <td style="padding: 4px 0; width: 100px;">Layanan:</td>
+                      <td style="padding: 4px 0; font-weight: 500;">${subject}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 4px 0;">Email:</td>
+                      <td style="padding: 4px 0; font-weight: 500;">${email}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 4px 0;">WhatsApp:</td>
+                      <td style="padding: 4px 0; font-weight: 500;">${whatsapp || '-'}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <p style="margin: 24px 0 0 0; font-size: 13px; color: #4b5563; line-height: 1.6;">
+                  Anda akan menerima email konfirmasi kedua setelah akun Anda diaktifkan oleh admin kami.
+                </p>
+              </div>
+              
+              <div style="background-color: #f8f9fa; padding: 20px 24px; text-align: center;">
+                <p style="margin: 0 0 8px 0; font-size: 12px; color: #6b7280;">
+                  Ini adalah email otomatis dari sistem Kadai POS
+                </p>
+                <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                  Jika ada pertanyaan, hubungi kami di <a href="mailto:support@kadaipos.id" style="color: #2563eb; text-decoration: none;">support@kadaipos.id</a>
+                </p>
+              </div>
             </div>
           `
         });
         
+        console.log('✅ Customer email result:', customerEmailResult);
+        
         // Also notify admin
-        await resend.emails.send({
+        console.log('📧 Sending admin notification...');
+        const adminEmailResult = await resend.emails.send({
           from: 'Kadai System <no-reply@kadaipos.id>',
           to: 'gemmyadyendra@gmail.com',
           subject: `NEW UPGRADE REQUEST: ${name}`,
           html: `<p>User <b>${name}</b> (${email}) requested: ${subject}</p><p>Message: ${message}</p>`
         });
+        
+        console.log('✅ Admin email result:', adminEmailResult);
       }
     } catch (emailError) {
-      console.error('Error sending request confirmation email:', emailError);
+      console.error('❌ Error sending request confirmation email:', emailError);
     }
 
     return NextResponse.json(
