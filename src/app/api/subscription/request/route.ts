@@ -85,35 +85,47 @@ export async function POST(request: Request) {
         const resend = new Resend(resendApiKey);
         
         console.log('📧 Sending customer email to:', email);
+        console.log('💰 Payment code from metadata:', metadata?.paymentUniqueCode);
+        console.log('📦 Total amount:', metadata?.totalAmount);
+        console.log('🏢 Business type:', metadata?.businessType);
         
         // Parse metadata and message to get request details
         const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
         const total_amount = metadata?.totalAmount || 0;
+        const outlet_count = metadata?.outletCount || 1;
+        
+        console.log('🏪 Outlet count:', outlet_count);
         
         // Parse order summary from message
         let orderSummaryLines: string[] = [];
         let tier_name = 'Tidak disebutkan';
         
-        console.log('📝 Parsing message:', message);
+        console.log('📝 Full message received:');
+        console.log(message);
+        console.log('---END MESSAGE---');
         
         if (message) {
           // Extract summary between "Ringkasan Pesanan:" and "Total Nominal:"
-          const summaryMatch = message.match(/Ringkasan Pesanan:[\r\n]+([\s\S]+?)[\r\n]+Total Nominal:/i);
+          const summaryMatch = message.match(/Ringkasan Pesanan:[\s]*([\s\S]+?)[\s]*Total Nominal:/i);
           if (summaryMatch) {
             const summaryText = summaryMatch[1].trim();
             console.log('✅ Found summary text:', summaryText);
-            orderSummaryLines = summaryText.split(/[\r\n]+/).filter(line => line.trim());
-            console.log('📋 Order lines:', orderSummaryLines);
+            orderSummaryLines = summaryText.split(/\n/).filter(line => line.trim());
+            console.log('📋 Order lines count:', orderSummaryLines.length);
+            console.log('📋 Order lines:', JSON.stringify(orderSummaryLines));
             
             // For single outlet, extract tier name
             if (orderSummaryLines.length === 1) {
               const tierMatch = orderSummaryLines[0].match(/-> ([^(]+)/);
               if (tierMatch) {
                 tier_name = tierMatch[1].trim();
+                console.log('🎯 Extracted tier name:', tier_name);
               }
             }
           } else {
-            console.log('❌ No summary match found');
+            console.log('❌ No summary match found - trying alternative patterns');
+            console.log('Message includes "Ringkasan Pesanan":', message.includes('Ringkasan Pesanan'));
+            console.log('Message includes "Total Nominal":', message.includes('Total Nominal'));
           }
         }
         
@@ -241,6 +253,14 @@ Tim Kadai`,
                                                     <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${business_type}</p>
                                                 </td>
                                             </tr>
+                                            <tr>
+                                                <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
+                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Jumlah Outlet</p>
+                                                </td>
+                                                <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
+                                                    <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${outlet_count} Outlet</p>
+                                                </td>
+                                            </tr>
                                         </table>
                                     </td>
                                 </tr>
@@ -260,13 +280,12 @@ Tim Kadai`,
                                             </div>
                                         ` : orderSummaryLines.length === 1 ? `
                                             <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
-                                                <p style="color: #64748B; font-size: 12px; margin: 0 0 4px; font-weight: 600;">PAKET</p>
-                                                <p style="color: #1E293B; font-size: 16px; margin: 0; font-weight: 700;">${tier_name}</p>
+                                                <p style="color: #1E293B; font-size: 14px; margin: 0; line-height: 1.6; font-weight: 600;">${orderSummaryLines[0]}</p>
                                             </div>
                                         ` : `
                                             <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
-                                                ${orderSummaryLines.map(line => `
-                                                    <p style="color: #1E293B; font-size: 14px; margin: 0 0 8px; line-height: 1.6;">${line}</p>
+                                                ${orderSummaryLines.map((line, idx) => `
+                                                    <p style="color: #1E293B; font-size: 14px; margin: 0 0 ${idx === orderSummaryLines.length - 1 ? '0' : '8px'}; line-height: 1.6; font-weight: 600;">${line}</p>
                                                 `).join('')}
                                             </div>
                                         `}
@@ -312,9 +331,12 @@ Tim Kadai`,
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                 <tr>
                                     <td align="center" style="padding: 10px 0;">
-                                        <a href="${paymentWebFallback}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
+                                        <a href="${paymentDeepLink}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
                                             💳 Lihat Detail Pembayaran
                                         </a>
+                                        <p style="color: #64748B; font-size: 12px; margin: 8px 0 0; text-align: center;">
+                                            Jika tombol tidak berfungsi, buka: <a href="${paymentWebFallback}" style="color: #8B5CF6; text-decoration: underline;">${paymentWebFallback}</a>
+                                        </p>
                                     </td>
                                 </tr>
                             </table>
