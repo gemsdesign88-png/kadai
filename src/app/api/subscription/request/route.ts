@@ -227,11 +227,32 @@ export async function POST(request: Request) {
           // Extract summary between "Ringkasan Pesanan:" and "Total Nominal:"
           // Clean message from potential extra newlines and normalize spaces
           const normalizedMessage = message.replace(/\r\n/g, '\n').replace(/\n\n+/g, '\n');
-          const summaryMatch = normalizedMessage.match(/Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Total Nominal:/i);
           
-          console.log('🔍 Regex test result:', summaryMatch ? 'MATCHED' : 'NO MATCH');
-          if (summaryMatch) {
-            const summaryText = summaryMatch[1].trim();
+          // Debug normalized message
+          console.log('📝 Normalized message for regex search:');
+          console.log(normalizedMessage);
+          
+          // Try multiple regex patterns to find "Ringkasan Pesanan" content
+          // 1. Standard pattern from app: Ringkasan Pesanan: ... Total Nominal:
+          // 2. Fallback for different headers
+          let summaryText = '';
+          const patterns = [
+            /Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Total Nominal:/i,
+            /Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Total:/i,
+            /Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Informasi/i,
+            /Paket Yang Dipilih:[\n\s]*([\s\S]+?)[\n\s]*Pilihan Tier/i
+          ];
+
+          for (const pattern of patterns) {
+            const match = normalizedMessage.match(pattern);
+            if (match) {
+              summaryText = match[1].trim();
+              console.log('✅ Found summary with pattern:', pattern);
+              break;
+            }
+          }
+          
+          if (summaryText) {
             console.log('✅ Found summary text:', summaryText);
             orderSummaryLines = summaryText.split(/\n/).filter(line => line.trim());
             console.log('📋 Order lines count:', orderSummaryLines.length);
@@ -242,13 +263,20 @@ export async function POST(request: Request) {
               console.log('🔍 Testing expansion for line:', line);
               
               // Flexible regex to catch: Store -> Tier (xN Outlet) (Billing) [Price]
-              const multiMatch = line.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/i);
+              // Also catch simpler formats: Store -> Tier (xN Outlet)
+              const multiMatch = line.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)/i);
               
               if (multiMatch) {
-                const [, storeName, tierName, count, billing, totalPrice] = multiMatch;
+                const [, storeName, tierName, count] = multiMatch;
                 const outletCount = parseInt(count);
-                const priceMatch = totalPrice.replace(/[^0-9]/g, '');
-                const totalVal = parseInt(priceMatch);
+                
+                // Try to find billing and price if they exist
+                const billingMatch = line.match(/\((Tahunan|Bulanan|Thn|Bln)\)/i);
+                const priceMatch = line.match(/\[(Rp[\d.,]+)\]/i);
+                
+                const billing = billingMatch ? billingMatch[1] : 'Thn';
+                const totalPriceStr = priceMatch ? priceMatch[1] : formatIdr(total_amount);
+                const totalVal = parseInt(totalPriceStr.replace(/[^0-9]/g, '')) || total_amount;
                 const pricePerOutlet = totalVal / outletCount;
                 
                 tier_name = tierName.trim();
@@ -268,25 +296,23 @@ export async function POST(request: Request) {
               }
             }
           } else {
-            // FALLBACK if main regex fails: Try to find any line with "->"
-            console.log('⚠️ Main regex failed, searching for fallback pattern');
+            // FALLBACK if all regex patterns fail: Try to find any line with "->"
+            console.log('⚠️ All summary regex patterns failed, searching for fallback line with ->');
             const lines = normalizedMessage.split('\n');
             const detailLine = lines.find(l => l.includes('->'));
             if (detailLine) {
               console.log('✅ Found fallback line:', detailLine);
-              const multiMatch = detailLine.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/i);
+              const multiMatch = detailLine.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)/i);
               if (multiMatch) {
-                const [, storeName, tierName, count, billing, totalPrice] = multiMatch;
+                const [, storeName, tierName, count] = multiMatch;
                 const outletCount = parseInt(count);
-                const priceMatch = totalPrice.replace(/[^0-9]/g, '');
-                const totalVal = parseInt(priceMatch);
-                const pricePerOutlet = totalVal / outletCount;
-                
                 tier_name = tierName.trim();
+                const pricePerOutlet = total_amount / outletCount;
+                
                 const expandedLines: string[] = [];
-                expandedLines.push(`1. ${storeName.trim()} - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                expandedLines.push(`1. ${storeName.trim()} - ${tierName.trim()} - ${formatIdr(pricePerOutlet)}`);
                 for (let i = 2; i <= outletCount; i++) {
-                  expandedLines.push(`${i}. Slot Outlet #${i} (Pending Setup) - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                  expandedLines.push(`${i}. Slot Outlet #${i} (Pending Setup) - ${tierName.trim()} - ${formatIdr(pricePerOutlet)}`);
                 }
                 orderSummaryLines = expandedLines;
               } else {
