@@ -87,7 +87,6 @@ export async function POST(request: Request) {
         console.log('📧 Sending customer email to:', email);
         
         // Parse metadata and message to get request details
-        const restaurant_name = metadata?.restaurant_name || name || 'Tidak disebutkan';
         const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
         const total_amount = metadata?.totalAmount || 0;
         
@@ -136,9 +135,9 @@ Kami telah menerima permintaan aktivasi akun Anda dengan detail berikut:
 Nama: ${name}
 Email: ${email}
 No. WhatsApp: ${whatsapp}
-Nama Restoran: ${restaurant_name}
 Tipe Bisnis: ${business_type}
-Paket: ${package_type}
+Paket: ${tier_name}
+Total: ${formatIdr(total_amount + paymentCode)}
 
 Tim kami akan segera menghubungi Anda melalui WhatsApp untuk proses aktivasi lebih lanjut dalam waktu 1x24 jam.
 
@@ -488,10 +487,11 @@ Tim Kadai`,
       { success: true, submissionId: submission.id }, 
       { headers: corsHeaders }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in subscription-request API:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { error: error.message || 'Internal server error' }, 
+      { error: errorMessage }, 
       { status: 500, headers: corsHeaders }
     );
   }
