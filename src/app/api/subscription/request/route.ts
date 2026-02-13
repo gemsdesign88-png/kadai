@@ -88,9 +88,111 @@ export async function POST(request: Request) {
         console.log('💰 Payment code from metadata:', metadata?.paymentUniqueCode);
         console.log('📦 Total amount:', metadata?.totalAmount);
         console.log('🏢 Business type:', metadata?.businessType);
+        console.log('🌐 Language:', metadata?.language);
+        
+        // Get language from metadata (default to 'id')
+        const lang = metadata?.language || 'id';
+        
+        // Email translations
+        const translations = {
+          id: {
+            subject: 'Permintaan Langganan Kadai',
+            greeting: 'Halo',
+            thanks: 'Terima kasih telah mengajukan permintaan langganan Kadai!',
+            subtitle: 'Kami telah menerima permintaan Anda dan akan segera memprosesnya.',
+            customerInfo: 'Informasi Pelanggan',
+            name: 'Nama',
+            email: 'Email',
+            whatsapp: 'WhatsApp',
+            businessType: 'Tipe Bisnis',
+            outletCount: 'Jumlah Outlet',
+            orderSummary: 'Ringkasan Pesanan',
+            package: 'PAKET',
+            subtotal: 'Subtotal',
+            uniqueCode: 'Kode Unik Verifikasi',
+            totalPayment: 'Total Pembayaran',
+            paymentButton: '💳 Lihat Detail Pembayaran',
+            buttonFallback: 'Jika tombol tidak berfungsi, buka:',
+            nextSteps: 'Langkah Selanjutnya 🚀',
+            step1: 'Klik tombol di atas untuk melihat detail pembayaran lengkap',
+            step2: 'Transfer pembayaran ke rekening yang tertera',
+            step3: 'Kirim bukti transfer melalui WhatsApp',
+            footer: 'Jika ada pertanyaan, jangan ragu untuk menghubungi kami.',
+            regards: 'Salam hangat',
+            team: 'Tim Kadai'
+          },
+          en: {
+            subject: 'Kadai Subscription Request',
+            greeting: 'Hello',
+            thanks: 'Thank you for submitting your Kadai subscription request!',
+            subtitle: 'We have received your request and will process it shortly.',
+            customerInfo: 'Customer Information',
+            name: 'Name',
+            email: 'Email',
+            whatsapp: 'WhatsApp',
+            businessType: 'Business Type',
+            outletCount: 'Outlet Count',
+            orderSummary: 'Order Summary',
+            package: 'PACKAGE',
+            subtotal: 'Subtotal',
+            uniqueCode: 'Verification Code',
+            totalPayment: 'Total Payment',
+            paymentButton: '💳 View Payment Details',
+            buttonFallback: 'If the button doesn\'t work, open:',
+            nextSteps: 'Next Steps 🚀',
+            step1: 'Click the button above to view full payment details',
+            step2: 'Transfer payment to the account listed',
+            step3: 'Send proof of transfer via WhatsApp',
+            footer: 'If you have any questions, don\\'t hesitate to contact us.',
+            regards: 'Best regards',
+            team: 'Kadai Team'
+          },
+          zh: {
+            subject: 'Kadai 订阅请求',
+            greeting: '您好',
+            thanks: '感谢您提交 Kadai 订阅请求！',
+            subtitle: '我们已收到您的请求，将尽快处理。',
+            customerInfo: '客户信息',
+            name: '姓名',
+            email: '电子邮箱',
+            whatsapp: 'WhatsApp',
+            businessType: '业务类型',
+            outletCount: '门店数量',
+            orderSummary: '订单摘要',
+            package: '套餐',
+            subtotal: '小计',
+            uniqueCode: '验证码',
+            totalPayment: '总付款',
+            paymentButton: '💳 查看付款详情',
+            buttonFallback: '如果按钮无法使用，请打开：',
+            nextSteps: '下一步 🚀',
+            step1: '点击上方按钮查看完整付款详情',
+            step2: '将付款转账至列出的账户',
+            step3: '通过 WhatsApp 发送转账凭证',
+            footer: '如有任何问题，请随时与我们联系。',
+            regards: '此致',
+            team: 'Kadai 团队'
+          }
+        };
+        
+        const t = translations[lang as keyof typeof translations] || translations.id;
+        
+        // Format currency helper
+        const formatIdr = (amount: number) => {
+          return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+          }).format(amount);
+        };
         
         // Parse metadata and message to get request details
-        const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
+        const rawBusinessType = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
+        const business_type = rawBusinessType === 'preppo' ? 'Kadai Preppo' : 
+                              rawBusinessType === 'depo' ? 'Kadai Depo' : 
+                              rawBusinessType === 'pro' ? 'Kadai Pro' : 
+                              rawBusinessType === 'resto' ? 'Kadai Resto' : 
+                              rawBusinessType;
         const total_amount = metadata?.totalAmount || 0;
         const outlet_count = metadata?.outletCount || 1;
         
@@ -114,12 +216,31 @@ export async function POST(request: Request) {
             console.log('📋 Order lines count:', orderSummaryLines.length);
             console.log('📋 Order lines:', JSON.stringify(orderSummaryLines));
             
-            // For single outlet, extract tier name
+            // For single outlet with multiple licenses, expand into list
             if (orderSummaryLines.length === 1) {
-              const tierMatch = orderSummaryLines[0].match(/-> ([^(]+)/);
-              if (tierMatch) {
-                tier_name = tierMatch[1].trim();
-                console.log('🎯 Extracted tier name:', tier_name);
+              const multiOutletMatch = orderSummaryLines[0].match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/);
+              if (multiOutletMatch) {
+                const [, storeName, tierName, count, billing, totalPrice] = multiOutletMatch;
+                const outletCount = parseInt(count);
+                const pricePerOutlet = parseInt(totalPrice.replace(/[^0-9]/g, '')) / outletCount;
+                
+                // Create expanded list
+                const expandedLines: string[] = [];
+                expandedLines.push(`1. ${storeName.trim()} - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                
+                for (let i = 2; i <= outletCount; i++) {
+                  expandedLines.push(`${i}. Slot Outlet #${i} (Pending Setup) - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                }
+                
+                orderSummaryLines = expandedLines;
+                console.log('📋 Expanded to multiple lines:', JSON.stringify(orderSummaryLines));
+              } else {
+                // Regular single outlet
+                const tierMatch = orderSummaryLines[0].match(/-> ([^(]+)/);
+                if (tierMatch) {
+                  tier_name = tierMatch[1].trim();
+                  console.log('🎯 Extracted tier name:', tier_name);
+                }
               }
             }
           } else {
@@ -131,15 +252,6 @@ export async function POST(request: Request) {
         
         const paymentDeepLink = `kadai://payment/${submission.id}`;
         const paymentWebFallback = `https://app.kadai.id/payment/${submission.id}`;
-        
-        // Format currency
-        const formatIdr = (amount: number) => {
-          return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-          }).format(amount);
-        };
         
         const customerEmailResult = await resend.emails.send({
           from: 'Kadai <no-reply@kadaipos.id>',
@@ -195,10 +307,10 @@ Tim Kadai`,
                                 </svg>
                             </div>
                             <h1 style="color: #ffffff; font-size: 28px; font-weight: 700; margin: 0 0 10px; line-height: 1.2;">
-                                Permintaan Aktivasi Diterima ✅
+                                ${t.thanks} ✅
                             </h1>
                             <p style="color: rgba(255, 255, 255, 0.9); font-size: 16px; margin: 0; line-height: 1.5;">
-                                Terima kasih telah memilih Kadai untuk bisnis Anda!
+                                ${t.subtitle}
                             </p>
                         </td>
                     </tr>
@@ -207,11 +319,8 @@ Tim Kadai`,
                     <tr>
                         <td style="padding: 40px;">
                             <h2 style="color: #1a1a1a; font-size: 20px; font-weight: 600; margin: 0 0 20px;">
-                                Halo, ${name}! 👋
+                                ${t.greeting}, ${name}! 👋
                             </h2>
-                            <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 0 0 24px;">
-                                Kami telah menerima permintaan aktivasi akun <strong>Kadai</strong> Anda. Tim kami sedang memproses permintaan Anda dan akan segera menghubungi Anda melalui WhatsApp.
-                            </p>
 
                             <!-- Details Box -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
@@ -231,7 +340,7 @@ Tim Kadai`,
                                             </tr>
                                             <tr>
                                                 <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
-                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Email</p>
+                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">${t.name}</p>
                                                 </td>
                                                 <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
                                                     <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${email}</p>
@@ -239,7 +348,7 @@ Tim Kadai`,
                                             </tr>
                                             <tr>
                                                 <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
-                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">No. WhatsApp</p>
+                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">${t.whatsapp}</p>
                                                 </td>
                                                 <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
                                                     <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${whatsapp}</p>
@@ -247,7 +356,7 @@ Tim Kadai`,
                                             </tr>
                                             <tr>
                                                 <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
-                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Tipe Bisnis</p>
+                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">${t.businessType}</p>
                                                 </td>
                                                 <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
                                                     <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${business_type}</p>
@@ -255,7 +364,7 @@ Tim Kadai`,
                                             </tr>
                                             <tr>
                                                 <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
-                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Jumlah Outlet</p>
+                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">${t.outletCount}</p>
                                                 </td>
                                                 <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
                                                     <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${outlet_count} Outlet</p>
@@ -271,7 +380,7 @@ Tim Kadai`,
                                 <tr>
                                     <td style="padding: 20px; background: #FFFFFF; border-radius: 12px; border: 2px solid #E2E8F0;">
                                         <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0 0 16px;">
-                                            📦 Ringkasan Pesanan
+                                            📦 ${t.orderSummary}
                                         </p>
                                         ${orderSummaryLines.length === 0 ? `
                                             <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
@@ -293,7 +402,7 @@ Tim Kadai`,
                                             <table width="100%" cellpadding="0" cellspacing="0">
                                                 <tr>
                                                     <td style="padding: 8px 0;">
-                                                        <p style="color: #64748B; font-size: 14px; margin: 0;">Subtotal</p>
+                                                        <p style="color: #64748B; font-size: 14px; margin: 0;">${t.subtotal}</p>
                                                     </td>
                                                     <td style="padding: 8px 0; text-align: right;">
                                                         <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${formatIdr(total_amount)}</p>
@@ -301,7 +410,7 @@ Tim Kadai`,
                                                 </tr>
                                                 <tr>
                                                     <td style="padding: 8px 0;">
-                                                        <p style="color: #8B5CF6; font-size: 14px; margin: 0;">Kode Unik Verifikasi</p>
+                                                        <p style="color: #8B5CF6; font-size: 14px; margin: 0;">${t.uniqueCode}</p>
                                                     </td>
                                                     <td style="padding: 8px 0; text-align: right;">
                                                         <p style="color: #8B5CF6; font-size: 14px; margin: 0; font-weight: 700; font-family: monospace;">+${paymentCode}</p>
@@ -312,7 +421,7 @@ Tim Kadai`,
                                                         <table width="100%" cellpadding="0" cellspacing="0">
                                                             <tr>
                                                                 <td>
-                                                                    <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 700;">Total Pembayaran</p>
+                                                                    <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 700;">${t.totalPayment}</p>
                                                                 </td>
                                                                 <td style="text-align: right;">
                                                                     <p style="color: #8B5CF6; font-size: 20px; margin: 0; font-weight: 700;">${formatIdr(total_amount + paymentCode)}</p>
@@ -332,10 +441,10 @@ Tim Kadai`,
                                 <tr>
                                     <td align="center" style="padding: 10px 0;">
                                         <a href="${paymentDeepLink}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
-                                            💳 Lihat Detail Pembayaran
+                                            ${t.paymentButton}
                                         </a>
                                         <p style="color: #64748B; font-size: 12px; margin: 8px 0 0; text-align: center;">
-                                            Jika tombol tidak berfungsi, buka: <a href="${paymentWebFallback}" style="color: #8B5CF6; text-decoration: underline;">${paymentWebFallback}</a>
+                                            ${t.buttonFallback} <a href="${paymentWebFallback}" style="color: #8B5CF6; text-decoration: underline;">${paymentWebFallback}</a>
                                         </p>
                                     </td>
                                 </tr>
@@ -343,7 +452,7 @@ Tim Kadai`,
 
                             <!-- Next Steps -->
                             <h3 style="color: #1a1a1a; font-size: 18px; font-weight: 600; margin: 0 0 16px;">
-                                Langkah Selanjutnya 🚀
+                                ${t.nextSteps}
                             </h3>
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                 <tr>
@@ -422,7 +531,7 @@ Tim Kadai`,
                             </table>
 
                             <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
-                                Jika Anda memiliki pertanyaan, jangan ragu untuk menghubungi tim support kami kapan saja.
+                                ${t.footer}
                             </p>
                         </td>
                     </tr>
