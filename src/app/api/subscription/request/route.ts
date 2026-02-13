@@ -65,13 +65,30 @@ export async function POST(request: Request) {
     // Use payment code from mobile app or generate if not provided
     const paymentCode = metadata?.paymentUniqueCode || Math.floor(Math.random() * 900) + 100;
 
-    // Update submission with payment code
+    // Parse tier name from message for later use
+    let extracted_tier = 'Tidak disebutkan';
+    if (message) {
+      const summaryMatch = message.match(/Ringkasan Pesanan:[\s]*([\s\S]+?)[\s]*Total Nominal:/i);
+      if (summaryMatch) {
+        const summaryText = summaryMatch[1].trim();
+        const lines = summaryText.split(/\n/).filter(line => line.trim());
+        if (lines.length > 0) {
+          const tierMatch = lines[0].match(/->\s*([^(]+)/);
+          if (tierMatch) {
+            extracted_tier = tierMatch[1].trim();
+          }
+        }
+      }
+    }
+    
+    // Update submission with payment code and tier name
     const { error: updateError } = await supabase
       .from('contact_submissions')
       .update({ 
         metadata: { 
           ...metadata, 
-          payment_code: paymentCode 
+          payment_code: paymentCode,
+          tier_name: extracted_tier
         } 
       })
       .eq('id', submission.id);
@@ -228,6 +245,10 @@ export async function POST(request: Request) {
                 console.log('🏪 Store:', storeName, 'Tier:', tierName, 'Count:', count, 'Price:', totalPrice);
                 const outletCount = parseInt(count);
                 const pricePerOutlet = parseInt(totalPrice.replace(/[^0-9]/g, '')) / outletCount;
+                
+                // Extract tier name for metadata
+                tier_name = tierName.trim();
+                console.log('🎯 Extracted tier name for multi-outlet:', tier_name);
                 
                 // Create expanded list
                 const expandedLines: string[] = [];
