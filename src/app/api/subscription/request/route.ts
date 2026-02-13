@@ -253,7 +253,12 @@ Tim Kadai`,
                                         <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0 0 16px;">
                                             📦 Ringkasan Pesanan
                                         </p>
-                                        ${orderSummaryLines.length === 1 ? `
+                                        ${orderSummaryLines.length === 0 ? `
+                                            <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                                                <p style="color: #64748B; font-size: 12px; margin: 0 0 4px; font-weight: 600;">PAKET</p>
+                                                <p style="color: #1E293B; font-size: 16px; margin: 0; font-weight: 700;">${business_type}</p>
+                                            </div>
+                                        ` : orderSummaryLines.length === 1 ? `
                                             <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
                                                 <p style="color: #64748B; font-size: 12px; margin: 0 0 4px; font-weight: 600;">PAKET</p>
                                                 <p style="color: #1E293B; font-size: 16px; margin: 0; font-weight: 700;">${tier_name}</p>
@@ -307,16 +312,9 @@ Tim Kadai`,
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                                 <tr>
                                     <td align="center" style="padding: 10px 0;">
-                                        <a href="${paymentDeepLink}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
+                                        <a href="${paymentWebFallback}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 16px 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);">
                                             💳 Lihat Detail Pembayaran
                                         </a>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td align="center" style="padding: 10px 0;">
-                                        <p style="color: #6b7280; font-size: 12px; margin: 0;">
-                                            Tidak bisa dibuka? <a href="${paymentWebFallback}" style="color: #FF5A5F; text-decoration: none; font-weight: 600;">Klik di sini</a>
-                                        </p>
                                     </td>
                                 </tr>
                             </table>
