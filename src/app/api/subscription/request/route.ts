@@ -49,6 +49,12 @@ export async function POST(request: Request) {
     const paymentCode = metadata?.paymentUniqueCode || Math.floor(Math.random() * 900) + 100;
     const lang = metadata?.language || 'id';
     
+    // Generate Invoice Number
+    const date = new Date();
+    const dateStr = date.toISOString().split('T')[0].replace(/-/g, ''); // 20260214
+    const shortId = submission.id.split('-')[0].toUpperCase();
+    const invoiceNumber = `INV/${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${shortId}`;
+
     // Format currency helper
     const formatIdr = (amount: number) => {
       return new Intl.NumberFormat('id-ID', {
@@ -142,7 +148,7 @@ export async function POST(request: Request) {
 
     // 3. Update Database with Correct Metadata
     await supabase.from('contact_submissions').update({ 
-      metadata: { ...metadata, payment_code: paymentCode, tier_name, order_summary: orderSummaryLines } 
+      metadata: { ...metadata, payment_code: paymentCode, tier_name, order_summary: orderSummaryLines, invoice_number: invoiceNumber } 
     }).eq('id', submission.id);
 
     // 4. Send Emails via Resend
@@ -150,8 +156,8 @@ export async function POST(request: Request) {
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
       const translations: Record<string, any> = {
-        id: { subject: 'Permintaan Langganan Kadai', thanks: 'Terima kasih telah mengajukan permintaan langganan Kadai!', subtitle: 'Kami telah menerima permintaan Anda dan akan segera memprosesnya.', greeting: 'Halo', nameLabel: 'Nama Lengkap', emailLabel: 'Email', whatsappLabel: 'WhatsApp', businessTypeLabel: 'Tipe Bisnis', outletCountLabel: 'Jumlah Outlet', summaryLabel: 'Ringkasan Pesanan', subtotalLabel: 'Subtotal', uniqueCodeLabel: 'Kode Unik', totalLabel: 'Total Pembayaran', buttonLabel: '✅ Konfirmasi Sudah Bayar', stepsLabel: 'Langkah Selanjutnya 🚀', step1: 'Tim kami akan menghubungi Anda (WhatsApp 1x24 jam)', step2: 'Verifikasi data & pembayaran', step3: 'Aktivasi akun Kadai', footer: 'Tim Kadai akan segera menghubungi Anda.' },
-        en: { subject: 'Kadai Subscription Request', thanks: 'Thank you for your Kadai subscription request!', subtitle: 'We have received your request and will process it shortly.', greeting: 'Hello', nameLabel: 'Full Name', emailLabel: 'Email', whatsappLabel: 'WhatsApp', businessTypeLabel: 'Business Type', outletCountLabel: 'Outlet Count', summaryLabel: 'Order Summary', subtotalLabel: 'Subtotal', uniqueCodeLabel: 'Unique Code', totalLabel: 'Total Payment', buttonLabel: '✅ Confirm Payment Made', stepsLabel: 'Next Steps 🚀', step1: 'Our team will contact you (WhatsApp 1x24h)', step2: 'Data & payment verification', step3: 'Kadai account activation', footer: 'Kadai Team will contact you shortly.' }
+        id: { subject: 'Permintaan Langganan Kadai', thanks: 'Terima kasih telah mengajukan permintaan langganan Kadai!', subtitle: 'Kami telah menerima permintaan Anda dan akan segera memprosesnya.', greeting: 'Halo', nameLabel: 'Nama Lengkap', emailLabel: 'Email', whatsappLabel: 'WhatsApp', businessTypeLabel: 'Tipe Bisnis', outletCountLabel: 'Jumlah Outlet', summaryLabel: 'Ringkasan Pesanan', subtotalLabel: 'Subtotal', uniqueCodeLabel: 'Kode Unik', totalLabel: 'Total Pembayaran', buttonLabel: '✅ Konfirmasi Sudah Bayar', stepsLabel: 'Langkah Selanjutnya 🚀', step1: 'Tim kami akan menghubungi Anda (WhatsApp 1x24 jam)', step2: 'Verifikasi data & pembayaran', step3: 'Aktivasi akun Kadai', footer: 'Tim Kadai akan segera menghubungi Anda.', invoiceLabel: 'Nomor Invoice' },
+        en: { subject: 'Kadai Subscription Request', thanks: 'Thank you for your Kadai subscription request!', subtitle: 'We have received your request and will process it shortly.', greeting: 'Hello', nameLabel: 'Full Name', emailLabel: 'Email', whatsappLabel: 'WhatsApp', businessTypeLabel: 'Business Type', outletCountLabel: 'Outlet Count', summaryLabel: 'Order Summary', subtotalLabel: 'Subtotal', uniqueCodeLabel: 'Unique Code', totalLabel: 'Total Payment', buttonLabel: '✅ Confirm Payment Made', stepsLabel: 'Next Steps 🚀', step1: 'Our team will contact you (WhatsApp 1x24h)', step2: 'Data & payment verification', step3: 'Kadai account activation', footer: 'Kadai Team will contact you shortly.', invoiceLabel: 'Invoice Number' }
       };
       const t = translations[lang] || translations.id;
 
@@ -170,6 +176,7 @@ export async function POST(request: Request) {
                   <h2 style="font-size: 18px; margin-bottom: 20px;">${isCustomer ? t.greeting + ' ' + name + '!' : 'Customer Details'}</h2>
                   <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
                     <table width="100%">
+                      <tr><td>${t.invoiceLabel}</td><td align="right"><b>${invoiceNumber}</b></td></tr>
                       <tr><td>${t.nameLabel}</td><td align="right"><b>${name}</b></td></tr>
                       <tr><td>${t.whatsappLabel}</td><td align="right"><b>${whatsapp}</b></td></tr>
                       <tr><td>${t.businessTypeLabel}</td><td align="right"><b>${business_type}</b></td></tr>
