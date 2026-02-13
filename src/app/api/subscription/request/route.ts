@@ -62,8 +62,8 @@ export async function POST(request: Request) {
 
     if (dbError) throw dbError;
 
-    // Generate unique payment code (last 3 digits)
-    const paymentCode = Math.floor(Math.random() * 900) + 100; // 100-999
+    // Use payment code from mobile app or generate if not provided
+    const paymentCode = metadata?.paymentUniqueCode || Math.floor(Math.random() * 900) + 100;
 
     // Update submission with payment code
     const { error: updateError } = await supabase
@@ -90,15 +90,20 @@ export async function POST(request: Request) {
         const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
         const total_amount = metadata?.totalAmount || 0;
         
-        // Parse order summary from message (format: "Ringkasan Pesanan:\n{summary}\n\nTotal Nominal:")
+        // Parse order summary from message
         let orderSummaryLines: string[] = [];
         let tier_name = 'Tidak disebutkan';
         
+        console.log('📝 Parsing message:', message);
+        
         if (message) {
-          const summaryMatch = message.match(/Ringkasan Pesanan:\n([\s\S]+?)\n\nTotal Nominal:/);
+          // Extract summary between "Ringkasan Pesanan:" and "Total Nominal:"
+          const summaryMatch = message.match(/Ringkasan Pesanan:[\r\n]+([\s\S]+?)[\r\n]+Total Nominal:/i);
           if (summaryMatch) {
             const summaryText = summaryMatch[1].trim();
-            orderSummaryLines = summaryText.split('\n').filter(line => line.trim());
+            console.log('✅ Found summary text:', summaryText);
+            orderSummaryLines = summaryText.split(/[\r\n]+/).filter(line => line.trim());
+            console.log('📋 Order lines:', orderSummaryLines);
             
             // For single outlet, extract tier name
             if (orderSummaryLines.length === 1) {
@@ -107,6 +112,8 @@ export async function POST(request: Request) {
                 tier_name = tierMatch[1].trim();
               }
             }
+          } else {
+            console.log('❌ No summary match found');
           }
         }
         
