@@ -225,54 +225,76 @@ export async function POST(request: Request) {
         
         if (message) {
           // Extract summary between "Ringkasan Pesanan:" and "Total Nominal:"
-          const summaryMatch = message.match(/Ringkasan Pesanan:[\s]*([\s\S]+?)[\s]*Total Nominal:/i);
+          // Clean message from potential extra newlines and normalize spaces
+          const normalizedMessage = message.replace(/\r\n/g, '\n').replace(/\n\n+/g, '\n');
+          const summaryMatch = normalizedMessage.match(/Ringkasan Pesanan:[\n\s]*([\s\S]+?)[\n\s]*Total Nominal:/i);
+          
           console.log('🔍 Regex test result:', summaryMatch ? 'MATCHED' : 'NO MATCH');
           if (summaryMatch) {
             const summaryText = summaryMatch[1].trim();
             console.log('✅ Found summary text:', summaryText);
-            console.log('📝 Summary text length:', summaryText.length);
             orderSummaryLines = summaryText.split(/\n/).filter(line => line.trim());
             console.log('📋 Order lines count:', orderSummaryLines.length);
-            console.log('📋 Order lines:', JSON.stringify(orderSummaryLines));
             
             // For single outlet with multiple licenses, expand into list
             if (orderSummaryLines.length === 1) {
-              console.log('🔍 Testing expansion for single line:', orderSummaryLines[0]);
-              const multiOutletMatch = orderSummaryLines[0].match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/);
-              console.log('🔍 Multi-outlet regex result:', multiOutletMatch ? 'MATCHED' : 'NO MATCH');
-              if (multiOutletMatch) {
-                const [, storeName, tierName, count, billing, totalPrice] = multiOutletMatch;
-                console.log('🏪 Store:', storeName, 'Tier:', tierName, 'Count:', count, 'Price:', totalPrice);
+              const line = orderSummaryLines[0];
+              console.log('🔍 Testing expansion for line:', line);
+              
+              // Flexible regex to catch: Store -> Tier (xN Outlet) (Billing) [Price]
+              const multiMatch = line.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/i);
+              
+              if (multiMatch) {
+                const [, storeName, tierName, count, billing, totalPrice] = multiMatch;
                 const outletCount = parseInt(count);
-                const pricePerOutlet = parseInt(totalPrice.replace(/[^0-9]/g, '')) / outletCount;
+                const priceMatch = totalPrice.replace(/[^0-9]/g, '');
+                const totalVal = parseInt(priceMatch);
+                const pricePerOutlet = totalVal / outletCount;
                 
-                // Extract tier name for metadata
                 tier_name = tierName.trim();
-                console.log('🎯 Extracted tier name for multi-outlet:', tier_name);
                 
-                // Create expanded list
                 const expandedLines: string[] = [];
                 expandedLines.push(`1. ${storeName.trim()} - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
-                
                 for (let i = 2; i <= outletCount; i++) {
                   expandedLines.push(`${i}. Slot Outlet #${i} (Pending Setup) - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
                 }
-                
                 orderSummaryLines = expandedLines;
-                console.log('📋 Expanded to multiple lines:', JSON.stringify(orderSummaryLines));
               } else {
-                // Regular single outlet
-                const tierMatch = orderSummaryLines[0].match(/-> ([^(]+)/);
+                // Tier extraction for single outlet: Store -> Tier (Billing) [Price]
+                const tierMatch = line.match(/->\s*([^(]+)/);
                 if (tierMatch) {
                   tier_name = tierMatch[1].trim();
-                  console.log('🎯 Extracted tier name:', tier_name);
                 }
               }
             }
           } else {
-            console.log('❌ No summary match found - trying alternative patterns');
-            console.log('Message includes "Ringkasan Pesanan":', message.includes('Ringkasan Pesanan'));
-            console.log('Message includes "Total Nominal":', message.includes('Total Nominal'));
+            // FALLBACK if main regex fails: Try to find any line with "->"
+            console.log('⚠️ Main regex failed, searching for fallback pattern');
+            const lines = normalizedMessage.split('\n');
+            const detailLine = lines.find(l => l.includes('->'));
+            if (detailLine) {
+              console.log('✅ Found fallback line:', detailLine);
+              const multiMatch = detailLine.match(/(.+?)\s*->\s*(.+?)\s*\(x(\d+)\s+Outlet\)\s*\((.+?)\)\s*\[(.+?)\]/i);
+              if (multiMatch) {
+                const [, storeName, tierName, count, billing, totalPrice] = multiMatch;
+                const outletCount = parseInt(count);
+                const priceMatch = totalPrice.replace(/[^0-9]/g, '');
+                const totalVal = parseInt(priceMatch);
+                const pricePerOutlet = totalVal / outletCount;
+                
+                tier_name = tierName.trim();
+                const expandedLines: string[] = [];
+                expandedLines.push(`1. ${storeName.trim()} - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                for (let i = 2; i <= outletCount; i++) {
+                  expandedLines.push(`${i}. Slot Outlet #${i} (Pending Setup) - ${tierName.trim()} (${billing}) - ${formatIdr(pricePerOutlet)}`);
+                }
+                orderSummaryLines = expandedLines;
+              } else {
+                orderSummaryLines = [detailLine.trim()];
+                const tierMatch = detailLine.match(/->\s*([^(]+)/);
+                if (tierMatch) tier_name = tierMatch[1].trim();
+              }
+            }
           }
         }
         
