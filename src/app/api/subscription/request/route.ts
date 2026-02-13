@@ -86,12 +86,42 @@ export async function POST(request: Request) {
         
         console.log('📧 Sending customer email to:', email);
         
-        // Parse metadata to get request details
+        // Parse metadata and message to get request details
         const restaurant_name = metadata?.restaurant_name || name || 'Tidak disebutkan';
         const business_type = metadata?.businessType || metadata?.business_type || 'Tidak disebutkan';
-        const package_type = metadata?.packageType || metadata?.package_type || metadata?.tier || 'Tidak disebutkan';
+        const total_amount = metadata?.totalAmount || 0;
+        
+        // Parse order summary from message (format: "Ringkasan Pesanan:\n{summary}\n\nTotal Nominal:")
+        let orderSummaryLines: string[] = [];
+        let tier_name = 'Tidak disebutkan';
+        
+        if (message) {
+          const summaryMatch = message.match(/Ringkasan Pesanan:\n([\s\S]+?)\n\nTotal Nominal:/);
+          if (summaryMatch) {
+            const summaryText = summaryMatch[1].trim();
+            orderSummaryLines = summaryText.split('\n').filter(line => line.trim());
+            
+            // For single outlet, extract tier name
+            if (orderSummaryLines.length === 1) {
+              const tierMatch = orderSummaryLines[0].match(/-> ([^(]+)/);
+              if (tierMatch) {
+                tier_name = tierMatch[1].trim();
+              }
+            }
+          }
+        }
+        
         const paymentDeepLink = `kadai://payment/${submission.id}`;
         const paymentWebFallback = `https://app.kadai.id/payment/${submission.id}`;
+        
+        // Format currency
+        const formatIdr = (amount: number) => {
+          return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+          }).format(amount);
+        };
         
         const customerEmailResult = await resend.emails.send({
           from: 'Kadai <no-reply@kadaipos.id>',
@@ -199,31 +229,70 @@ Tim Kadai`,
                                             </tr>
                                             <tr>
                                                 <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
-                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Nama Restoran</p>
-                                                </td>
-                                                <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
-                                                    <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${restaurant_name}</p>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 12px 16px; text-align: left; border-bottom: 1px solid #E2E8F0;">
                                                     <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Tipe Bisnis</p>
                                                 </td>
                                                 <td style="padding: 12px 16px; text-align: right; border-bottom: 1px solid #E2E8F0;">
                                                     <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${business_type}</p>
                                                 </td>
                                             </tr>
-                                            <tr>
-                                                <td style="padding: 12px 16px; text-align: left;">
-                                                    <p style="color: #64748B; font-size: 13px; margin: 0; font-weight: 600;">Paket</p>
-                                                </td>
-                                                <td style="padding: 12px 16px; text-align: right;">
-                                                    <div style="background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); border-radius: 8px; padding: 6px 16px; display: inline-block;">
-                                                        <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: 700;">${package_type}</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
                                         </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Order Summary -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 20px; background: #FFFFFF; border-radius: 12px; border: 2px solid #E2E8F0;">
+                                        <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0 0 16px;">
+                                            📦 Ringkasan Pesanan
+                                        </p>
+                                        ${orderSummaryLines.length === 1 ? `
+                                            <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                                                <p style="color: #64748B; font-size: 12px; margin: 0 0 4px; font-weight: 600;">PAKET</p>
+                                                <p style="color: #1E293B; font-size: 16px; margin: 0; font-weight: 700;">${tier_name}</p>
+                                            </div>
+                                        ` : `
+                                            <div style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                                                ${orderSummaryLines.map(line => `
+                                                    <p style="color: #1E293B; font-size: 14px; margin: 0 0 8px; line-height: 1.6;">${line}</p>
+                                                `).join('')}
+                                            </div>
+                                        `}
+                                        <div style="border-top: 2px solid #E2E8F0; padding-top: 16px; margin-top: 16px;">
+                                            <table width="100%" cellpadding="0" cellspacing="0">
+                                                <tr>
+                                                    <td style="padding: 8px 0;">
+                                                        <p style="color: #64748B; font-size: 14px; margin: 0;">Subtotal</p>
+                                                    </td>
+                                                    <td style="padding: 8px 0; text-align: right;">
+                                                        <p style="color: #1E293B; font-size: 14px; margin: 0; font-weight: 600;">${formatIdr(total_amount)}</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 8px 0;">
+                                                        <p style="color: #8B5CF6; font-size: 14px; margin: 0;">Kode Unik Verifikasi</p>
+                                                    </td>
+                                                    <td style="padding: 8px 0; text-align: right;">
+                                                        <p style="color: #8B5CF6; font-size: 14px; margin: 0; font-weight: 700; font-family: monospace;">+${paymentCode}</p>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" style="padding: 16px 0 8px 0; border-top: 2px solid #8B5CF6;">
+                                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                                            <tr>
+                                                                <td>
+                                                                    <p style="color: #1a1a1a; font-size: 16px; margin: 0; font-weight: 700;">Total Pembayaran</p>
+                                                                </td>
+                                                                <td style="text-align: right;">
+                                                                    <p style="color: #8B5CF6; font-size: 20px; margin: 0; font-weight: 700;">${formatIdr(total_amount + paymentCode)}</p>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
