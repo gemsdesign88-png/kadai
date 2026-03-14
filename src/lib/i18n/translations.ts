@@ -50,9 +50,23 @@ export const translations = {
         tokoDesc: "Retail (Mini Market, Boutique, Electronics, Vape store, etc.)",
         restoTitle: "Kadai Resto",
         restoDesc: "Food & Beverage (Resto, Cafe, Bakery, Food Truck, etc.)",
+        preppoTitle: "Kadai Preppo",
+        preppoDesc: "Central Kitchen (Cloud Kitchen, Catering, Restaurant Chains)",
+        depoTitle: "Kadai Depo",
+        depoDesc: "Warehouse Management (Multi-location Inventory & Distribution)",
         proTitle: "Kadai Pro",
         proDesc: "Professional Services (Barbershop, Laundry, Salon, Clinic, etc.)",
+        customerTitle: "Customer Web",
+        customerDesc: "Online Ordering & Customer Engagement Platform",
         compare: "Compare Solutions"
+      },
+      ecosystemHero: {
+        badge: "Complete Ecosystem",
+        title: "Ecosystem",
+        highlight: "Kadai",
+        subtitle: "One platform for all types of businesses",
+        ctaText: "Hover to see relationships. Click to explore further.",
+        ctaButton: "Explore All Solutions"
       },
     },
     hero: {
@@ -1537,6 +1551,261 @@ export const translations = {
         ],
         button: "Schedule Demo",
         contact: "or contact sales"
+      }
+    },
+    preppoPage: {
+      hero: {
+        badge: "Central Kitchen Management",
+        title: "Preppo: Your",
+        titleHighlight: "Central Kitchen",
+        titleSuffix: "Solution",
+        subtitle: "Central kitchen management system for F&B businesses to scale efficiently. Consistent production, managed distribution, and minimal waste.",
+        priceLabel: "Starting from",
+        price: "Rp 149,000",
+        pricePeriod: "/month",
+        getStarted: "Get Started"
+      },
+      featuresSection: {
+        title: "Kadai Preppo",
+        titlePrefix: "Features of",
+        subtitle: "Manage central kitchen from planning to waste control in one platform"
+      },
+      features: [
+        {
+          title: "Prep Task Management",
+          description: "Create, assign, and track daily prep tasks. Monitor real-time status with completion time analytics and success rate."
+        },
+        {
+          title: "Batch Tracking System",
+          description: "Auto-generated batch ID (OUTLET-ITEM-YYMMDD-SEQ). Track every batch from prep date to expiry with quantity and storage type."
+        },
+        {
+          title: "Expiry Monitor",
+          description: "Automatic alerts for items nearing expiry. Mark items as used/wasted with complete waste reason tracking."
+        },
+        {
+          title: "Smart Label Printing",
+          description: "Print labels with 4 templates: Classic, Big Expiry, Compact, and Industrial. Customize size, language (ID/EN/ZH), and time format."
+        },
+        {
+          title: "Prep Library",
+          description: "Prep items database with recipes, shelf life per storage (Room/Chiller/Freezer), typical batch, allergen info, and staff commission."
+        },
+        {
+          title: "Multi-Outlet Dashboard",
+          description: "Central dashboard for all outlets. Monitor efficiency, pending tasks, and outlet health status (healthy/warning/critical)."
+        },
+        {
+          title: "Waste Control Analytics",
+          description: "Track waste with reasons (expired, spoiled, over-prep) and stage (prep, storage, service). Cost estimation and trend analytics."
+        },
+        {
+          title: "Production Planning",
+          description: "Forecast demand, set target quantities, priority levels (low/medium/high), and assign to staff with performance tracking."
+        },
+        {
+          title: "Batch History",
+          description: "Complete history of all batches created. Filter by date range, search by name/batch ID/staff, and reprint functionality."
+        }
+      ],
+      useCasesSection: {
+        title: "Perfect for Your Business",
+        subtitle: "From restaurant chains to cloud kitchens"
+      },
+      useCases: [
+        {
+          title: "Restaurant Chains",
+          description: "Manage central kitchen for restaurant chains with high menu consistency",
+          benefits: ["Standardized taste", "Quality control", "Cost efficiency"]
+        },
+        {
+          title: "Cloud Kitchen",
+          description: "Operate multiple brands from one central kitchen efficiently",
+          benefits: ["Multi-brand support", "Shared resources", "Lower overhead"]
+        },
+        {
+          title: "Catering Business",
+          description: "Manage large-scale catering production with complex planning",
+          benefits: ["Event planning", "Bulk production", "Delivery scheduling"]
+        }
+      ],
+      labelConfigSection: {
+        title: "Smart Label Printing",
+        titleHighlight: "Configuration",
+        subtitle: "Customize label printing with various sizes, languages, and formats according to your business needs"
+      },
+      labelConfigs: [
+        {
+          name: "Label Size",
+          desc: "Flexible dimensions",
+          features: ["50mm × 25mm", "60mm × 30mm", "Custom size", "Auto-scaling"]
+        },
+        {
+          name: "Multi-Language",
+          desc: "3 languages supported",
+          features: ["Bahasa Indonesia", "English", "中文 (Chinese)", "Auto-translation"]
+        },
+        {
+          name: "Time Format",
+          desc: "Your preference",
+          features: ["12-hour format", "24-hour format", "Date format", "Timezone support"]
+        },
+        {
+          name: "Batch Tracking",
+          desc: "Unique identifiers",
+          features: ["Auto batch number", "Outlet code", "Item code prefix", "Date-based ID"]
+        }
+      ],
+      printerSupport: "Supports printers: Bluetooth thermal, USB, Zebra, and other label printers",
+      uiPreviewSection: {
+        title: "Preppo",
+        titlePrefix: "Interface",
+        subtitle: "See Preppo's intuitive and easy-to-use application interface"
+      },
+      uiPreviews: [
+        {
+          badge: "Prep Library",
+          title: "Prep Items Database",
+          description: "Manage all prep items with complete recipes, shelf life for various storage types (Room/Chiller/Freezer), typical batch size, allergen info, and staff commission.",
+          features: [
+            "Recipe & ingredients with quantities",
+            "Shelf life tracking per storage type",
+            "Category management & color coding",
+            "Commission setup per item",
+            "Allergen & dietary information"
+          ]
+        },
+        {
+          badge: "Task Management",
+          title: "Daily Prep Tasks",
+          description: "Create, assign, and track daily prep tasks with complete details. Monitor real-time status with completion time analytics and success rate for each staff member.",
+          features: [
+            "Set target quantity & priority level",
+            "Assign to specific staff with roles",
+            "Track completion time & efficiency",
+            "Performance analytics per staff",
+            "Automatic reminders & notifications"
+          ]
+        },
+        {
+          badge: "Expiry Monitor",
+          title: "Real-time Expiry Tracking",
+          description: "Monitor all batches nearing expiry with automatic alerts. Mark items as used/wasted with complete waste reason tracking for analytics and cost control.",
+          features: [
+            "Visual countdown to expiry",
+            "Color-coded status (fresh/expiring/expired)",
+            "Quick action: Use or Waste",
+            "Waste reason tracking (expired, spoiled, etc)",
+            "Cost impact analytics"
+          ]
+        }
+      ],
+      labelTemplatesSection: {
+        badge: "Label Preview",
+        title: "4 Professional Label Templates",
+        subtitle: "Preview printed output from 4 available label templates (50mm × 25mm)",
+        templates: [
+          { name: "Classic", description: "Standard with times" },
+          { name: "Big Expiry", description: "Date focused" },
+          { name: "Compact", description: "Clean & modern" },
+          { name: "Industrial", description: "Zebra-style" }
+        ],
+        footer: "All templates automatically include item name, batch number, prep & expiry times, staff who prepared, with customizable size & language (50×25mm, 60×30mm, or custom)."
+      },
+      howItWorksSection: {
+        title: "How Preppo Works",
+        subtitle: "Efficient workflow from planning to delivery"
+      },
+      howItWorksSteps: [
+        {
+          title: "Setup Prep Library",
+          description: "Create prep items with recipes, shelf life (Room/Chiller/Freezer), typical batch size, and allergen info"
+        },
+        {
+          title: "Create Prep Tasks",
+          description: "Generate daily prep tasks, set target quantity, priority level, and assign to staff. System tracks completion time and efficiency"
+        },
+        {
+          title: "Print Smart Labels",
+          description: "Staff complete tasks and print labels from 4 template choices. Auto-generate batch ID and track expiry date"
+        },
+        {
+          title: "Monitor & Analytics",
+          description: "Real-time expiry monitoring, waste tracking, and performance analytics for all outlets from central dashboard"
+        }
+      ],
+      pricing: {
+        title: "Simple Pricing",
+        subtitle: "Choose the plan that fits your scale",
+        toggle: {
+          monthly: "Monthly",
+          yearly: "Yearly",
+          save: "Save 10%"
+        },
+        tiers: [
+          {
+            name: "Starter",
+            priceMonthly: "Rp 149,000",
+            priceYearly: "Rp 1,608,000",
+            priceYearlyMonthly: "Rp 134,000",
+            period: "/month",
+            periodYearly: "/year",
+            badge: null,
+            description: "Perfect for getting started",
+            features: [
+              "Prep item management",
+              "Expiry monitoring",
+              "Smart label printing",
+              "Batch analytics",
+              "3,000 labels/month",
+              "Email support"
+            ]
+          },
+          {
+            name: "Growth",
+            priceMonthly: "Rp 349,000",
+            priceYearly: "Rp 4,188,000",
+            priceYearlyMonthly: "Rp 349,000",
+            period: "/month",
+            periodYearly: "/year",
+            badge: "POPULAR",
+            description: "For growing operations",
+            features: [
+              "Everything in Starter",
+              "15,000 labels/month",
+              "Multi-outlet dashboard",
+              "Waste control analytics",
+              "Production planning",
+              "Priority support"
+            ]
+          },
+          {
+            name: "Pro",
+            priceMonthly: "Rp 599,000",
+            priceYearly: "Rp 6,468,000",
+            priceYearlyMonthly: "Rp 539,000",
+            period: "/month",
+            periodYearly: "/year",
+            badge: null,
+            description: "For large scale operations",
+            features: [
+              "Everything in Growth",
+              "Unlimited labels",
+              "Advanced analytics",
+              "Custom integrations",
+              "Dedicated support",
+              "Training & onboarding"
+            ]
+          }
+        ],
+        cta: "Start Free Trial",
+        note: "14-day free trial • No credit card required"
+      },
+      ctaSection: {
+        title: "Ready to Scale Your",
+        titleHighlight: "Central Kitchen?",
+        subtitle: "Start managing your central kitchen more efficiently. Try free for 14 days!",
+        button: "Try Free Now"
       }
     },
     restoPage: {
@@ -3432,9 +3701,23 @@ We will respond to your inquiry within 7 business days.`
         tokoDesc: "Retail (Mini Market, Butik, Elektronik, Vape store, dll.)",
         restoTitle: "Kadai Resto",
         restoDesc: "Food & Beverage (Resto, Cafe, Bakery, Food Truck, dll.)",
+        preppoTitle: "Kadai Preppo",
+        preppoDesc: "Dapur Terpusat (Cloud Kitchen, Catering, Restoran Chain)",
+        depoTitle: "Kadai Depo",
+        depoDesc: "Manajemen Gudang (Inventory & Distribusi Multi-lokasi)",
         proTitle: "Kadai Pro",
         proDesc: "Layanan Profesional (Barbershop, Laundry, Salon, Klinik, dll.)",
+        customerTitle: "Customer Web",
+        customerDesc: "Platform Pemesanan Online & Engagement Pelanggan",
         compare: "Bandingkan Solusi"
+      },
+      ecosystemHero: {
+        badge: "Ekosistem Lengkap",
+        title: "Ekosistem",
+        highlight: "Kadai",
+        subtitle: "Platform satu pintu untuk segala jenis bisnis",
+        ctaText: "Hover untuk melihat relasi. Klik untuk explore lebih lanjut.",
+        ctaButton: "Jelajahi Semua Solusi"
       },
     },
     hero: {
@@ -4763,6 +5046,261 @@ We will respond to your inquiry within 7 business days.`
         ],
         button: "Jadwalkan Demo",
         contact: "atau hubungi sales"
+      }
+    },
+    preppoPage: {
+      hero: {
+        badge: "Central Kitchen Management",
+        title: "Preppo: Solusi",
+        titleHighlight: "Central Kitchen",
+        titleSuffix: "",
+        subtitle: "Sistem manajemen dapur terpusat untuk bisnis F&B yang ingin scale dengan efisien. Produksi konsisten, distribusi terkelola, dan waste yang minimal.",
+        priceLabel: "Mulai dari",
+        price: "Rp 149.000",
+        pricePeriod: "/bulan",
+        getStarted: "Mulai Sekarang"
+      },
+      featuresSection: {
+        title: "Kadai Preppo",
+        titlePrefix: "Fitur",
+        subtitle: "Kelola central kitchen dari perencanaan hingga waste control dalam satu platform"
+      },
+      features: [
+        {
+          title: "Prep Task Management",
+          description: "Buat, assign, dan track tugas prep harian. Monitor status real-time dengan analytics completion time dan success rate."
+        },
+        {
+          title: "Batch Tracking System",
+          description: "Auto-generated batch ID (OUTLET-ITEM-YYMMDD-SEQ). Track setiap batch dari prep date sampai expiry dengan quantity dan storage type."
+        },
+        {
+          title: "Expiry Monitor",
+          description: "Alert otomatis untuk item yang akan expired. Mark item sebagai used/wasted dengan waste reason tracking lengkap."
+        },
+        {
+          title: "Smart Label Printing",
+          description: "Print label dengan 4 template: Classic, Big Expiry, Compact, dan Industrial. Customize size, bahasa (ID/EN/CN), dan format waktu."
+        },
+        {
+          title: "Prep Library",
+          description: "Database prep items dengan recipe, shelf life per storage (Room/Chiller/Freezer), typical batch, allergen info, dan staff commission."
+        },
+        {
+          title: "Multi-Outlet Dashboard",
+          description: "Central dashboard untuk semua outlet. Monitor efficiency, pending tasks, dan outlet health status (healthy/warning/critical)."
+        },
+        {
+          title: "Waste Control Analytics",
+          description: "Track waste dengan reason (expired, spoiled, over-prep) dan stage (prep, storage, service). Estimasi cost dan analytics trends."
+        },
+        {
+          title: "Production Planning",
+          description: "Forecast demand, set target quantities, priority levels (low/medium/high), dan assign ke staff dengan performance tracking."
+        },
+        {
+          title: "Batch History",
+          description: "Riwayat lengkap semua batch yang pernah dibuat. Filter by date range, search by name/batch ID/staff, dan reprint functionality."
+        }
+      ],
+      useCasesSection: {
+        title: "Cocok Untuk Bisnis Anda",
+        subtitle: "Dari restaurant chain hingga cloud kitchen"
+      },
+      useCases: [
+        {
+          title: "Restaurant Chains",
+          description: "Kelola central kitchen untuk chain restaurant dengan menu consistency tinggi",
+          benefits: ["Standardisasi rasa", "Quality control", "Cost efficiency"]
+        },
+        {
+          title: "Cloud Kitchen",
+          description: "Operasikan multiple brand dari satu central kitchen dengan efisien",
+          benefits: ["Multi-brand support", "Shared resources", "Lower overhead"]
+        },
+        {
+          title: "Catering Business",
+          description: "Manage large-scale catering production dengan planning yang kompleks",
+          benefits: ["Event planning", "Bulk production", "Delivery scheduling"]
+        }
+      ],
+      labelConfigSection: {
+        title: "Smart Label Printing",
+        titleHighlight: "Configuration",
+        subtitle: "Customize label printing dengan berbagai ukuran, bahasa, dan format sesuai kebutuhan bisnis Anda"
+      },
+      labelConfigs: [
+        {
+          name: "Label Size",
+          desc: "Flexible dimensions",
+          features: ["50mm × 25mm", "60mm × 30mm", "Custom size", "Auto-scaling"]
+        },
+        {
+          name: "Multi-Language",
+          desc: "3 languages supported",
+          features: ["Bahasa Indonesia", "English", "中文 (Chinese)", "Auto-translation"]
+        },
+        {
+          name: "Time Format",
+          desc: "Your preference",
+          features: ["12-hour format", "24-hour format", "Date format", "Timezone support"]
+        },
+        {
+          name: "Batch Tracking",
+          desc: "Unique identifiers",
+          features: ["Auto batch number", "Outlet code", "Item code prefix", "Date-based ID"]
+        }
+      ],
+      printerSupport: "Support printer: Bluetooth thermal, USB, Zebra, dan printer label lainnya",
+      uiPreviewSection: {
+        title: "Preppo",
+        titlePrefix: "Interface",
+        subtitle: "Lihat tampilan aplikasi Preppo yang intuitif dan mudah digunakan"
+      },
+      uiPreviews: [
+        {
+          badge: "Prep Library",
+          title: "Database Prep Items",
+          description: "Kelola semua prep items dengan recipe lengkap, shelf life untuk berbagai storage type (Room/Chiller/Freezer), typical batch size, allergen info, dan staff commission.",
+          features: [
+            "Resep & ingredients dengan quantity",
+            "Shelf life tracking per storage type",
+            "Category management & color coding",
+            "Commission setup per item",
+            "Allergen & dietary information"
+          ]
+        },
+        {
+          badge: "Task Management",
+          title: "Daily Prep Tasks",
+          description: "Create, assign, dan track tugas prep harian dengan detail lengkap. Monitor status real-time dengan analytics completion time dan success rate untuk setiap staff.",
+          features: [
+            "Set target quantity & priority level",
+            "Assign ke staff specific dengan role",
+            "Track completion time & efficiency",
+            "Performance analytics per staff",
+            "Automatic reminder & notifications"
+          ]
+        },
+        {
+          badge: "Expiry Monitor",
+          title: "Real-time Expiry Tracking",
+          description: "Monitor semua batch yang akan expired dengan alert otomatis. Mark item sebagai used/wasted dengan waste reason tracking lengkap untuk analytics dan cost control.",
+          features: [
+            "Visual countdown to expiry",
+            "Color-coded status (fresh/expiring/expired)",
+            "Quick action: Use or Waste",
+            "Waste reason tracking (expired, spoiled, etc)",
+            "Cost impact analytics"
+          ]
+        }
+      ],
+      labelTemplatesSection: {
+        badge: "Label Preview",
+        title: "4 Template Label Profesional",
+        subtitle: "Preview hasil cetak dari 4 template label yang tersedia (50mm × 25mm)",
+        templates: [
+          { name: "Classic", description: "Standard with times" },
+          { name: "Big Expiry", description: "Date focused" },
+          { name: "Compact", description: "Clean & modern" },
+          { name: "Industrial", description: "Zebra-style" }
+        ],
+        footer: "Semua template otomatis mencantumkan nama item, batch number, waktu prep & expiry, staff yang prepare, dengan ukuran & bahasa yang dapat disesuaikan (50×25mm, 60×30mm, atau custom)."
+      },
+      howItWorksSection: {
+        title: "Cara Kerja Preppo",
+        subtitle: "Workflow yang efisien dari planning hingga delivery"
+      },
+      howItWorksSteps: [
+        {
+          title: "Setup Prep Library",
+          description: "Buat prep items dengan recipe, shelf life (Room/Chiller/Freezer), typical batch size, dan allergen info"
+        },
+        {
+          title: "Create Prep Tasks",
+          description: "Generate daily prep tasks, set target quantity, priority level, dan assign ke staff. System track completion time dan efficiency"
+        },
+        {
+          title: "Print Smart Labels",
+          description: "Staff complete task dan print label dengan 4 template pilihan. Auto-generate batch ID dan track expiry date"
+        },
+        {
+          title: "Monitor & Analytics",
+          description: "Real-time expiry monitoring, waste tracking, dan performance analytics untuk semua outlet dari central dashboard"
+        }
+      ],
+      pricing: {
+        title: "Harga Sederhana",
+        subtitle: "Pilih paket yang sesuai skala bisnis Anda",
+        toggle: {
+          monthly: "Bulanan",
+          yearly: "Tahunan",
+          save: "Hemat 10%"
+        },
+        tiers: [
+          {
+            name: "Starter",
+            priceMonthly: "Rp 149.000",
+            priceYearly: "Rp 1.608.000",
+            priceYearlyMonthly: "Rp 134.000",
+            period: "/bulan",
+            periodYearly: "/tahun",
+            badge: null,
+            description: "Sempurna untuk memulai",
+            features: [
+              "Manajemen prep items",
+              "Monitor kedaluwarsa",
+              "Smart label printing",
+              "Analisis batch",
+              "3.000 label/bulan",
+              "Email support"
+            ]
+          },
+          {
+            name: "Growth",
+            priceMonthly: "Rp 349.000",
+            priceYearly: "Rp 4.188.000",
+            priceYearlyMonthly: "Rp 349.000",
+            period: "/bulan",
+            periodYearly: "/tahun",
+            badge: "POPULER",
+            description: "Untuk operasi yang berkembang",
+            features: [
+              "Semua fitur Starter",
+              "15.000 label/bulan",
+              "Multi-outlet dashboard",
+              "Waste control analytics",
+              "Production planning",
+              "Priority support"
+            ]
+          },
+          {
+            name: "Pro",
+            priceMonthly: "Rp 599.000",
+            priceYearly: "Rp 6.468.000",
+            priceYearlyMonthly: "Rp 539.000",
+            period: "/bulan",
+            periodYearly: "/tahun",
+            badge: null,
+            description: "Untuk operasi skala besar",
+            features: [
+              "Semua fitur Growth",
+              "Unlimited labels",
+              "Advanced analytics",
+              "Custom integrations",
+              "Dedicated support",
+              "Training & onboarding"
+            ]
+          }
+        ],
+        cta: "Coba Gratis Sekarang",
+        note: "Uji coba gratis 14 hari • Tanpa kartu kredit"
+      },
+      ctaSection: {
+        title: "Ready to Scale Your",
+        titleHighlight: "Central Kitchen?",
+        subtitle: "Mulai kelola central kitchen dengan lebih efisien. Coba gratis 14 hari!",
+        button: "Coba Gratis Sekarang"
       }
     },
     restoPage: {
@@ -6425,9 +6963,23 @@ Kami akan menanggapi pertanyaan Anda dalam 7 hari kerja.`
         tokoDesc: "零售业 (迷你超市、精品店、电子产品、电子烟店等)",
         restoTitle: "Kadai Resto",
         restoDesc: "餐饮业 (餐厅、咖啡馆、面包店、餐车等)",
+        preppoTitle: "Kadai Preppo",
+        preppoDesc: "中央厨房 (云厨房、餐饮连锁、配餐中心)",
+        depoTitle: "Kadai Depo",
+        depoDesc: "仓库管理 (多地点库存和配送管理)",
         proTitle: "Kadai Pro",
         proDesc: "专业服务 (理发店、洗衣店、沙龙、诊所等)",
+        customerTitle: "Customer Web",
+        customerDesc: "在线订购和客户互动平台",
         compare: "比较解决方案"
+      },
+      ecosystemHero: {
+        badge: "完整生态系统",
+        title: "生态系统",
+        highlight: "Kadai",
+        subtitle: "适用于所有类型企业的一体化平台",
+        ctaText: "悬停查看关系。单击以进一步探索。",
+        ctaButton: "探索所有解决方案"
       },
     },
     hero: {
@@ -7907,6 +8459,261 @@ Kami akan menanggapi pertanyaan Anda dalam 7 hari kerja.`
         ],
         button: "安排演示",
         contact: "或联系销售"
+      }
+    },
+    preppoPage: {
+      hero: {
+        badge: "中央厨房管理",
+        title: "Preppo：您的",
+        titleHighlight: "中央厨房",
+        titleSuffix: "解决方案",
+        subtitle: "为希望高效扩展的餐饮企业提供中央厨房管理系统。生产一致、分配有序、浪费最小。",
+        priceLabel: "起价",
+        price: "Rp 149,000",
+        pricePeriod: "/月",
+        getStarted: "立即开始"
+      },
+      featuresSection: {
+        title: "Kadai Preppo",
+        titlePrefix: "功能",
+        subtitle: "在一个平台上管理从规划到浪费控制的中央厨房"
+      },
+      features: [
+        {
+          title: "备餐任务管理",
+          description: "创建、分配和跟踪每日备餐任务。通过完成时间分析和成功率实时监控状态。"
+        },
+        {
+          title: "批次跟踪系统",
+          description: "自动生成批次 ID（OUTLET-ITEM-YYMMDD-SEQ）。从备餐日期到过期跟踪每个批次，包括数量和存储类型。"
+        },
+        {
+          title: "过期监控",
+          description: "即将过期的物品自动警报。将物品标记为已使用/浪费，并完整跟踪浪费原因。"
+        },
+        {
+          title: "智能标签打印",
+          description: "使用4种模板打印标签：经典、大过期日期、紧凑和工业。自定义尺寸、语言（ID/EN/ZH）和时间格式。"
+        },
+        {
+          title: "备餐库",
+          description: "备餐物品数据库，包含配方、每种存储的保质期（室温/冷藏/冷冻）、典型批次、过敏原信息和员工佣金。"
+        },
+        {
+          title: "多门店仪表板",
+          description: "所有门店的中央仪表板。监控效率、待处理任务和门店健康状态（健康/警告/危急）。"
+        },
+        {
+          title: "浪费控制分析",
+          description: "通过原因（过期、变质、过度备餐）和阶段（备餐、存储、服务）跟踪浪费。成本估算和趋势分析。"
+        },
+        {
+          title: "生产规划",
+          description: "预测需求、设置目标数量、优先级（低/中/高），并分配给具有绩效跟踪的员工。"
+        },
+        {
+          title: "批次历史",
+          description: "创建的所有批次的完整历史记录。按日期范围筛选、按名称/批次ID/员工搜索和重新打印功能。"
+        }
+      ],
+      useCasesSection: {
+        title: "适合您的业务",
+        subtitle: "从连锁餐厅到云厨房"
+      },
+      useCases: [
+        {
+          title: "连锁餐厅",
+          description: "为菜单一致性高的连锁餐厅管理中央厨房",
+          benefits: ["标准化口味", "质量控制", "成本效率"]
+        },
+        {
+          title: "云厨房",
+          description: "从一个中央厨房高效运营多个品牌",
+          benefits: ["多品牌支持", "共享资源", "更低的开销"]
+        },
+        {
+          title: "餐饮业务",
+          description: "通过复杂规划管理大规模餐饮生产",
+          benefits: ["活动规划", "批量生产", "配送调度"]
+        }
+      ],
+      labelConfigSection: {
+        title: "智能标签打印",
+        titleHighlight: "配置",
+        subtitle: "根据您的业务需求，使用各种尺寸、语言和格式自定义标签打印"
+      },
+      labelConfigs: [
+        {
+          name: "标签尺寸",
+          desc: "灵活的尺寸",
+          features: ["50mm × 25mm", "60mm × 30mm", "自定义尺寸", "自动缩放"]
+        },
+        {
+          name: "多语言",
+          desc: "支持3种语言",
+          features: ["Bahasa Indonesia", "English", "中文 (Chinese)", "自动翻译"]
+        },
+        {
+          name: "时间格式",
+          desc: "您的偏好",
+          features: ["12小时格式", "24小时格式", "日期格式", "时区支持"]
+        },
+        {
+          name: "批次跟踪",
+          desc: "唯一标识符",
+          features: ["自动批次号", "门店代码", "物品代码前缀", "基于日期的ID"]
+        }
+      ],
+      printerSupport: "支持打印机：蓝牙热敏、USB、Zebra和其他标签打印机",
+      uiPreviewSection: {
+        title: "Preppo",
+        titlePrefix: "界面",
+        subtitle: "查看Preppo直观易用的应用界面"
+      },
+      uiPreviews: [
+        {
+          badge: "备餐库",
+          title: "备餐物品数据库",
+          description: "管理所有备餐物品，包含完整配方、各种存储类型的保质期（室温/冷藏/冷冻）、典型批次大小、过敏原信息和员工佣金。",
+          features: [
+            "配方和食材及其数量",
+            "按存储类型跟踪保质期",
+            "类别管理和颜色编码",
+            "每项佣金设置",
+            "过敏原和膳食信息"
+          ]
+        },
+        {
+          badge: "任务管理",
+          title: "每日备餐任务",
+          description: "创建、分配和跟踪每日备餐任务及完整详细信息。通过每个员工的完成时间分析和成功率实时监控状态。",
+          features: [
+            "设置目标数量和优先级",
+            "分配给具有特定角色的员工",
+            "跟踪完成时间和效率",
+            "每位员工的绩效分析",
+            "自动提醒和通知"
+          ]
+        },
+        {
+          badge: "过期监控",
+          title: "实时过期跟踪",
+          description: "使用自动警报监控所有即将过期的批次。将物品标记为已使用/浪费，并完整跟踪浪费原因以进行分析和成本控制。",
+          features: [
+            "过期的视觉倒计时",
+            "颜色编码状态（新鲜/即将过期/已过期）",
+            "快速操作：使用或浪费",
+            "浪费原因跟踪（过期、变质等）",
+            "成本影响分析"
+          ]
+        }
+      ],
+      labelTemplatesSection: {
+        badge: "标签预览",
+        title: "4种专业标签模板",
+        subtitle: "从4种可用标签模板（50mm × 25mm）预览打印输出",
+        templates: [
+          { name: "经典", description: "标准带时间" },
+          { name: "大过期日期", description: "日期为重点" },
+          { name: "紧凑", description: "简洁现代" },
+          { name: "工业", description: "斑马风格" }
+        ],
+        footer: "所有模板自动包含物品名称、批次号、备餐和过期时间、准备人员，并可自定义尺寸和语言（50×25mm、60×30mm或自定义）。"
+      },
+      howItWorksSection: {
+        title: "Preppo工作原理",
+        subtitle: "从规划到配送的高效工作流程"
+      },
+      howItWorksSteps: [
+        {
+          title: "设置备餐库",
+          description: "创建备餐物品，包含配方、保质期（室温/冷藏/冷冻）、典型批次大小和过敏原信息"
+        },
+        {
+          title: "创建备餐任务",
+          description: "生成每日备餐任务、设置目标数量、优先级，并分配给员工。系统跟踪完成时间和效率"
+        },
+        {
+          title: "打印智能标签",
+          description: "员工完成任务并从4种模板选择打印标签。自动生成批次ID并跟踪过期日期"
+        },
+        {
+          title: "监控和分析",
+          description: "从中央仪表板对所有门店进行实时过期监控、浪费跟踪和绩效分析"
+        }
+      ],
+      pricing: {
+        title: "简单定价",
+        subtitle: "选择适合您规模的计划",
+        toggle: {
+          monthly: "按月",
+          yearly: "按年",
+          save: "节省10%"
+        },
+        tiers: [
+          {
+            name: "入门版",
+            priceMonthly: "Rp 149,000",
+            priceYearly: "Rp 1,608,000",
+            priceYearlyMonthly: "Rp 134,000",
+            period: "/月",
+            periodYearly: "/年",
+            badge: null,
+            description: "适合起步阶段",
+            features: [
+              "备餐项目管理",
+              "过期监控",
+              "智能标签打印",
+              "批次分析",
+              "3,000 标签/月",
+              "邮件支持"
+            ]
+          },
+          {
+            name: "成长版",
+            priceMonthly: "Rp 349,000",
+            priceYearly: "Rp 4,188,000",
+            priceYearlyMonthly: "Rp 349,000",
+            period: "/月",
+            periodYearly: "/年",
+            badge: "热门",
+            description: "适合发展中的业务",
+            features: [
+              "包含入门版所有功能",
+              "15,000 标签/月",
+              "多门店仪表板",
+              "浪费控制分析",
+              "生产规划",
+              "优先支持"
+            ]
+          },
+          {
+            name: "专业版",
+            priceMonthly: "Rp 599,000",
+            priceYearly: "Rp 6,468,000",
+            priceYearlyMonthly: "Rp 539,000",
+            period: "/月",
+            periodYearly: "/年",
+            badge: null,
+            description: "适合大规模运营",
+            features: [
+              "包含成长版所有功能",
+              "无限标签",
+              "高级分析",
+              "自定义集成",
+              "专属支持",
+              "培训和入职指导"
+            ]
+          }
+        ],
+        cta: "开始免费试用",
+        note: "14天免费试用 • 无需信用卡"
+      },
+      ctaSection: {
+        title: "准备扩展您的",
+        titleHighlight: "中央厨房？",
+        subtitle: "开始更高效地管理您的中央厨房。免费试用14天！",
+        button: "立即免费试用"
       }
     },
     restoPage: {

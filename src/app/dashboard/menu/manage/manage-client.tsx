@@ -32,6 +32,23 @@ interface MenuItem {
   image_url?: string
   restaurant_id: string
   menu_category?: MenuCategory
+  has_modifiers?: boolean
+  modifier_groups?: ModifierGroup[]
+}
+
+interface Modifier {
+  id?: string;
+  name: string;
+  price: number;
+  available: boolean;
+}
+
+interface ModifierGroup {
+  id?: string;
+  name: string;
+  min_selection: number;
+  max_selection: number;
+  modifiers: Modifier[];
 }
 
 interface BulkMenuItem {
@@ -77,7 +94,9 @@ export default function MenuManagePage() {
     category: '',
     category_id: null as string | null,
     image_url: '',
-    available: true
+    available: true,
+    has_modifiers: false,
+    modifierGroups: [] as ModifierGroup[]
   })
 
   const [newCategoryName, setNewCategoryName] = useState('')
@@ -95,6 +114,50 @@ export default function MenuManagePage() {
   const [bulkItems, setBulkItems] = useState<BulkMenuItem[]>([{ id: '1', name: '', price: '', description: '', parent_category_id: null, category_id: null, available: true }])
   const [bulkSaving, setBulkSaving] = useState(false)
   const [bulkItemImages, setBulkItemImages] = useState<{[key: string]: File | null}>({})
+
+  const addModifierGroup = () => {
+    setFormData(prev => ({
+      ...prev,
+      modifierGroups: [
+        ...prev.modifierGroups,
+        { name: 'Pilihan Baru', min_selection: 0, max_selection: 1, modifiers: [] }
+      ]
+    }));
+  };
+
+  const updateModifierGroup = (index: number, updates: Partial<ModifierGroup>) => {
+    const newGroups = [...formData.modifierGroups];
+    newGroups[index] = { ...newGroups[index], ...updates };
+    setFormData({ ...formData, modifierGroups: newGroups });
+  };
+
+  const removeModifierGroup = (index: number) => {
+    setFormData({
+      ...formData,
+      modifierGroups: formData.modifierGroups.filter((_, i) => i !== index)
+    });
+  };
+
+  const addModifier = (groupIndex: number) => {
+    const newGroups = [...formData.modifierGroups];
+    newGroups[groupIndex].modifiers.push({ name: '', price: 0, available: true });
+    setFormData({ ...formData, modifierGroups: newGroups });
+  };
+
+  const updateModifier = (groupIndex: number, modIndex: number, updates: Partial<Modifier>) => {
+    const newGroups = [...formData.modifierGroups];
+    newGroups[groupIndex].modifiers[modIndex] = { 
+      ...newGroups[groupIndex].modifiers[modIndex], 
+      ...updates 
+    };
+    setFormData({ ...formData, modifierGroups: newGroups });
+  };
+
+  const removeModifier = (groupIndex: number, modIndex: number) => {
+    const newGroups = [...formData.modifierGroups];
+    newGroups[groupIndex].modifiers = newGroups[groupIndex].modifiers.filter((_, i) => i !== modIndex);
+    setFormData({ ...formData, modifierGroups: newGroups });
+  };
 
   useEffect(() => {
     loadMenu()
@@ -133,7 +196,13 @@ export default function MenuManagePage() {
 
       const { data: items } = await supabase
         .from('menu_items')
-        .select('*')
+        .select(`
+          *,
+          modifier_groups (
+            *,
+            modifiers (*)
+          )
+        `)
         .eq('restaurant_id', restaurants.id)
         .order('name')
 
@@ -371,7 +440,9 @@ export default function MenuManagePage() {
         category: item.category || '',
         category_id: item.category_id || null,
         image_url: item.image_url || '',
-        available: item.available ?? true
+        available: item.available ?? true,
+        has_modifiers: item.has_modifiers ?? false,
+        modifierGroups: item.modifier_groups ?? []
       })
       // Reset image upload state for editing
       setImageFile(null)
@@ -385,7 +456,9 @@ export default function MenuManagePage() {
         category: '',
         category_id: null,
         image_url: '',
-        available: true
+        available: true,
+        has_modifiers: false,
+        modifierGroups: []
       })
       // Reset image upload state for new item
       setImageFile(null)
@@ -430,28 +503,45 @@ export default function MenuManagePage() {
       category_id: formData.category_id,
       image_url: finalImageUrl,
       available: formData.available,
-      restaurant_id: restaurant.id
+      restaurant_id: restaurant.id,
+      has_modifiers: formData.has_modifiers,
+      modifier_groups: formData.modifierGroups
     }
 
-    console.log('🔍 Inserting menu item:', itemData)
-    console.log('🏪 Restaurant:', restaurant)
+    console.log('🔍 Saving menu item via edge function:', itemData)
 
     try {
-      if (editingItem) {
-        await supabase
-          .from('menu_items')
-          .update(itemData)
-          .eq('id', editingItem.id)
-      } else {
-        await supabase
-          .from('menu_items')
-          .insert(itemData)
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) throw new Error('Unauthorized')
+
+      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      if (!baseUrl) throw new Error('Supabase URL is not configured')
+
+      const url = editingItem
+        ? `${baseUrl}/functions/v1/restaurant-api/menu/${editingItem.id}`
+        : `${baseUrl}/functions/v1/restaurant-api/menu`
+
+      const method = editingItem ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(itemData)
+      })
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}))
+        throw new Error(errJson.error || `HTTP error! status: ${response.status}`)
       }
 
       // Reset image state
       setImageFile(null)
       setImagePreview(null)
-      setFormData({...formData, image_url: ''})
+      setFormData({...formData, image_url: '', has_modifiers: false, modifierGroups: []})
 
       setShowModal(false)
       loadMenu()
@@ -668,14 +758,28 @@ Gado Gado,30000,Mixed vegetables with peanut sauce,,,true`
     if (!confirm(dt('deleteItemConfirm'))) return
 
     try {
-      await supabase
-        .from('menu_items')
-        .delete()
-        .eq('id', id)
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) throw new Error('Unauthorized')
+
+      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      if (!baseUrl) throw new Error('Supabase URL is not configured')
+
+      const response = await fetch(`${baseUrl}/functions/v1/restaurant-api/menu/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete item via API')
+      }
 
       loadMenu()
     } catch (error) {
       console.error('Error deleting item:', error)
+      alert('Failed to delete item. Please try again.')
     }
   }
 
@@ -1350,6 +1454,114 @@ Gado Gado,30000,Mixed vegetables with peanut sauce,,,true`
                   />
                 </div>
               </div>
+
+              {/* Modifiers Section */}
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Pilihan / Modifiers</h3>
+                    <p className="text-xs text-gray-500">Tambahkan opsi seperti level pedas, topping, dll.</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={formData.has_modifiers}
+                      onChange={(e) => setFormData({...formData, has_modifiers: e.target.checked})}
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+
+                {formData.has_modifiers && (
+                  <div className="space-y-4 mt-4">
+                    {formData.modifierGroups.map((group, gIndex) => (
+                      <div key={gIndex} className="p-4 bg-gray-50 rounded-xl border border-gray-200 relative">
+                        <button
+                          type="button"
+                          onClick={() => removeModifierGroup(gIndex)}
+                          className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 hover:bg-red-200"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="grid grid-cols-1 gap-3 mb-4">
+                          <input
+                            type="text"
+                            placeholder="Nama Grup (misal: Level Pedas)"
+                            value={group.name}
+                            onChange={(e) => updateModifierGroup(gIndex, { name: e.target.value })}
+                            className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <label className="text-[10px] text-gray-500 uppercase font-bold">Min</label>
+                              <input
+                                type="number"
+                                value={group.min_selection}
+                                onChange={(e) => updateModifierGroup(gIndex, { min_selection: parseInt(e.target.value) || 0 })}
+                                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <label className="text-[10px] text-gray-500 uppercase font-bold">Max</label>
+                              <input
+                                type="number"
+                                value={group.max_selection}
+                                onChange={(e) => updateModifierGroup(gIndex, { max_selection: parseInt(e.target.value) || 0 })}
+                                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mt-4">
+                          {group.modifiers.map((mod, mIndex) => (
+                            <div key={mIndex} className="flex gap-2 items-center">
+                              <input
+                                type="text"
+                                placeholder="Nama Opsi"
+                                value={mod.name}
+                                onChange={(e) => updateModifier(gIndex, mIndex, { name: e.target.value })}
+                                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                              />
+                              <input
+                                type="number"
+                                placeholder="Harga"
+                                value={mod.price}
+                                onChange={(e) => updateModifier(gIndex, mIndex, { price: parseFloat(e.target.value) || 0 })}
+                                className="w-24 px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeModifier(gIndex, mIndex)}
+                                className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => addModifier(gIndex)}
+                            className="w-full py-1.5 text-xs border border-dashed border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                          >
+                            + Tambah Opsi
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addModifierGroup}
+                      className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-xl hover:border-blue-400 hover:text-blue-600 transition-all font-medium text-sm"
+                    >
+                      + Tambah Grup Pilihan
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2 pt-4">
                 <button
                   type="button"

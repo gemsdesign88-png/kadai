@@ -1,6 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/server-admin';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { generateInvoicePDF } from '@/lib/pdf-service';
 
 // Add CORS headers for mobile app access
 const corsHeaders = {
@@ -15,11 +16,7 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+    const supabase = createAdminClient();
     
     const body = await request.json();
     const { name, email, whatsapp, subject, message, metadata } = body;
@@ -49,11 +46,13 @@ export async function POST(request: Request) {
     const paymentCode = metadata?.paymentUniqueCode || Math.floor(Math.random() * 900) + 100;
     const lang = metadata?.language || 'id';
     
-    // Generate Invoice Number
-    const date = new Date();
-    const dateStr = date.toISOString().split('T')[0].replace(/-/g, ''); // 20260214
-    const shortId = submission.id.split('-')[0].toUpperCase();
-    const invoiceNumber = `INV/${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${shortId}`;
+    // Generate Invoice Number: KAD-DDMMYY-XXXX
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const year = now.getFullYear().toString().slice(-2);
+    const shortId = submission.id.split('-')[0].toUpperCase().slice(0, 4);
+    const invoiceNumber = `KAD-${day}${month}${year}-${shortId}`;
 
     // Format currency helper
     const formatIdr = (amount: number) => {
@@ -156,47 +155,148 @@ export async function POST(request: Request) {
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
       const translations: Record<string, any> = {
-        id: { subject: 'Permintaan Langganan Kadai', thanks: 'Terima kasih telah mengajukan permintaan langganan Kadai!', subtitle: 'Kami telah menerima permintaan Anda dan akan segera memprosesnya.', greeting: 'Halo', nameLabel: 'Nama Lengkap', emailLabel: 'Email', whatsappLabel: 'WhatsApp', businessTypeLabel: 'Tipe Bisnis', outletCountLabel: 'Jumlah Outlet', summaryLabel: 'Ringkasan Pesanan', subtotalLabel: 'Subtotal', uniqueCodeLabel: 'Kode Unik', totalLabel: 'Total Pembayaran', buttonLabel: '✅ Konfirmasi Sudah Bayar', stepsLabel: 'Langkah Selanjutnya 🚀', step1: 'Tim kami akan menghubungi Anda (WhatsApp 1x24 jam)', step2: 'Verifikasi data & pembayaran', step3: 'Aktivasi akun Kadai', footer: 'Tim Kadai akan segera menghubungi Anda.', invoiceLabel: 'Nomor Invoice' },
-        en: { subject: 'Kadai Subscription Request', thanks: 'Thank you for your Kadai subscription request!', subtitle: 'We have received your request and will process it shortly.', greeting: 'Hello', nameLabel: 'Full Name', emailLabel: 'Email', whatsappLabel: 'WhatsApp', businessTypeLabel: 'Business Type', outletCountLabel: 'Outlet Count', summaryLabel: 'Order Summary', subtotalLabel: 'Subtotal', uniqueCodeLabel: 'Unique Code', totalLabel: 'Total Payment', buttonLabel: '✅ Confirm Payment Made', stepsLabel: 'Next Steps 🚀', step1: 'Our team will contact you (WhatsApp 1x24h)', step2: 'Data & payment verification', step3: 'Kadai account activation', footer: 'Kadai Team will contact you shortly.', invoiceLabel: 'Invoice Number' }
+        id: { 
+          subject: 'Permintaan Langganan Kadai', 
+          thanks: 'Terima kasih telah mengajukan permintaan langganan Kadai!', 
+          subtitle: 'Kami telah menerima permintaan Anda dan akan segera memprosesnya.', 
+          greeting: 'Halo', 
+          nameLabel: 'Nama Lengkap', 
+          emailLabel: 'Email', 
+          whatsappLabel: 'WhatsApp', 
+          businessTypeLabel: 'Tipe Bisnis', 
+          outletCountLabel: 'Jumlah Outlet', 
+          summaryLabel: 'Ringkasan Pesanan', 
+          subtotalLabel: 'Subtotal', 
+          uniqueCodeLabel: 'Kode Unik', 
+          totalLabel: 'Total Pembayaran', 
+          buttonLabel: '✅ Konfirmasi Sudah Bayar', 
+          stepsLabel: 'Langkah Selanjutnya 🚀', 
+          step1: 'Tim kami akan menghubungi Anda (WhatsApp 1x24 jam)', 
+          step2: 'Verifikasi data & pembayaran', 
+          step3: 'Aktivasi akun Kadai', 
+          footer: 'Tim Kadai akan segera menghubungi Anda.', 
+          invoiceLabel: 'Nomor Invoice',
+          paymentInfoLabel: '🏦 Informasi Pembayaran',
+          bankLabel: 'Bank',
+          accountNoLabel: 'No. Rekening',
+          accountNameLabel: 'Atas Nama',
+          transferNote: 'Mohon transfer tepat sampai 3 digit terakhir agar sistem dapat mendeteksi pembayaran Anda secara otomatis.'
+        },
+        en: { 
+          subject: 'Kadai Subscription Request', 
+          thanks: 'Thank you for your Kadai subscription request!', 
+          subtitle: 'We have received your request and will process it shortly.', 
+          greeting: 'Hello', 
+          nameLabel: 'Full Name', 
+          emailLabel: 'Email', 
+          whatsappLabel: 'WhatsApp', 
+          businessTypeLabel: 'Business Type', 
+          outletCountLabel: 'Outlet Count', 
+          summaryLabel: 'Order Summary', 
+          subtotalLabel: 'Subtotal', 
+          uniqueCodeLabel: 'Unique Code', 
+          totalLabel: 'Total Payment', 
+          buttonLabel: '✅ Confirm Payment Made', 
+          stepsLabel: 'Next Steps 🚀', 
+          step1: 'Our team will contact you (WhatsApp 1x24h)', 
+          step2: 'Data & payment verification', 
+          step3: 'Kadai account activation', 
+          footer: 'Kadai Team will contact you shortly.', 
+          invoiceLabel: 'Invoice Number',
+          paymentInfoLabel: '🏦 Payment Information',
+          bankLabel: 'Bank',
+          accountNoLabel: 'Account Number',
+          accountNameLabel: 'Account Name',
+          transferNote: 'Please transfer the exact amount including the last 3 digits so our system can detect your payment automatically.'
+        }
       };
       const t = translations[lang] || translations.id;
+
+      // Generate PDF Invoice
+      const pdfBytes = await generateInvoicePDF({
+        invoiceNumber,
+        date: new Date().toLocaleDateString('id-ID'),
+        customerName: name,
+        customerEmail: email,
+        customerPhone: whatsapp || '',
+        businessType: business_type,
+        items: orderSummaryLines.length > 0 ? orderSummaryLines : [`Langganan Kadai - Paket ${tier_name} - ${formatIdr(total_amount)}`],
+        subtotal: total_amount,
+        uniqueCode: paymentCode,
+        total: total_amount + paymentCode,
+        lang,
+        status: 'PENDING'
+      });
 
       const htmlTemplate = (isCustomer: boolean) => `
         <!DOCTYPE html>
         <html>
-        <body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f5f5f5;">
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f5f5f5;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
             <tr><td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <tr><td style="background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); padding: 40px; text-align: center;">
-                  <h1 style="color: #ffffff; font-size: 24px; margin: 0;">${isCustomer ? t.thanks : 'NEW UPGRADE REQUEST: ' + name}</h1>
-                  <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">${isCustomer ? t.subtitle : 'Business Type: ' + business_type}</p>
+              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+                <tr><td style="background: linear-gradient(135deg, #FF0050 0%, #CC0040 100%); padding: 40px; text-align: center;">
+                  <img src="https://kadaipos.id/logo-email.png" alt="Kadai Logo" style="height: 48px; margin-bottom: 24px;">
+                  <h1 style="color: #ffffff; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${isCustomer ? t.thanks : 'NEW UPGRADE REQUEST: ' + name}</h1>
+                  <p style="color: rgba(255,255,255,0.9); margin-top: 12px; font-size: 16px;">${isCustomer ? t.subtitle : 'Business Type: ' + business_type}</p>
                 </td></tr>
                 <tr><td style="padding: 40px;">
-                  <h2 style="font-size: 18px; margin-bottom: 20px;">${isCustomer ? t.greeting + ' ' + name + '!' : 'Customer Details'}</h2>
-                  <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
-                    <table width="100%">
-                      <tr><td>${t.invoiceLabel}</td><td align="right"><b>${invoiceNumber}</b></td></tr>
-                      <tr><td>${t.nameLabel}</td><td align="right"><b>${name}</b></td></tr>
-                      <tr><td>${t.whatsappLabel}</td><td align="right"><b>${whatsapp}</b></td></tr>
-                      <tr><td>${t.businessTypeLabel}</td><td align="right"><b>${business_type}</b></td></tr>
-                      <tr><td>${t.outletCountLabel}</td><td align="right"><b>${outlet_count} Outlet</b></td></tr>
+                  <h2 style="font-size: 18px; margin-bottom: 24px; color: #1a1a1a;">${isCustomer ? t.greeting + ' ' + name + '!' : 'Customer Details'}</h2>
+                  
+                  <div style="background: #f8fafc; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 32px;">
+                    <table width="100%" style="border-spacing: 0;">
+                      <tr><td style="padding: 8px 0; color: #64748b;">${t.invoiceLabel}</td><td align="right" style="padding: 8px 0;"><strong>${invoiceNumber}</strong></td></tr>
+                      <tr><td style="padding: 8px 0; color: #64748b;">${t.nameLabel}</td><td align="right" style="padding: 8px 0;"><strong>${name}</strong></td></tr>
+                      <tr><td style="padding: 8px 0; color: #64748b;">${t.whatsappLabel}</td><td align="right" style="padding: 8px 0;"><strong>${whatsapp}</strong></td></tr>
+                      <tr><td style="padding: 8px 0; color: #64748b;">${t.businessTypeLabel}</td><td align="right" style="padding: 8px 0;"><strong>${business_type}</strong></td></tr>
+                      <tr><td style="padding: 8px 0; color: #64748b;">${t.outletCountLabel}</td><td align="right" style="padding: 8px 0;"><strong>${outlet_count} Outlet</strong></td></tr>
                     </table>
                   </div>
-                  <div style="padding: 20px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 30px;">
-                    <p style="font-weight: bold; margin-bottom: 15px;">📦 ${t.summaryLabel}</p>
-                    ${orderSummaryLines.length > 0 ? orderSummaryLines.map(line => `<p style="margin: 5px 0; font-size: 14px;">${line}</p>`).join('') : '<p style="margin: 5px 0; font-size: 14px;">Tier: ' + tier_name + '</p>'}
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-                    <table width="100%">
-                      <tr><td>${t.subtotalLabel}</td><td align="right">${formatIdr(total_amount)}</td></tr>
-                      <tr><td style="color: #8B5CF6;">${t.uniqueCodeLabel}</td><td align="right" style="color: #8B5CF6;">+${paymentCode}</td></tr>
-                      <tr><td style="font-weight: bold; font-size: 18px;">${t.totalLabel}</td><td align="right" style="font-weight: bold; font-size: 20px; color: #8B5CF6;">${formatIdr(total_amount + paymentCode)}</td></tr>
+
+                  <div style="padding: 24px; background: #fff5f7; border-radius: 16px; border: 1px solid #fed7e2; margin-bottom: 32px;">
+                    <p style="font-weight: 800; margin: 0 0 16px; color: #9B1C1C; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">${t.paymentInfoLabel}</p>
+                    <table width="100%" style="font-size: 14px; border-spacing: 0;">
+                      <tr><td style="padding: 8px 0; color: #702459;">${t.bankLabel}</td><td align="right" style="padding: 8px 0;"><strong>BCA</strong></td></tr>
+                      <tr><td style="padding: 8px 0; color: #702459;">${t.accountNoLabel}</td><td align="right" style="padding: 8px 0;"><strong style="font-family: 'SF Mono', Consolas, monospace; font-size: 18px; color: #FF0050;">8690868653</strong></td></tr>
+                      <tr><td style="padding: 8px 0; color: #702459;">${t.accountNameLabel}</td><td align="right" style="padding: 8px 0;"><strong>Gemmy Adyendra</strong></td></tr>
+                      <tr><td colspan="2" style="padding-top: 16px; border-top: 1px solid #fed7e2; font-size: 12px; color: #9B1C1C; line-height: 1.5; font-style: italic;">${t.transferNote}</td></tr>
                     </table>
                   </div>
-                  <div style="text-align: center; margin-bottom: 30px;">
-                    <a href="https://app.kadai.id/payment/${submission.id}" style="display: inline-block; background: linear-gradient(135deg, #FF5A5F 0%, #8B5CF6 100%); color: white; padding: 16px 40px; border-radius: 12px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 12px rgba(255,90,95,0.3);">${t.buttonLabel}</a>
+
+                  <div style="padding: 24px; background: white; border-radius: 16px; border: 2px solid #f1f5f9; margin-bottom: 32px;">
+                    <p style="font-weight: 800; margin-bottom: 16px; color: #1a1a1a;">📦 ${t.summaryLabel}</p>
+                    ${orderSummaryLines.length > 0 ? orderSummaryLines.map(line => `<p style="margin: 8px 0; font-size: 14px; color: #475569;">• ${line}</p>`).join('') : '<p style="margin: 8px 0; font-size: 14px; color: #475569;">• Tier: ' + tier_name + '</p>'}
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;">
+                    <table width="100%">
+                      <tr><td style="padding: 4px 0; color: #64748b;">${t.subtotalLabel}</td><td align="right" style="padding: 4px 0;">${formatIdr(total_amount)}</td></tr>
+                      <tr><td style="padding: 4px 0; color: #FF0050; font-weight: 600;">${t.uniqueCodeLabel}</td><td align="right" style="padding: 4px 0; color: #FF0050; font-weight: 600;">+${paymentCode}</td></tr>
+                      <tr><td style="padding: 16px 0 0; font-weight: 800; font-size: 18px; color: #1a1a1a;">${t.totalLabel}</td><td align="right" style="padding: 16px 0 0; font-weight: 800; font-size: 20px; color: #FF0050;">${formatIdr(total_amount + paymentCode)}</td></tr>
+                    </table>
                   </div>
-                  ${isCustomer ? `<h3 style="font-size: 16px; border-top: 1px solid #eee; padding-top: 20px;">${t.stepsLabel}</h3><p style="font-size: 14px; color: #666;">• ${t.step1}<br>• ${t.step2}<br>• ${t.step3}</p>` : `<p style="font-size: 11px; color: #999;">Raw Message:<br>${message.replace(/\n/g, '<br>')}</p>`}
+
+                  <div style="text-align: center; margin-bottom: 32px;">
+                    <a href="https://wa.me/628211031903?text=${encodeURIComponent('Halo Admin, saya konfirmasi pembayaran untuk Invoice ' + invoiceNumber)}" style="display: inline-block; background: #FF0050; color: white; padding: 18px 48px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 16px; box-shadow: 0 4px 14px rgba(255,0,80,0.4);">${t.buttonLabel}</a>
+                  </div>
+
+                  ${isCustomer ? `
+                  <div style="border-top: 2px solid #f1f5f9; padding-top: 32px;">
+                    <h3 style="font-size: 16px; font-weight: 800; color: #1a1a1a; margin-bottom: 16px;">${t.stepsLabel}</h3>
+                    <div style="color: #64748b; font-size: 14px; line-height: 1.6;">
+                      <p style="margin: 8px 0;">✅ ${t.step1}</p>
+                      <p style="margin: 8px 0;">✅ ${t.step2}</p>
+                      <p style="margin: 8px 0;">✅ ${t.step3}</p>
+                    </div>
+                  </div>
+                  ` : `
+                  <div style="border-top: 2px solid #f1f5f9; padding-top: 32px;">
+                    <p style="font-size: 11px; color: #94a3b8; font-family: monospace;">Raw Message Source:<br>${message.replace(/\n/g, '<br>')}</p>
+                  </div>
+                  `}
+
+                  <p style="margin-top: 40px; font-size: 12px; color: #94a3b8; text-align: center;">
+                    Email ini dikirim secara otomatis oleh sistem penagihan Kadai.<br>
+                    &copy; 2026 PT Kadai Indonesia. All rights reserved.
+                  </p>
                 </td></tr>
               </table>
             </td></tr>
@@ -210,18 +310,30 @@ export async function POST(request: Request) {
         from: 'Kadai <no-reply@kadaipos.id>',
         to: email,
         subject: t.subject,
-        html: htmlTemplate(true)
+        html: htmlTemplate(true),
+        attachments: [
+          {
+            filename: `Invoice_${invoiceNumber}.pdf`,
+            content: Buffer.from(pdfBytes)
+          }
+        ]
       });
       // Admin Email
       await resend.emails.send({
         from: 'Kadai Notification <no-reply@kadaipos.id>',
         to: 'gemmyadyendra@gmail.com',
         subject: `[UPGRADE] ${name} - ${business_type}`,
-        html: htmlTemplate(false)
+        html: htmlTemplate(false),
+        attachments: [
+          {
+            filename: `Invoice_${invoiceNumber}.pdf`,
+            content: Buffer.from(pdfBytes)
+          }
+        ]
       });
     }
 
-    return NextResponse.json({ success: true, submissionId: submission.id }, { headers: corsHeaders });
+    return NextResponse.json({ success: true, submissionId: submission.id, invoiceNumber }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });

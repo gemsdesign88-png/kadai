@@ -355,3 +355,52 @@ body.order-page-active nav[role="navigation"]:not(.order-page-wrapper nav) {
   position: relative;
   z-index: 1;
 }
+
+/* Fix autofill/autocomplete styling - prevent blue background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: var(--color-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--color-primary);
+}
+
+/* For dark backgrounds */
+input:-webkit-autofill {
+  background-clip: text;
+}
+
+/* Prevent selection highlighting issues */
+input::selection,
+textarea::selection {
+  background-color: rgba(255, 90, 95, 0.2);
+  color: var(--color-primary);
+}
+
+/* Ensure clean input appearance */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Remove autocomplete dropdown styling */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+  margin: 0;
+}

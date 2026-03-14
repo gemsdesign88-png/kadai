@@ -8,14 +8,13 @@ import { Container } from "@/components/ui/container"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/ui/language-switcher"
 import { useLanguage } from "@/lib/i18n/context"
-import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store, UtensilsCrossed, Scissors, Warehouse } from "lucide-react"
+import { Menu, X, ShoppingCart, Utensils, TrendingUp, Users, Grid, CreditCard, Package, ChefHat, QrCode, Tag, Heart, Settings, Palette, ChevronDown, Store, UtensilsCrossed, Scissors, Warehouse, Globe } from "lucide-react"
 import { motion } from "framer-motion"
 
 const navigation = [
   { name: "features", href: "/features", hasDropdown: true },
   { name: "pricing", href: "/pricing" },
   { name: "business", href: "/business", hasDropdown: true },
-  { name: "warehouse", href: "/warehouse" },
   { name: "benefits", href: "/benefits" },
   { name: "about", href: "/about" },
   { name: "contact", href: "/contact" },
@@ -24,7 +23,10 @@ const navigation = [
 const businessMenu = [
   { icon: Store, titleId: "tokoTitle", descId: "tokoDesc", href: "/business/toko", color: "#0066FF" },
   { icon: UtensilsCrossed, titleId: "restoTitle", descId: "restoDesc", href: "/business/resto", color: "#FF6B35" },
+  { icon: ChefHat, titleId: "preppoTitle", descId: "preppoDesc", href: "/business/preppo", color: "#F59E0B" },
+  { icon: Warehouse, titleId: "depoTitle", descId: "depoDesc", href: "/business/depo", color: "#10B981" },
   { icon: Scissors, titleId: "proTitle", descId: "proDesc", href: "/business/pro", color: "#8B5CF6" },
+  { icon: Globe, titleId: "customerTitle", descId: "customerDesc", href: "/business/customer", color: "#3B82F6" },
 ]
 
 const featuresMenu = [

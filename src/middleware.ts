@@ -100,6 +100,7 @@ export async function middleware(request: NextRequest) {
     '/warehouse',
     '/api/demo-request',
     '/register',
+    '/ecosystem-demo',
   ];
   
   // Check if the path starts with any public route

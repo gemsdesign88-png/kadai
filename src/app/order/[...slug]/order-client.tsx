@@ -477,7 +477,7 @@ export default function CustomerOrderPage() {
 
       {/* Menu Items - Modern Card Layout */}
       <div className="px-4 py-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filteredMenu.map((item) => {
             const cartItem = orderItems.find((i) => i.id === item.id);
             const inCart = !!cartItem;
@@ -485,19 +485,20 @@ export default function CustomerOrderPage() {
             return (
               <div
                 key={item.id}
-                className={`bg-white rounded-2xl shadow-sm border-2 overflow-hidden transition-all duration-300 hover:shadow-lg`}
+                onClick={() => !inCart && addItem(item)}
+                className={`group relative aspect-square bg-white rounded-2xl shadow-sm border-2 overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer`}
                 style={{
                   borderColor: inCart ? primaryColor : '#F3F4F6',
-                  boxShadow: inCart ? `0 0 0 2px ${primaryColor}20` : 'none'
+                  boxShadow: inCart ? `0 0 0 2px ${primaryColor}40` : 'none'
                 }}
               >
                 {/* Image Section */}
-                <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200">
                   {item.image_url ? (
                     <img
                       src={getMenuImageUrl(item.image_url) || ''}
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       onError={(e) => {
                         // Fallback to placeholder if image fails to load
                         (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300/f3f4f6/9ca3af?text=${encodeURIComponent(item.name)}`;
@@ -506,90 +507,58 @@ export default function CustomerOrderPage() {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-2 bg-gray-300 rounded-full flex items-center justify-center">
-                          <span className="text-2xl">🍽️</span>
+                        <div className="w-12 h-12 mx-auto mb-2 bg-gray-300 rounded-full flex items-center justify-center">
+                          <span className="text-xl">🍽️</span>
                         </div>
-                        <p className="text-xs text-gray-500 font-medium">No Image</p>
+                        <p className="text-[10px] text-gray-500 font-medium">No Image</p>
                       </div>
                     </div>
                   )}
 
-                  {/* Quantity Badge */}
-                  {inCart && cartItem && (
-                    <div className="absolute top-3 right-3 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg" style={{ backgroundColor: primaryColor }}>
-                      {cartItem.quantity}
-                    </div>
-                  )}
-                </div>
+                  {/* Gradient Overlay for Title */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
-                {/* Content Section */}
-                <div className="p-4">
-                  {/* Item Name and Category */}
-                  <div className="mb-2">
-                    <h3 className="text-lg font-bold text-gray-900 line-clamp-2">{item.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {item.menu_category?.name || item.category}
+                  {/* Title and Price Overlay */}
+                  <div className="absolute inset-x-0 bottom-0 p-3 md:p-4 pointer-events-none">
+                    <h3 className="text-white font-bold text-sm sm:text-base md:text-lg line-clamp-2 leading-tight">
+                      {item.name}
+                    </h3>
+                    <p className="text-white/90 text-[10px] md:text-xs font-semibold mt-1">
+                      Rp{item.price.toLocaleString('id-ID')}
                     </p>
                   </div>
 
-                  {/* Description */}
-                  {item.description && (
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                      {item.description}
-                    </p>
-                  )}
-
-                  {/* Price and Quantity Controls */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-xl font-bold text-gray-900">
-                        Rp{item.price.toLocaleString('id-ID')}
-                      </span>
-                    </div>
-
-                    {inCart && cartItem ? (
-                      // Quantity Controls (like mobile app)
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => updateQuantity(item.id, cartItem.quantity - 1)}
-                          className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm"
-                          style={{
-                            backgroundColor: 'white',
-                            border: '2px solid #E5E7EB',
-                            color: primaryColor
-                          }}
-                        >
-                          <Minus className="w-5 h-5" />
-                        </button>
-                        <span className="text-lg font-bold text-gray-900 min-w-[32px] text-center">
-                          {cartItem.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateQuantity(item.id, cartItem.quantity + 1)}
-                          className="w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 shadow-sm"
-                          style={{
-                            backgroundColor: primaryColor,
-                            color: 'white'
-                          }}
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      // Add Button
+                  {/* Quantity and Controls - Interactive Badge */}
+                  {inCart && cartItem ? (
+                    <div 
+                      className="absolute top-3 right-3 flex items-center bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
-                        onClick={() => addItem(item)}
-                        className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm"
-                        style={{
-                          backgroundColor: 'white',
-                          border: '2px solid #E5E7EB',
-                          color: '#374151'
-                        }}
+                        onClick={() => updateQuantity(item.id, cartItem.quantity - 1)}
+                        className="p-1 px-2 hover:bg-gray-50 transition-colors"
+                        style={{ color: primaryColor }}
                       >
-                        <Plus className="w-6 h-6" />
+                        <Minus className="w-4 h-4" />
                       </button>
-                    )}
-                  </div>
+                      <span className="text-sm font-bold text-gray-900 px-1 min-w-[20px] text-center">
+                        {cartItem.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, cartItem.quantity + 1)}
+                        className="p-1 px-2 hover:bg-gray-50 transition-colors"
+                        style={{ color: primaryColor }}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 scale-90 group-hover:scale-100">
+                      <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 text-gray-900 shadow-md">
+                        <Plus className="w-5 h-5" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );

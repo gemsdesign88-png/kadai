@@ -1,14 +1,48 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server-admin';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { generateInvoicePDF } from '@/lib/pdf-service';
 
 const ADMIN_EMAILS = ['gemmyadyendra@gmail.com', 'admin@kadaipos.id', 'mamak@kadaipos.id'];
+
+const normalizeStoreName = (name: string) =>
+  name
+    .replace(/^\d+\.\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+const extractStoreNamesFromOrderSummary = (orderSummary: unknown): string[] => {
+  const lines: string[] = Array.isArray(orderSummary)
+    ? orderSummary.map((line) => String(line || '').trim())
+    : typeof orderSummary === 'string'
+      ? orderSummary
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+      : [];
+
+  if (lines.length === 0) return [];
+
+  return lines
+    .map((line) => {
+      const arrowSplit = line.split('->');
+      if (arrowSplit.length >= 2) return arrowSplit[0].trim();
+
+      const dashSplit = line.split(' - ');
+      return dashSplit.length >= 2 ? dashSplit[0].trim() : '';
+    })
+    .map((name) => normalizeStoreName(name))
+    .filter((name) => !!name && !name.includes('slot outlet'));
+};
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    const adminSupabase = createAdminClient();
     
-    // Verify admin access
+    // Verify admin access via normal client
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -24,8 +58,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Submission ID and User ID are required' }, { status: 400 });
     }
 
-    // Get submission details for email
-    const { data: submission, error: fetchSubError } = await supabase
+    // Get submission details using admin client to ensure we can read it
+    const { data: submission, error: fetchSubError } = await adminSupabase
       .from('contact_submissions')
       .select('*')
       .eq('id', submissionId)
@@ -33,62 +67,184 @@ export async function POST(request: Request) {
 
     if (fetchSubError) throw fetchSubError;
 
+    const isFirstApproval = submission.status === 'new';
+
     // 1. Update contact submission status
-    const { error: subError } = await supabase
+    const notesPrefix = isFirstApproval ? 'Approved by admin' : 'Re-applied approval by admin';
+    const { error: subError } = await adminSupabase
       .from('contact_submissions')
-      .update({ status: 'replied', notes: `Approved by admin at ${new Date().toISOString()}` })
+      .update({ status: 'replied', notes: `${notesPrefix} at ${new Date().toISOString()}` })
       .eq('id', submissionId);
 
     if (subError) throw subError;
 
-    // 2. Update user_profiles.outlet_count
-    if (outletCount && outletCount > 0) {
-      const { error: profileError } = await supabase
+    // 2. Update user_profiles.outlet_count only on first approval
+    if (isFirstApproval && outletCount && outletCount > 0) {
+      // First get current count
+      const { data: profile } = await adminSupabase
         .from('user_profiles')
-        .update({ outlet_count: outletCount })
+        .select('outlet_count')
+        .eq('id', userId)
+        .single();
+      
+      const currentCount = profile?.outlet_count || 0;
+      const newTotalCount = currentCount + outletCount;
+
+      const { error: profileError } = await adminSupabase
+        .from('user_profiles')
+        .update({ outlet_count: newTotalCount })
         .eq('id', userId);
       
       if (profileError) throw profileError;
+      console.log(`✅ Updated outlet_count from ${currentCount} to ${newTotalCount} for user ${userId}`);
+    } else if (!isFirstApproval) {
+      console.log(`ℹ️ Skipped outlet_count increment for re-approval on submission ${submissionId}`);
     }
 
-    // 3. Activate the main Preppo/Depo store if applicable
-    const { data: stores, error: storeFetchError } = await supabase
-      .from('restaurants')
-      .select('id, name, business_type')
-      .eq('owner_id', userId)
-      .eq('is_active', false)
-      .order('created_at', { ascending: false });
-
-    if (storeFetchError) throw storeFetchError;
-
+    // 3. Activate/Upgrade Restaurants
+    const metadata = submission.metadata || {};
+    const restaurantIdFromMetadata = metadata.restaurantId;
+    const restaurantIdsFromMetadata = Array.isArray(metadata.restaurantIds)
+      ? metadata.restaurantIds.filter((id: unknown) => typeof id === 'string')
+      : [];
+    const orderSummaryStoreNames = extractStoreNamesFromOrderSummary(
+      metadata.order_summary || metadata.orderSummary || submission.message || ''
+    );
+    const effectiveBusinessType = String(
+      businessType || metadata.businessType || metadata.business_type || ''
+    ).toLowerCase();
+    
     let activatedStoreName = 'Toko';
-    if (stores && stores.length > 0) {
-      activatedStoreName = stores[0].name;
-      const { error: activateError } = await supabase
-        .from('restaurants')
-        .update({ 
-          is_active: true,
-          subscription_status: 'active',
-          subscription_plan: 'monthly',
-          subscription_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        })
-        .eq('id', stores[0].id);
-      
-      if (activateError) throw activateError;
+
+    // Set expiration 32 days from now (30 days + 2 days grace)
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate() + 32);
+
+    const updatePayload = {
+      is_active: true,
+      subscription_status: 'active',
+      subscription_plan: 'monthly',
+      // Map Preppo/Depo to 'pro' for now because of DB constraint 'restaurants_plan_tier_check'
+      // which only allows ['toko', 'starter', 'growth', 'pro']
+      plan_tier: (effectiveBusinessType === 'preppo' || effectiveBusinessType === 'depo' || effectiveBusinessType === 'pro') ? 'pro' :
+                 (['toko', 'starter', 'growth', 'pro'].includes(effectiveBusinessType) ? effectiveBusinessType : 'starter'),
+      is_trial: false,
+      subscription_starts_at: startDate.toISOString(),
+      subscription_ends_at: endDate.toISOString()
+    };
+
+    const targetRestaurantIds = new Set<string>();
+
+    if (restaurantIdFromMetadata && typeof restaurantIdFromMetadata === 'string') {
+      targetRestaurantIds.add(restaurantIdFromMetadata);
     }
 
-    // 4. Send approval email to customer
+    for (const id of restaurantIdsFromMetadata) {
+      targetRestaurantIds.add(id);
+    }
+
+    if (orderSummaryStoreNames.length > 0) {
+      const { data: ownerRestaurants, error: ownerRestaurantsError } = await adminSupabase
+        .from('restaurants')
+        .select('id, name')
+        .eq('owner_id', userId);
+
+      if (ownerRestaurantsError) {
+        console.error('❌ Error loading owner restaurants:', ownerRestaurantsError);
+      } else if (ownerRestaurants) {
+        const orderSummarySet = new Set(orderSummaryStoreNames);
+        for (const store of ownerRestaurants) {
+          if (orderSummarySet.has(normalizeStoreName(store.name || ''))) {
+            targetRestaurantIds.add(store.id);
+          }
+        }
+      }
+    }
+
+    if (targetRestaurantIds.size > 0) {
+      const targetIds = Array.from(targetRestaurantIds);
+      const { data: targetedActivated, error: targetedError } = await adminSupabase
+        .from('restaurants')
+        .update(updatePayload)
+        .in('id', targetIds)
+        .select('name');
+
+      if (targetedError) {
+        console.error('❌ Error in targeted activation:', targetedError);
+      } else if (targetedActivated && targetedActivated.length > 0) {
+        activatedStoreName = targetedActivated[0].name;
+        console.log(`✅ Activated ${targetedActivated.length} targeted restaurants for user ${userId}`);
+      }
+    }
+
+    // Fallback: activate by owner (+ optional business_type) if no explicit target was found.
+    if (activatedStoreName === 'Toko') {
+      let massActivateQuery = adminSupabase
+        .from('restaurants')
+        .update(updatePayload)
+        .eq('owner_id', userId);
+
+      if (effectiveBusinessType) {
+        massActivateQuery = massActivateQuery.eq('business_type', effectiveBusinessType);
+      }
+
+      const { data: activatedBunch, error: massActivateError } = await massActivateQuery.select('name');
+
+      if (massActivateError) {
+        console.error('❌ Error in mass activation:', massActivateError);
+      } else if (activatedBunch && activatedBunch.length > 0) {
+        activatedStoreName = activatedBunch[0].name;
+        console.log(`✅ Mass activated ${activatedBunch.length} restaurants for user ${userId}`);
+      }
+    }
+
+    // 4. Send approval email to customer with Invoice Attachment
     try {
       const resendApiKey = process.env.RESEND_API_KEY;
       if (resendApiKey && submission.email) {
         const resend = new Resend(resendApiKey);
         const name = submission.name || 'Pelanggan';
-        const typeLabel = businessType === 'preppo' ? 'Preppo' : (businessType === 'depo' ? 'Depo' : 'Premium');
+        const typeLabel = effectiveBusinessType === 'preppo' ? 'Preppo' : (effectiveBusinessType === 'depo' ? 'Depo' : 'Premium');
+        const now = new Date();
+        const day = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const year = now.getFullYear().toString().slice(-2);
+        const fallbackId = submissionId.split('-')[0].toUpperCase().slice(0, 4);
+        const invoiceNo = submission.metadata?.invoice_number || `KAD-${day}${month}${year}-${fallbackId}`;
+        const totalAmount = submission.metadata?.totalAmount || 0;
+        const paymentCode = submission.metadata?.payment_code || 0;
+        const finalAmount = totalAmount + paymentCode;
+
+        // Helper to format currency
+        const formatIdr = (amount: number) => {
+          return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+          }).format(amount);
+        };
+
+        // Generate PDF Invoice (PAID/Lunas version)
+        const pdfBytes = await generateInvoicePDF({
+          invoiceNumber: invoiceNo,
+          date: new Date().toLocaleDateString('id-ID'),
+          customerName: name,
+          customerEmail: submission.email,
+          customerPhone: submission.whatsapp || '',
+          businessType: typeLabel,
+          items: submission.metadata?.order_summary || [`Langganan Kadai - Paket ${typeLabel} - ${formatIdr(totalAmount)}`],
+          subtotal: totalAmount,
+          uniqueCode: paymentCode,
+          total: finalAmount,
+          lang: 'id',
+          status: 'PAID'
+        });
 
         await resend.emails.send({
           from: 'Kadai <no-reply@kadaipos.id>',
           to: submission.email,
-          subject: '🎉 Selamat! Akun Kadai Anda Telah Aktif',
+          subject: '🎉 Akun Kadai Anda Telah Aktif & Invoice Lunas',
           html: `
 <!DOCTYPE html>
 <html lang="id">
@@ -102,200 +258,78 @@ export async function POST(request: Request) {
         <tr>
             <td align="center">
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                    
-                    <!-- Header with Gradient -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); padding: 40px 40px 30px; text-align: center;">
-                            <div style="margin-bottom: 20px;">
-                                <svg width="160" height="53" viewBox="0 0 180 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block;">
-                                    <path d="M35.8292 17.2939C38.4963 16.5793 41.2383 18.1621 41.9532 20.8291L49.7178 49.8076C50.4324 52.4748 48.8497 55.2158 46.1827 55.9307C43.5153 56.6454 40.7734 55.0628 40.0587 52.3955L32.294 23.418C31.5793 20.7508 33.1621 18.0088 35.8292 17.2939ZM17.127 20.3115C17.8419 17.6446 20.583 16.062 23.2501 16.7764C25.9174 17.4911 27.5009 20.2331 26.7862 22.9004L19.0215 51.8779C18.3068 54.5452 15.5648 56.1278 12.8975 55.4131C10.2305 54.6983 8.64788 51.9572 9.36237 49.29L17.127 20.3115ZM45.0001 4C47.7615 4.00003 50.0001 6.2386 50.0001 9C50.0001 11.7614 47.7615 14 45.0001 14H15.0001C12.2386 14 10.0001 11.7614 10.0001 9C10.0001 6.23858 12.2386 4 15.0001 4H45.0001Z" fill="#FFFFFF"/>
-                                    <path d="M68 45.078V14.418H72.83V32.226H77.45L82.826 23.658H88.16L82.154 32.982C84.086 33.654 85.584 34.788 86.648 36.384C87.712 37.952 88.244 39.758 88.244 41.802V45.078H83.414V41.802C83.414 40.794 83.176 39.884 82.7 39.072C82.224 38.232 81.58 37.574 80.768 37.098C79.956 36.622 79.032 36.384 77.996 36.384H72.83V45.078H68Z" fill="#FFFFFF"/>
-                                </svg>
-                            </div>
+                        <td style="background: linear-gradient(135deg, #FF0050 0%, #D00040 100%); padding: 40px 40px 30px; text-align: center;">
+                            <img src="https://kadaipos.id/logo-email.png" alt="Kadai Logo" style="height: 40px; margin-bottom: 20px;">
                             <h1 style="color: #ffffff; font-size: 28px; font-weight: 700; margin: 0 0 10px; line-height: 1.2;">
-                                🎉 Akun Anda Telah Aktif!
+                                🎉 Akun Telah Aktif!
                             </h1>
                             <p style="color: rgba(255, 255, 255, 0.9); font-size: 16px; margin: 0; line-height: 1.5;">
                                 Selamat bergabung dengan Kadai ${typeLabel}
                             </p>
                         </td>
                     </tr>
-
-                    <!-- Content -->
                     <tr>
                         <td style="padding: 40px;">
                             <h2 style="color: #1a1a1a; font-size: 20px; font-weight: 600; margin: 0 0 20px;">
                                 Halo, ${name}! 👋
                             </h2>
                             <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 0 0 24px;">
-                                Kami punya kabar gembira! Permintaan aktivasi paket <strong>Kadai ${typeLabel}</strong> Anda telah disetujui dan akun Anda sekarang sudah <strong style="color: #10B981;">AKTIF</strong>! 🚀
+                                Permintaan aktivasi paket <strong>Kadai ${typeLabel}</strong> Anda telah disetujui. Akun Anda sekarang sudah <strong style="color: #FF0050;">AKTIF</strong>!
                             </p>
-
-                            <!-- Success Box -->
+                            
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
                                 <tr>
-                                    <td style="padding: 24px; background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); border-radius: 12px; border-left: 4px solid #10B981;">
-                                        <p style="color: #065F46; font-size: 16px; font-weight: 700; margin: 0 0 12px;">
-                                            ✅ Aktivasi Berhasil
-                                        </p>
-                                        <ul style="margin: 0; padding-left: 20px; color: #047857;">
-                                            <li style="margin-bottom: 8px;">Toko Utama (<strong>${activatedStoreName}</strong>) sudah aktif</li>
-                                            ${outletCount > 1 ? `<li style="margin-bottom: 8px;">Anda memiliki total <strong>${outletCount} slot outlet</strong></li>` : ''}
-                                            ${outletCount > 1 ? `<li style="margin-bottom: 8px;">Anda dapat menambah <strong>${outletCount - 1} outlet tambahan</strong> di menu Manajemen Toko</li>` : ''}
-                                            <li>Semua fitur ${typeLabel} sekarang tersedia untuk Anda</li>
-                                        </ul>
+                                    <td style="padding: 24px; background: #fff5f7; border-radius: 12px; border-left: 4px solid #FF0050;">
+                                        <p style="margin: 0 0 8px; font-size: 12px; color: #9B1C1C; font-weight: bold; text-transform: uppercase;">Nomor Invoice Lunas</p>
+                                        <p style="font-family: monospace; font-size: 18px; font-weight: bold; color: #7F1D1D; margin: 0;">${invoiceNo}</p>
+                                        <p style="margin: 8px 0 0; font-size: 13px; color: #9B1C1C;">File invoice resmi (PDF) telah kami lampirkan di email ini.</p>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Next Steps -->
-                            <h3 style="color: #1a1a1a; font-size: 18px; font-weight: 600; margin: 0 0 16px;">
-                                Langkah Selanjutnya 🚀
-                            </h3>
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
-                                <tr>
-                                    <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
-                                        <table width="100%" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td width="40" valign="top">
-                                                    <table cellpadding="0" cellspacing="0" style="width: 32px; height: 32px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%;">
-                                                        <tr>
-                                                            <td align="center" valign="middle" style="color: #ffffff; font-weight: 600; font-size: 14px;">1</td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                                <td style="padding-left: 12px;">
-                                                    <p style="color: #1a1a1a; font-size: 15px; font-weight: 600; margin: 0 0 4px;">Buka Aplikasi Kadai</p>
-                                                    <p style="color: #6b7280; font-size: 13px; margin: 0; line-height: 1.4;">Login dan mulai gunakan fitur-fitur baru Anda</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
-                                        <table width="100%" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td width="40" valign="top">
-                                                    <table cellpadding="0" cellspacing="0" style="width: 32px; height: 32px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%;">
-                                                        <tr>
-                                                            <td align="center" valign="middle" style="color: #ffffff; font-weight: 600; font-size: 14px;">2</td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                                <td style="padding-left: 12px;">
-                                                    <p style="color: #1a1a1a; font-size: 15px; font-weight: 600; margin: 0 0 4px;">Kelola Toko Anda</p>
-                                                    <p style="color: #6b7280; font-size: 13px; margin: 0; line-height: 1.4;">Setup menu, staff, dan konfigurasi toko Anda</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px 0;">
-                                        <table width="100%" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td width="40" valign="top">
-                                                    <table cellpadding="0" cellspacing="0" style="width: 32px; height: 32px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%;">
-                                                        <tr>
-                                                            <td align="center" valign="middle" style="color: #ffffff; font-weight: 600; font-size: 14px;">3</td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                                <td style="padding-left: 12px;">
-                                                    <p style="color: #1a1a1a; font-size: 15px; font-weight: 600; margin: 0 0 4px;">Mulai Transaksi</p>
-                                                    <p style="color: #6b7280; font-size: 13px; margin: 0; line-height: 1.4;">Sistem POS Anda siap digunakan!</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
+                            <div style="margin-bottom: 30px;">
+                                <h3 style="color: #1a1a1a; font-size: 18px; font-weight: 600; margin: 0 0 16px;">Detail Outlet:</h3>
+                                <ul style="margin: 0; padding-left: 20px; color: #4a5568;">
+                                    <li style="margin-bottom: 8px;">Toko Utama: <strong>${activatedStoreName}</strong></li>
+                                    ${outletCount > 1 ? `<li>Total Slot Outlet: <strong>${outletCount} Outlet</strong></li>` : ''}
+                                </ul>
+                            </div>
 
-                            ${outletCount > 1 ? `
-                            <!-- Info Box for Multiple Outlets -->
-                            <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-left: 4px solid #3B82F6; border-radius: 8px; margin-bottom: 24px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <p style="color: #1e40af; font-size: 14px; font-weight: 600; margin: 0 0 8px;">
-                                            📍 Menambah Outlet Tambahan
-                                        </p>
-                                        <p style="color: #1e40af; font-size: 14px; line-height: 1.5; margin: 0;">
-                                            Anda memiliki ${outletCount - 1} slot outlet tambahan. Untuk menambahkan outlet baru, buka menu <strong>Manajemen Toko</strong> di aplikasi Kadai.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                            ` : ''}
-
-                            <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0;">
-                                Terima kasih telah mempercayakan bisnis Anda kepada Kadai. Jika ada pertanyaan, jangan ragu untuk menghubungi kami.
+                            <div style="text-align: center;">
+                                <a href="https://app.kadai.id" style="display: inline-block; background: #FF0050; color: white; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-weight: bold;">Masuk ke Aplikasi</a>
+                            </div>
+                            
+                            <p style="margin-top: 30px; font-size: 12px; color: #718096; text-align: center;">
+                                Butuh bantuan? Hubungi kami di WhatsApp <a href="https://wa.me/628211031903" style="color: #FF0050;">+62 821 1031 9033</a>
                             </p>
                         </td>
                     </tr>
-
-                    <!-- Footer -->
-                    <tr>
-                        <td style="background: #f9fafb; padding: 30px 40px; border-top: 1px solid #e5e7eb;">
-                            <table width="100%" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td align="center" style="padding-bottom: 16px;">
-                                        <p style="color: #1a1a1a; font-size: 16px; font-weight: 600; margin: 0 0 8px;">
-                                            Butuh Bantuan? 🤝
-                                        </p>
-                                        <p style="color: #6b7280; font-size: 14px; margin: 0 0 12px;">
-                                            Tim kami siap membantu Anda 24/7
-                                        </p>
-                                        <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
-                                            <tr>
-                                                <td style="padding: 0 12px;">
-                                                    <a href="mailto:support@kadaipos.id" style="color: #10B981; font-size: 14px; font-weight: 600; text-decoration: none;">
-                                                        📧 support@kadaipos.id
-                                                    </a>
-                                                </td>
-                                                <td style="padding: 0 12px; border-left: 1px solid #e5e7eb;">
-                                                    <a href="https://wa.me/6281339765775" style="color: #10B981; font-size: 14px; font-weight: 600; text-decoration: none;">
-                                                        📱 WhatsApp
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td align="center" style="padding-top: 16px; border-top: 1px solid #e5e7eb;">
-                                        <p style="color: #9ca3af; font-size: 12px; line-height: 1.5; margin: 0 0 8px;">
-                                            © 2025 Kadai. All rights reserved.
-                                        </p>
-                                        <p style="color: #9ca3af; font-size: 12px; line-height: 1.5; margin: 0;">
-                                            <a href="https://kadaipos.id" style="color: #9ca3af; text-decoration: none;">Website</a> •
-                                            <a href="https://kadaipos.id/privacy" style="color: #9ca3af; text-decoration: none;">Privacy</a> •
-                                            <a href="https://kadaipos.id/terms" style="color: #9ca3af; text-decoration: none;">Terms</a>
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-
                 </table>
             </td>
         </tr>
     </table>
 </body>
-</html>
-          `
+</html>`,
+          attachments: [
+            {
+              content: Buffer.from(pdfBytes).toString('base64'),
+              filename: `Invoice-${invoiceNo.replace(/\//g, '-')}.pdf`,
+              type: 'application/pdf',
+            }
+          ]
         });
-        console.log(`Approval email sent to ${submission.email}`);
+        console.log(`Approval email sent with invoice to ${submission.email}`);
       }
     } catch (emailError) {
       console.error('Error sending approval email:', emailError);
-      // We don't throw here to avoid failing the whole process if only email fails
     }
 
     return NextResponse.json({ success: true, message: 'Upgrade approved successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : 'Internal server error';
     console.error('Error in approve-upgrade API:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }
+

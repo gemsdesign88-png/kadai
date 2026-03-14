@@ -1,3 +1,4 @@
+import { EcosystemHero } from "@/components/sections/ecosystem-hero"
 import { BusinessHealth } from "@/components/sections/business-health"
 import { IndustrySelector } from "@/components/sections/industry-selector"
 import { DualModeSystem } from "@/components/sections/dual-mode-system"
@@ -18,6 +19,7 @@ export default async function Home() {
   
   return (
     <main className="relative">
+      <EcosystemHero />
       <BusinessHealth />
       <IndustrySelector />
       <MagicPasteShowcase />

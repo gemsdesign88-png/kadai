@@ -944,16 +944,16 @@ export default function AdminDashboard({
                               Email
                             </Button>
                             
-                            {lead.subject.includes('Upgrade Request') && lead.status === 'new' && (
+                            {lead.subject.includes('Upgrade Request') && (
                               <Button
                                 variant="default"
                                 size="sm"
-                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                className={`flex-1 ${lead.status === 'new' ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'}`}
                                 onClick={() => handleApproveUpgrade(lead)}
                                 disabled={saving}
                               >
                                 <CheckCircle2 className="w-4 h-4 mr-2" />
-                                Approve Upgrade
+                                {lead.status === 'new' ? 'Approve Upgrade' : 'Re-apply Upgrade'}
                               </Button>
                             )}
                           </div>

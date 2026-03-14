@@ -76,7 +76,8 @@ export default function ContactForm({ type, subjectPrefix }: ContactFormProps) {
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   type="text"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
+                  autoComplete="off"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
                   placeholder={formStrings.placeholders.name}
                 />
               </div>
@@ -91,7 +92,8 @@ export default function ContactForm({ type, subjectPrefix }: ContactFormProps) {
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
                   type="email"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
+                  autoComplete="email"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
                   placeholder={formStrings.placeholders.email}
                 />
               </div>
@@ -107,7 +109,8 @@ export default function ContactForm({ type, subjectPrefix }: ContactFormProps) {
                   value={formData.whatsapp}
                   onChange={e => setFormData({ ...formData, whatsapp: e.target.value })}
                   type="tel"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
+                  autoComplete="tel"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
                   placeholder={formStrings.placeholders.whatsapp}
                 />
               </div>
@@ -123,7 +126,8 @@ export default function ContactForm({ type, subjectPrefix }: ContactFormProps) {
                   value={formData.subject}
                   onChange={e => setFormData({ ...formData, subject: e.target.value })}
                   type="text"
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
+                  autoComplete="off"
+                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium"
                   placeholder={formStrings.placeholders.subject}
                 />
               </div>
@@ -137,7 +141,8 @@ export default function ContactForm({ type, subjectPrefix }: ContactFormProps) {
                 rows={4}
                 value={formData.message}
                 onChange={e => setFormData({ ...formData, message: e.target.value })}
-                className="w-full p-6 bg-gray-50 border-transparent rounded-3xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium resize-none text-lg"
+                autoComplete="off"
+                className="w-full p-6 bg-gray-50 border border-gray-200 rounded-3xl focus:bg-white focus:border-[#FF5A5F] focus:ring-4 focus:ring-[#FF5A5F]/5 transition-all outline-none font-medium resize-none text-lg"
                 placeholder={formStrings.placeholders.message}
               />
             </div>
