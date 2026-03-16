@@ -235,12 +235,6 @@ export default function AboutPage() {
                 >
                   {t.about.cta.contactUs}
                 </Link>
-                <Link
-                  href="/pricing"
-                  className="px-8 py-5 border-2 border-white/20 text-white rounded-full font-black hover:bg-white/10 transition-colors"
-                >
-                  {t.about.cta.viewPricing}
-                </Link>
               </div>
             </div>
           </div>

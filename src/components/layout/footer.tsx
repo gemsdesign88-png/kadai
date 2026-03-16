@@ -36,7 +36,6 @@ export function Footer() {
     links: [
       { name: t.nav.features, href: "/features" },
       { name: t.nav.benefits, href: "/benefits" },
-      { name: t.nav.pricing, href: "/pricing" },
       { name: t.nav.getDemo, href: "/demo" },
       { name: t.nav.about, href: "/about" },
       { name: t.nav.contact, href: "/contact" },
