@@ -150,18 +150,15 @@ export default function PricingPage() {
             const monthlyRestoPlans = restoPlans.filter((p: any) => p.period === 'monthly' || p.duration_months === 1);
             const yearlyRestoPlans = restoPlans.filter((p: any) => p.period === 'yearly' || p.duration_months === 12);
 
-            // Get the lowest promo price for display
-            const promoMonthly = monthlyRestoPlans.find((p: any) => p.id.includes('promo'));
-            const promoYearly = yearlyRestoPlans.find((p: any) => p.id.includes('promo'));
+            // Get the lowest price for display
+            // Starter or Promo
+            const starterMonthly = monthlyRestoPlans.find((p: any) => p.id === 'starter_monthly' || p.id === 'resto_starter_monthly' || p.id === 'promo_monthly');
+            const starterYearly = yearlyRestoPlans.find((p: any) => p.id === 'starter_yearly' || p.id === 'resto_starter_yearly' || p.id === 'promo_yearly');
             
             // Build revenue tiers info (using monthly plans)
             const tiers = monthlyRestoPlans.map((plan: any) => {
-              let tierName = 'Promo';
-              if (plan.id.includes('promo')) tierName = 'Promo';
-              else if (plan.id.includes('starter')) tierName = 'Starter';
-              else if (plan.id.includes('growth')) tierName = 'Growth';
-              else if (plan.id.includes('pro')) tierName = 'Pro';
-
+              let tierName = plan.name.replace('Resto ', '');
+              
               let revenueRange = language === 'id' ? 'Skala kecil' : language === 'zh' ? '小规模' : 'Small scale';
               if (plan.monthly_revenue_min !== null && plan.monthly_revenue_max !== null) {
                 const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
@@ -183,19 +180,23 @@ export default function PricingPage() {
               };
             });
 
+            // Get max prices for display
+            const proMonthly = monthlyRestoPlans.find((p: any) => p.id === 'pro_monthly');
+            const proYearly = yearlyRestoPlans.find((p: any) => p.id === 'pro_yearly');
+
             packagesData.push({
               type: 'resto',
               icon: <ChefHat className="w-12 h-12 text-purple-600" />,
               name: 'Kadai Resto',
               tagline: t.pricing.restoTagline,
-              monthlyPrice: 149000,
-              yearlyPrice: 1599000,
-              monthlyPriceDisplay: language === 'id' ? 'Rp149K - 499K' : language === 'zh' ? 'Rp149K - 499K' : 'Rp149K - 499K',
-              yearlyPriceDisplay: language === 'id' ? 'Rp1.599K - 5.388K' : language === 'zh' ? 'Rp1.599K - 5.388K' : 'Rp1.599K - 5.388K',
+              monthlyPrice: starterMonthly?.price_idr || 149000,
+              yearlyPrice: starterYearly?.price_idr || 1599000,
+              monthlyPriceDisplay: `Rp${((starterMonthly?.price_idr || 149000) / 1000).toFixed(0)}K - ${((proMonthly?.price_idr || 499000) / 1000).toFixed(0)}K`,
+              yearlyPriceDisplay: `Rp${((starterYearly?.price_idr || 1599000) / 1000).toFixed(0)}K - ${((proYearly?.price_idr || 5399000) / 1000).toFixed(0)}K`,
               suitableFor: t.pricing.restoSuitable,
               features: [...t.pricing.restoFeatures],
               recommended: true,
-              badge: promoMonthly?.badge || t.pricing.badge2,
+              badge: starterMonthly?.badge || t.pricing.badge2,
               isRevenueBased: true,
               revenueNote: t.pricing.restoNote2,
               revenueNoteMonthly: t.pricing.restoNoteMonthly,
@@ -203,24 +204,52 @@ export default function PricingPage() {
               tiers,
             });
 
-            // Pro Package (same pricing as Resto)
+            // Pro Package (same pricing as Resto - derived from "pro" tier plans)
+            // Filter plans for 'pro' services (tier 'pro' in DB)
+            const proServicePlans = data.filter((p: any) => p.plan_tier === 'pro' && p.id.startsWith('pro_'));
+            const monthlyProPlans = proServicePlans.filter((p: any) => p.period === 'monthly' || p.duration_months === 1);
+            const yearlyProPlans = proServicePlans.filter((p: any) => p.period === 'yearly' || p.duration_months === 12);
+
+            const proStarterMonthly = monthlyProPlans.find((p: any) => p.id === 'pro_starter_monthly' || p.id === 'pro_promo_monthly');
+            const proProMonthly = monthlyProPlans.find((p: any) => p.id === 'pro_pro_monthly');
+            const proStarterYearly = yearlyProPlans.find((p: any) => p.id === 'pro_starter_yearly' || p.id === 'pro_promo_yearly');
+            const proProYearly = yearlyProPlans.find((p: any) => p.id === 'pro_pro_yearly');
+
+            const proTiers = monthlyProPlans.map((plan: any) => {
+              let tierName = plan.name.replace('Pro ', '');
+              let revenueRange = language === 'id' ? 'Skala kecil' : language === 'zh' ? '小规模' : 'Small scale';
+              if (plan.monthly_revenue_min !== null && plan.monthly_revenue_max !== null) {
+                const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
+                revenueRange = `Rp${(plan.monthly_revenue_min / 1000000).toFixed(0)}M - ${(plan.monthly_revenue_max / 1000000).toFixed(0)}M${unit}`;
+              } else if (plan.monthly_revenue_max !== null) {
+                const prefix = language === 'id' ? 'Hingga' : language === 'zh' ? '最多' : 'Up to';
+                const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
+                revenueRange = `${prefix} Rp${(plan.monthly_revenue_max / 1000000).toFixed(0)}M${unit}`;
+              } else if (plan.monthly_revenue_min !== null) {
+                const prefix = language === 'id' ? 'Di atas' : language === 'zh' ? '超过' : 'Above';
+                const unit = language === 'id' ? '/bulan' : language === 'zh' ? '/月' : '/month';
+                revenueRange = `${prefix} Rp${(plan.monthly_revenue_min / 1000000).toFixed(0)}M${unit}`;
+              }
+              return { name: tierName, price: plan.price_display, revenue: revenueRange };
+            });
+
             packagesData.push({
               type: 'resto' as any,
               icon: <Scissors className="w-12 h-12" style={{color: '#8B5CF6'}} />,
               name: 'Kadai Pro',
               tagline: language === 'id' ? 'Untuk Layanan Profesional' : language === 'zh' ? '专业服务' : 'For Professional Services',
-              monthlyPrice: 149000,
-              yearlyPrice: 1599000,
-              monthlyPriceDisplay: language === 'id' ? 'Rp149K - 499K' : language === 'zh' ? 'Rp149K - 499K' : 'Rp149K - 499K',
-              yearlyPriceDisplay: language === 'id' ? 'Rp1.599K - 5.388K' : language === 'zh' ? 'Rp1.599K - 5.388K' : 'Rp1.599K - 5.388K',
+              monthlyPrice: proStarterMonthly?.price_idr || 149000,
+              yearlyPrice: proStarterYearly?.price_idr || 1599000,
+              monthlyPriceDisplay: `Rp${((proStarterMonthly?.price_idr || 149000) / 1000).toFixed(0)}K - ${((proProMonthly?.price_idr || 499000) / 1000).toFixed(0)}K`,
+              yearlyPriceDisplay: `Rp${((proStarterYearly?.price_idr || 1599000) / 1000).toFixed(0)}K - ${((proProYearly?.price_idr || 5399000) / 1000).toFixed(0)}K`,
               suitableFor: language === 'id' ? 'Salon, spa, klinik, gym, dan semua layanan profesional' : language === 'zh' ? '美容院、水疗、诊所、健身房等专业服务' : 'Salons, spas, clinics, gyms, and all professional services',
               features: [...t.pricing.proFeatures],
-              badge: promoMonthly?.badge || t.pricing.badge2,
+              badge: proStarterMonthly?.badge || t.pricing.badge2,
               isRevenueBased: true,
               revenueNote: t.pricing.restoNote2,
               revenueNoteMonthly: t.pricing.restoNoteMonthly,
               revenueNoteYearly: t.pricing.restoNoteYearly,
-              tiers,
+              tiers: proTiers,
             });
           }
 

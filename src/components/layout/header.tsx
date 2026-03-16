@@ -13,7 +13,6 @@ import { motion } from "framer-motion"
 
 const navigation = [
   { name: "features", href: "/features", hasDropdown: true },
-  { name: "pricing", href: "/pricing" },
   { name: "business", href: "/business", hasDropdown: true },
   { name: "benefits", href: "/benefits" },
   { name: "about", href: "/about" },

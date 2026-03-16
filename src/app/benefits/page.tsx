@@ -173,12 +173,6 @@ export default function BenefitsPage() {
                 {hero.ctaPrimary}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center justify-center px-8 py-5 rounded-full bg-white border border-gray-200 text-gray-900 font-bold shadow-sm hover:shadow-md transition-shadow"
-              >
-                {hero.ctaSecondary}
-              </Link>
             </div>
           </motion.div>
         </Container>
