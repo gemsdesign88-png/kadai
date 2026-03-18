@@ -33,6 +33,7 @@ export async function middleware(request: NextRequest) {
   const isSibosNewDomain = host === 'sibos.kadai.id';
   const isAppOldDomain = host === 'app.kadaipos.id';
   const isAppNewDomain = host === 'app.kadai.id';
+  const isProyoNewDomain = host === 'proyo.kadai.id' || host === 'proyo.kadai.app';
   const isOrderOldDomain = host === 'order.kadaipos.id';
   const isOrderNewDomain = host === 'order.kadai.id';
 
@@ -57,9 +58,15 @@ export async function middleware(request: NextRequest) {
   }
   
   // Redirect sibos.* and app.* to dashboard
-  if (isSibosNewDomain || isAppNewDomain) {
+  if (isSibosNewDomain || isAppNewDomain || isProyoNewDomain) {
+    if (isProyoNewDomain && !pathname.startsWith('/proyo')) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/proyo${pathname}`;
+      return NextResponse.rewrite(url);
+    }
+    
     // If not already on dashboard/login/auth/admin/register routes, redirect to dashboard
-    if (pathname === '/' || 
+    if (pathname === '/' && !isProyoNewDomain || 
         (!pathname.startsWith('/dashboard') && 
          !pathname.startsWith('/login') && 
          !pathname.startsWith('/admin') &&
@@ -67,6 +74,7 @@ export async function middleware(request: NextRequest) {
          !pathname.startsWith('/register') &&
          !pathname.startsWith('/onboarding') &&
          !pathname.startsWith('/delete-account') &&
+         !isProyoNewDomain &&
          !pathname.startsWith('/_next'))) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
@@ -101,6 +109,7 @@ export async function middleware(request: NextRequest) {
     '/api/demo-request',
     '/register',
     '/ecosystem-demo',
+    '/proyo',
   ];
   
   // Check if the path starts with any public route
