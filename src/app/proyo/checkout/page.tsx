@@ -34,6 +34,7 @@ function CheckoutContent() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    password: "",
     phoneNumber: "",
     companyName: "",
     companyDomain: "", // e.g. .proyo.app
@@ -116,7 +117,7 @@ function CheckoutContent() {
                         placeholder="Budi Santoso"
                         value={formData.fullName}
                         onChange={e => setFormData({...formData, fullName: e.target.value})}
-                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium text-black"
                       />
                     </div>
                   </div>
@@ -130,7 +131,38 @@ function CheckoutContent() {
                         placeholder="budi@perusahaan.com"
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
-                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium text-black"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Password Akun</label>
+                    <div className="relative">
+                      <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input 
+                        required
+                        type="password" 
+                        placeholder="••••••••"
+                        value={formData.password}
+                        onChange={e => setFormData({...formData, password: e.target.value})}
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium text-black"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nomor WhatsApp</label>
+                    <div className="relative">
+                      <MessageSquare className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input 
+                        required
+                        type="tel" 
+                        placeholder="0812..."
+                        value={formData.phoneNumber}
+                        onChange={e => setFormData({...formData, phoneNumber: e.target.value})}
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium text-black"
                       />
                     </div>
                   </div>
@@ -146,7 +178,7 @@ function CheckoutContent() {
                       placeholder="PT Konstruksi Maju Jaya"
                       value={formData.companyName}
                       onChange={e => setFormData({...formData, companyName: e.target.value})}
-                      className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium"
+                      className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium text-black"
                     />
                   </div>
                 </div>
