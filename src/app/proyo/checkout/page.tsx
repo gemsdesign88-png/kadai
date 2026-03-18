@@ -53,12 +53,26 @@ function CheckoutContent() {
       `- Perusahaan: ${formData.companyName}\n` +
       `- Nama: ${formData.fullName}\n` +
       `- Email: ${formData.email}\n` +
+      `- Telepon: ${formData.phoneNumber}\n` +
       `- Modul: ${selectedModules.join(", ")}\n` +
       `- Kapasitas: ${workers} Pekerja\n` +
       `- Total: ${formatPrice(parseInt(total))}/bln\n\n` +
       `Saya akan melakukan transfer ke Rekening BCA 8690868654 (Gemmy Adyendra). Mohon aktivasi akun saya.`;
     
     return `https://wa.me/628121650800?text=${encodeURIComponent(text)}`;
+  };
+
+  const getModulePrice = (mId: string) => {
+    const w = parseInt(workers);
+    if (mId === "attendance") {
+      let rate = 10000;
+      if (w > 200) rate = 8000;
+      else if (w > 100) rate = 9000;
+      return w * rate;
+    }
+    if (mId === "payroll") return 499000;
+    if (mId === "finance") return 999000;
+    return 0;
   };
 
   const handleNextStep = (e: React.FormEvent) => {
@@ -270,6 +284,7 @@ function CheckoutContent() {
                       {mId === 'attendance' && <p className="text-[10px] font-bold text-gray-400">{workers} Pekerja</p>}
                     </div>
                   </div>
+                  <span className="text-xs font-bold text-gray-600">{formatPrice(getModulePrice(mId))}</span>
                 </div>
               ))}
             </div>
