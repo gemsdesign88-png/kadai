@@ -48,6 +48,10 @@ function CheckoutContent() {
   };
 
   const generateWAMessage = () => {
+    const subtotal = parseInt(total);
+    const tax = Math.round(subtotal * 0.11);
+    const finalTotal = subtotal + tax;
+    
     const text = `Halo Proyo! Saya baru saja melakukan checkout di website.\n\n` +
       `📌 *Detail Pesanan:*\n` +
       `- Perusahaan: ${formData.companyName}\n` +
@@ -55,8 +59,11 @@ function CheckoutContent() {
       `- Email: ${formData.email}\n` +
       `- Telepon: ${formData.phoneNumber}\n` +
       `- Modul: ${selectedModules.join(", ")}\n` +
-      `- Kapasitas: ${workers} Pekerja\n` +
-      `- Total: ${formatPrice(parseInt(total))}/bln\n\n` +
+      `- Kapasitas: ${workers} Pekerja\n\n` +
+      `💰 *Rincian Biaya:*\n` +
+      `- Subtotal: ${formatPrice(subtotal)}\n` +
+      `- PPN (11%): ${formatPrice(tax)}\n` +
+      `*Total: ${formatPrice(finalTotal)}/bln*\n\n` +
       `Saya akan melakukan transfer ke Rekening BCA 8690868654 (Gemmy Adyendra). Mohon aktivasi akun saya.`;
     
     return `https://wa.me/628121650800?text=${encodeURIComponent(text)}`;
@@ -293,18 +300,20 @@ function CheckoutContent() {
 
             <div className="bg-gray-50 rounded-[32px] p-8 space-y-4">
               <div className="flex justify-between items-center text-gray-500 font-bold text-xs uppercase tracking-widest">
-                <span>Tagihan Bulanan</span>
+                <span>Subtotal</span>
                 <span>{formatPrice(parseInt(total))}</span>
               </div>
               <div className="flex justify-between items-center text-gray-400 font-bold text-[10px] uppercase tracking-widest">
-                <span>Biaya Setup Domain</span>
-                <span className="text-emerald-500">Gratis</span>
+                <span>PPN (11%)</span>
+                <span>{formatPrice(Math.round(parseInt(total) * 0.11))}</span>
               </div>
               
               <div className="pt-4 mt-4 border-t border-gray-200 flex flex-col gap-1">
                 <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">Total Investasi</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-black text-gray-900 tracking-tighter">{formatPrice(parseInt(total))}</span>
+                  <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                    {formatPrice(Math.round(parseInt(total) * 1.11))}
+                  </span>
                   <span className="text-gray-400 font-bold text-xs">/bln</span>
                 </div>
               </div>
