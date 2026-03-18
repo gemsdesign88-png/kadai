@@ -37,7 +37,6 @@ function CheckoutContent() {
     password: "",
     phoneNumber: "",
     companyName: "",
-    companyDomain: "", // e.g. .proyo.app
   });
 
   const formatPrice = (price: number) => {
@@ -52,7 +51,6 @@ function CheckoutContent() {
     const text = `Halo Proyo! Saya baru saja melakukan checkout di website.\n\n` +
       `📌 *Detail Pesanan:*\n` +
       `- Perusahaan: ${formData.companyName}\n` +
-      `- Domain: ${formData.companyDomain}.proyo.app\n` +
       `- Nama: ${formData.fullName}\n` +
       `- Email: ${formData.email}\n` +
       `- Modul: ${selectedModules.join(", ")}\n` +
@@ -181,25 +179,6 @@ function CheckoutContent() {
                       className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium text-black"
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Subdomain Aplikasi</label>
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input 
-                        required
-                        type="text" 
-                        placeholder="nama-perusahaan"
-                        value={formData.companyDomain}
-                        onChange={e => setFormData({...formData, companyDomain: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
-                        className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all outline-none font-medium"
-                      />
-                    </div>
-                    <span className="text-gray-400 font-bold">.proyo.app</span>
-                  </div>
-                  <p className="text-[10px] text-gray-400 ml-1 italic">*Ini akan digunakan tim Anda untuk login di mobile & web app.</p>
                 </div>
 
                 <button 
